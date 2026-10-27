@@ -1,9 +1,29 @@
 {
   "status": "passed",
   "behavior_tests": 23,
-  "sqlite_probe_tests": 2,
+  "sqlite_probe_tests": 5,
   "failed": 0,
   "backend": "PostgreSQL 16.15",
-  "scope": "Same storage behavior suite in isolated schemas, including budget, ACL and >10k recovery; two SQLite read-only probe tests also run",
-  "log": "store-postgresql.log"
+  "scope": "Same PostgreSQL storage behavior suite in isolated schemas, including budget, ACL and >10k recovery; five SQLite unit tests cover Any-driver path URL roundtrips, non-UTF-8 rejection, read-only probes and exact-file content preservation. The SQLite unit tests are not PostgreSQL behavior tests.",
+  "log": "store-postgresql.log",
+  "ignored": 0,
+  "captured_at_utc": "2026-10-27T22:55:19.060563+00:00",
+  "command": "cargo test -p rstrbot-store --locked --offline",
+  "command_exit_code": 0,
+  "database_environment": "RSTRBOT_TEST_DATABASE_URL points to the local disposable PostgreSQL instance; each behavior test uses a unique isolated schema.",
+  "sqlite_unit_test_breakdown": {
+    "path_url_and_utf8": 2,
+    "read_only_probe": 3
+  },
+  "log_sha256": "a6cc225fa2ff71c32cafcc5a1491b021f2a41b2a4c61d0da7392a8dd4abc9fdf",
+  "source_sha256": {
+    "crates/rstrbot-store/src/auth.rs": "3483362c924c99858959410f0d710d299726383b2623c92ac4b7e0e6d98c662e",
+    "crates/rstrbot-store/src/backup.rs": "a08c2aa57a9beeb7c0adef820f4d63713534af9306aa03ff7837b747979d9116",
+    "crates/rstrbot-store/src/budget.rs": "5595c6b2b2c4f1e86a10bf89707b5b1a37815dc39602c236e6ac3976494c0426",
+    "crates/rstrbot-store/src/lib.rs": "8104efed6747b557ae14ccae3ddd91ed9845c368d02844342b46d1da46794723",
+    "crates/rstrbot-store/src/probe.rs": "4840cf47c314d70137137abfef845e0d915f213a70709d6ee8b6ab67364d1da9",
+    "crates/rstrbot-store/src/resources.rs": "2b96d8837d937e061ed9443b3c27fac972f2eb745bf4bae2a4bf076fdeb008ef",
+    "crates/rstrbot-store/src/workspaces.rs": "3a3a2671b1d125d79c3847a2b4c169b0af0d3354dd54ecfdfb65551126d3ee8b",
+    "crates/rstrbot-store/tests/behavior.rs": "f08c3d88c98f6104534771af018e612fa8ded492bdf12c542c03ae0710693d83"
+  }
 }

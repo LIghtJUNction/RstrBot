@@ -33,12 +33,12 @@
 
 ## 当前版本实际验证
 
-本轮只引用 [v0.1.2 的回执](evidence/v0.1.2/)。核心 release SHA-256：`9a1a9330899b6c76259976828ef16fbf53d29dc01f8f0a42f051430418460c17`。源码与最终 WebUI 输入见 [build-inputs.json](evidence/v0.1.2/build-inputs.json)，实际二进制和脚本指纹保存在各回执中。历史回执不累计为本版通过数量。
+本轮只引用 [v0.1.2 的回执](evidence/v0.1.2/)。核心 release SHA-256：`8e4fc6c5dde77008dd13c18902eb932da7330b86a4c65f2e956ea0405d8b7af2`。源码与最终 WebUI 输入见 [build-inputs.json](evidence/v0.1.2/build-inputs.json)，实际二进制和脚本指纹保存在各回执中。历史回执不累计为本版通过数量。
 
 | 检查 | 实际结果 | 证据与边界 |
 | --- | --- | --- |
-| Rust 工作区 | 60 项通过，0 失败，0 忽略；格式、全目标严格 Clippy、严格 Rustdoc、release 构建通过 | [Rust 回执](evidence/v0.1.2/rust-verification.json)；Linux 本机 |
-| PostgreSQL 存储 | 23 项同套业务测试通过；另有 2 项 SQLite 只读探测测试 | [存储回执](evidence/v0.1.2/store-postgresql-verification.json)；独立临时 schema |
+| Rust 工作区 | 63 项通过，0 失败，0 忽略；格式、全目标严格 Clippy、严格 Rustdoc、release 构建通过 | [Rust 回执](evidence/v0.1.2/rust-verification.json)；Linux 本机 |
+| PostgreSQL 存储 | 23 项同套业务测试通过；另有 5 项 SQLite 路径/只读探测单元测试 | [存储回执](evidence/v0.1.2/store-postgresql-verification.json)；独立临时 schema |
 | HTTP / 数据库 / 缓存 / 恢复 | 22 组全部通过，合计 184 次场景组执行 | [完整矩阵](evidence/v0.1.2/integration-matrix.json)；跨配置重复场景不代表独立需求完成率 |
 | 持久流式记录 | 3 条同时执行的真实 HTTP/SSE 流，150 个片段完整落库；重启后一致且没有再次请求上游 | [流式回执](evidence/v0.1.2/stream-persistence-sqlite.json)；本地协议夹具 |
 | 大历史恢复 | runs、deliveries、schedules 各 10,025 条历史记录后仍可重启；扫描到末尾未完成记录并保留原意图 | [重启回执](evidence/v0.1.2/history-recovery-sqlite.json)；容量回归，不是固定硬件性能承诺 |
@@ -60,6 +60,7 @@
 4. **前端跟随真实角色。** 实例管理员身份不能替代工作区角色。成员读取他人的共享会话时没有写入口；管理员降权后退出管理页并清缓存。工作区管理员可停用已有批准路由，但不能批准新目标或重新启用它。
 5. **初始化与聊天细节。** SQLite/PostgreSQL 选择始终可见；选择尚未应用时不能误用旧数据库建立管理员。保留阅读位置、补载历史锚点和草稿，普通数值字段不再被错误转成日期。
 6. **验收覆盖交付程序。** 所有本轮 HTTP、SDK、MCP 与浏览器结果使用固定的 0.1.2 release 二进制，并核对执行前后的摘要。矩阵 runner 验证候选、测试脚本与回执指纹；旧版失败记录保留为历史，不能复用为本版通过。
+7. **修复 Windows 默认 SQLite 文件 URL。** 首轮远端 CI 发现，直接拼接文件路径会把盘符和文件名特殊字符误当作 URL 结构。默认路径和测试夹具现在使用同一完整路径编码，保留实际文件名；用户提供的合法 URL 不变。旧失败配置不会自动重写，需保留原数据库并显式纠正 `database_url`，不能删除数据库重建。初轮失败回执保存在 [github-actions-initial.json](evidence/v0.1.2/github-actions-initial.json)，最终 Windows CI 是否通过以修复后实际运行结果为准。
 
 此前实现的共享上下文过滤、私有代理快照保护、计划任务所有权、密钥与目的地绑定、未知费用冻结、原子会话受理及版本 CAS 继续保留。对应回归纳入本轮验收。详细变更见 [CHANGELOG.md](../CHANGELOG.md)。
 

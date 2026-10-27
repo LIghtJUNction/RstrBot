@@ -1375,10 +1375,8 @@ mod tests {
         let directory = tempfile::tempdir().expect("temporary directory");
         let config = crate::state::Config {
             data_dir: directory.path().to_owned(),
-            database_url: format!(
-                "sqlite://{}?mode=rwc",
-                directory.path().join("router.db").display()
-            ),
+            database_url: Store::sqlite_file_url(&directory.path().join("router.db"))
+                .expect("SQLite file URL"),
             listen: "127.0.0.1:0".parse().expect("socket address"),
             valkey_url: None,
             secure_cookie: false,

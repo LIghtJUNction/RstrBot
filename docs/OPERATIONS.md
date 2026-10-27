@@ -114,6 +114,20 @@ same authorization and resource operations. The runtime currently applies its
 initial schema on connection, so the database role needs the corresponding schema
 privileges; separate migration/runtime roles and PG RLS are still unverified.
 
+Default SQLite file URLs now encode the complete filesystem path, so Windows
+drive letters, separators, spaces, Unicode and URL-special characters retain
+their filename meaning. User-supplied valid connection URLs remain unchanged.
+This fixes a failure exposed by the initial Windows CI run; it does not itself
+establish final Windows runtime, plugin or desktop acceptance.
+
+An existing Windows `config.json` containing the old malformed default URL is
+**not automatically rewritten**. Stop the core, preserve the database, config and
+`secrets.key`, then explicitly correct `database_url` to the properly encoded URL
+of that same existing database, either in the protected config or through
+`--database-url` / `RSTRBOT_DATABASE_URL`. Do not delete the database or data root
+to regenerate defaults. The [initial CI receipt](evidence/v0.1.2/github-actions-initial.json)
+retains the earlier failure; use the final release's later CI record for status.
+
 ```sh
 RSTRBOT_DATABASE_URL='postgresql://user:password@localhost/rstrbot' \
   ./target/debug/rstrbot --data-dir /srv/rstrbot --web-dir web/dist

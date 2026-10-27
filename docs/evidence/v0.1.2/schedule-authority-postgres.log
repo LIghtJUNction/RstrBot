@@ -2,8 +2,8 @@
   "database": "postgresql",
   "model": "diagnostic process fixture, not a live AI provider",
   "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
-  "started_at": "2026-10-27T22:34:21.300245+00:00",
-  "binary_sha256": "9a1a9330899b6c76259976828ef16fbf53d29dc01f8f0a42f051430418460c17",
+  "started_at": "2026-10-27T22:55:56.659779+00:00",
+  "binary_sha256": "8e4fc6c5dde77008dd13c18902eb932da7330b86a4c65f2e956ea0405d8b7af2",
   "harness_sha256": "ddbff3b5af26746d914911bde005546795bd58cc854b6d125a136bc4881331fc",
   "checks": [
     "operator/admin/other-owner may read a shared schedule but cannot change, re-enable, no-op update or trigger its owner's intention",
@@ -13,6 +13,6 @@
     "full membership revocation denies schedule update/trigger and preserves the paused intention"
   ],
   "status": "passed",
-  "duration_seconds": 4.119,
+  "duration_seconds": 4.142,
   "passed_checks": 5
 }

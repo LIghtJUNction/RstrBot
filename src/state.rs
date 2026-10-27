@@ -158,10 +158,7 @@ impl Config {
             serde_json::from_slice::<Self>(&fs::read(&path)?)?
         } else {
             Self {
-                database_url: format!(
-                    "sqlite://{}?mode=rwc",
-                    data_dir.join("rstrbot.db").display()
-                ),
+                database_url: Store::sqlite_file_url(&data_dir.join("rstrbot.db"))?,
                 data_dir: data_dir.clone(),
                 listen,
                 valkey_url: None,

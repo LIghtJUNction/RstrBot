@@ -26,10 +26,7 @@ async fn database_with_url() -> (Store, Option<tempfile::TempDir>, String) {
         (Store::connect(&url).await.unwrap(), None, url)
     } else {
         let dir = tempfile::tempdir().unwrap();
-        let url = format!(
-            "sqlite://{}?mode=rwc",
-            dir.path().join("test.sqlite3").display()
-        );
+        let url = Store::sqlite_file_url(&dir.path().join("test.sqlite3")).unwrap();
         (Store::connect(&url).await.unwrap(), Some(dir), url)
     }
 }

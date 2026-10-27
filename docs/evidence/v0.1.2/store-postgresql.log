@@ -1,96 +1,44 @@
-   Compiling libc v0.2.191
-   Compiling serde_core v1.0.229
-   Compiling getrandom v0.2.17
-   Compiling crypto-common v0.1.7
-   Compiling digest v0.10.7
-   Compiling futures-sink v0.3.34
-   Compiling num-traits v0.2.19
-   Compiling ring v0.17.14
-   Compiling serde v1.0.229
-   Compiling smallvec v1.16.4
-   Compiling icu_normalizer v2.4.0
-   Compiling parking_lot_core v0.9.12
-   Compiling idna_adapter v1.2.2
-   Compiling rand_core v0.6.4
-   Compiling socket2 v0.6.5
-   Compiling mio v1.2.4
-   Compiling syn v2.0.119
-   Compiling futures-util v0.3.34
-   Compiling tokio v1.54.1
-   Compiling tracing-attributes v0.1.31
-   Compiling idna v1.1.0
-   Compiling parking_lot v0.12.5
-   Compiling rustls-webpki v0.103.16
-   Compiling tracing-core v0.1.36
-   Compiling log v0.4.34
-   Compiling tracing v0.1.44
-   Compiling serde_json v1.0.154
-   Compiling rustls v0.23.46
-   Compiling tokio-stream v0.1.19
-   Compiling futures-intrusive v0.5.0
-   Compiling url v2.5.8
-   Compiling sha2 v0.10.9
-   Compiling either v1.19.0
-   Compiling base64 v0.22.1
-   Compiling sqlx-core v0.8.6
-   Compiling rand_chacha v0.3.1
-   Compiling atoi v2.0.0
-   Compiling futures-channel v0.3.34
-   Compiling hmac v0.12.1
-   Compiling serde_urlencoded v0.7.1
-   Compiling hkdf v0.12.4
-   Compiling flume v0.11.1
-   Compiling rand v0.8.8
-   Compiling getrandom v0.4.3
-   Compiling futures-executor v0.3.34
-   Compiling md-5 v0.10.6
-   Compiling password-hash v0.5.0
-   Compiling sqlx-postgres v0.8.6
-   Compiling sqlx-sqlite v0.8.6
-   Compiling blake2 v0.10.6
-   Compiling chrono v0.4.45
-   Compiling sqlx v0.8.6
-   Compiling argon2 v0.5.3
-   Compiling uuid v1.29.0
-   Compiling tempfile v3.27.0
    Compiling rstrbot-store v0.1.2 (/workspace/scratch/d2860555bebf/RstrBot/crates/rstrbot-store)
-    Finished `test` profile [unoptimized] target(s) in 21.51s
+    Finished `test` profile [unoptimized] target(s) in 1.87s
      Running unittests src/lib.rs (/tmp/rstrbot-d286-target/debug/deps/rstrbot_store-1fcd70ea29ace50a)
 
-running 2 tests
+running 5 tests
+test probe::tests::sqlite_file_url_rejects_non_utf8_without_lossy_conversion ... ok
+test probe::tests::sqlite_file_paths_survive_any_driver_url_roundtrip ... ok
 test probe::tests::probe_does_not_create_a_file ... ok
 test probe::tests::probe_does_not_migrate_existing_foreign_database ... ok
+test probe::tests::encoded_file_path_opens_the_exact_file_and_probe_keeps_it_read_only ... ok
 
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
      Running tests/behavior.rs (/tmp/rstrbot-d286-target/debug/deps/behavior-2de7a13935830b84)
 
 running 23 tests
-test invalid_admission_rolls_back_receipt_and_history_before_retry ... ok
-test deletion_removes_replayable_private_payloads ... ok
 test actual_cost_over_reservation_is_recorded_as_debt ... ok
 test concurrent_reservations_cannot_overspend_and_unknown_stays_frozen ... ok
+test deletion_removes_replayable_private_payloads ... ok
 test idempotency_preserves_unknown_intent_and_compares_fingerprint ... ok
-test bootstrap_is_atomic_and_cannot_be_repeated ... ok
+test invalid_admission_rolls_back_receipt_and_history_before_retry ... ok
 test admission_uses_current_resource_permissions_and_snapshots ... ok
 test populated_database_probe_and_reconnect_preserve_records ... ok
 test recovery_cursor_survives_deletion_and_bounds_concurrent_growth ... ok
-test membership_revocation_shrinks_existing_tokens_and_event_replay ... ok
-test private_resources_are_private_even_from_workspace_owner ... ok
+test bootstrap_is_atomic_and_cannot_be_repeated ... ok
 test privileged_resource_writes_recheck_current_role_inside_transaction ... ok
+test private_resources_are_private_even_from_workspace_owner ... ok
+test membership_revocation_shrinks_existing_tokens_and_event_replay ... ok
 test run_admission_is_atomic_and_busy_keys_remain_retryable ... ok
-test roles_cannot_escalate_or_remove_last_owner ... ok
 test shared_run_cannot_publish_a_private_agent_snapshot ... ok
 test recovery_pages_bound_large_payloads_without_skipping_records ... ok
 test revoked_actor_receipts_can_be_recorded_without_reviving_deleted_runs ... ok
+test roles_cannot_escalate_or_remove_last_owner ... ok
 test schedule_owner_updates_require_current_execution_permission ... ok
 test stale_configuration_cannot_overwrite_a_concurrent_edit ... ok
+test shared_schedule_moderation_can_remove_but_never_reconfigure_another_owners_job ... ok
+test shared_schedule_visibility_never_delegates_the_owners_execution_authority ... ok
 test recovery_scan_traverses_more_than_ten_thousand_records_in_bounded_pages ... ok
 test snapshot_restore_keeps_ownership_unknown_funds_and_quarantines_effects ... ok
-test shared_schedule_visibility_never_delegates_the_owners_execution_authority ... ok
-test shared_schedule_moderation_can_remove_but_never_reconfigure_another_owners_job ... ok
 
-test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.81s
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.25s
 
    Doc-tests rstrbot_store
 

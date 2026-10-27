@@ -27,7 +27,9 @@
 
 ### 验证接线
 
-新增大历史恢复、流持久化、排队授权与投递会话撤销回归。`scripts/verify_integration.py` 收集 **22 组**真实服务 HTTP/恢复组合，其中投递凭据撤销同时运行 SQLite 和 PostgreSQL；浏览器脚本保留原 11 组并新增 3 组，共 **14 组**。前端纯逻辑测试现有 13 项，Node 工具链统一为 24.22.1。
+首次远端 CI 暴露 Windows 默认 SQLite 文件 URL 构造错误：直接拼接文件路径会让盘符或文件名中的特殊字符被解释为 URL 结构。现在统一编码完整文件路径，保留反斜杠、空格、Unicode 与 `%`、`?`、`#`、`+` 等字符的文件名含义；不改写用户提供的合法连接 URL。已经保存的旧错误 Windows 配置不会自动重写，必须保留原数据库并显式纠正 `database_url`，不能通过删除数据库或数据根处理。原始失败保存在 [初轮 CI 回执](docs/evidence/v0.1.2/github-actions-initial.json)；最终 Windows CI 状态以修复后的实际运行结果为准。
+
+新增大历史恢复、流持久化、排队授权与投递会话撤销回归。`scripts/verify_integration.py` 收集 **22 组**真实服务 HTTP/恢复组合，其中投递凭据撤销同时运行 SQLite 和 PostgreSQL；浏览器脚本保留原 11 组并新增 3 组，共 **14 组**。前端纯逻辑测试现有 14 项，Node 工具链统一为 24.22.1。
 
 这些数量描述测试代码与接线范围。最终 release 构建的通过、失败、未执行状态必须读取 `docs/evidence/v0.1.2/`，不能从接线数量或 0.1.1 的历史回执推断通过。GitHub 工作流定义也不等于已完成的 GitHub Actions 运行。
 

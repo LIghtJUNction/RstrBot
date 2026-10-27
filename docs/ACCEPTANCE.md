@@ -8,12 +8,12 @@
 
 ## 当前版本实际验证
 
-本轮只引用 [v0.1.2 的回执](evidence/v0.1.2/)。核心 release SHA-256：`9a1a9330899b6c76259976828ef16fbf53d29dc01f8f0a42f051430418460c17`。源码与最终 WebUI 输入见 [build-inputs.json](evidence/v0.1.2/build-inputs.json)，实际二进制和脚本指纹保存在各回执中。历史回执不累计为本版通过数量。
+本轮只引用 [v0.1.2 的回执](evidence/v0.1.2/)。核心 release SHA-256：`8e4fc6c5dde77008dd13c18902eb932da7330b86a4c65f2e956ea0405d8b7af2`。源码与最终 WebUI 输入见 [build-inputs.json](evidence/v0.1.2/build-inputs.json)，实际二进制和脚本指纹保存在各回执中。历史回执不累计为本版通过数量。
 
 | 检查 | 实际结果 | 证据与边界 |
 | --- | --- | --- |
-| Rust 工作区 | 60 项通过，0 失败，0 忽略；格式、全目标严格 Clippy、严格 Rustdoc、release 构建通过 | [Rust 回执](evidence/v0.1.2/rust-verification.json)；Linux 本机 |
-| PostgreSQL 存储 | 23 项同套业务测试通过；另有 2 项 SQLite 只读探测测试 | [存储回执](evidence/v0.1.2/store-postgresql-verification.json)；独立临时 schema |
+| Rust 工作区 | 63 项通过，0 失败，0 忽略；格式、全目标严格 Clippy、严格 Rustdoc、release 构建通过 | [Rust 回执](evidence/v0.1.2/rust-verification.json)；Linux 本机 |
+| PostgreSQL 存储 | 23 项同套业务测试通过；另有 5 项 SQLite 路径/只读探测单元测试 | [存储回执](evidence/v0.1.2/store-postgresql-verification.json)；独立临时 schema |
 | HTTP / 数据库 / 缓存 / 恢复 | 22 组全部通过，合计 184 次场景组执行 | [完整矩阵](evidence/v0.1.2/integration-matrix.json)；跨配置重复场景不代表独立需求完成率 |
 | 持久流式记录 | 3 条同时执行的真实 HTTP/SSE 流，150 个片段完整落库；重启后一致且没有再次请求上游 | [流式回执](evidence/v0.1.2/stream-persistence-sqlite.json)；本地协议夹具 |
 | 大历史恢复 | runs、deliveries、schedules 各 10,025 条历史记录后仍可重启；扫描到末尾未完成记录并保留原意图 | [重启回执](evidence/v0.1.2/history-recovery-sqlite.json)；容量回归，不是固定硬件性能承诺 |
@@ -43,7 +43,7 @@
 | RB-010 PostgreSQL 功能对等 | 部分实现 | 相同 SQLx Any 业务与迁移；最终 release 同版 23 项存储测试在独立 PostgreSQL schema 上通过 | 独立运行/迁移账户、RLS、更完整故障注入与实际多节点验收 |
 | RB-011 Valkey 可选与降级 | 部分实现 | `src/cache.rs` 可选限时 presence 缓存；权限、预算、运行事实仍在数据库 | 有/无、不可达、停止/清空/重启均已有实际回执；当前仍只提供 presence，未实现完整缓存加速层 |
 | RB-012 迁移、备份与灾备 | 部分实现 | 一致数据库快照、摘要校验、双向 SQLite/PG 空目标迁移、原密钥解密、登录会话令牌不导出、恢复隔离；真实 CLI/HTTP 测试 | 完整附件/插件外部数据备份、密钥轮换与业务写入交界灾备；当前明确 `includes_external_state=false` |
-| RB-013 配置、路径与并发编辑 | 部分实现 | 系统目录/便携根、0600 文件、资源 CAS、服务锁、配置保存 | 全面继承/清空/禁用语义、数据根迁移和配置升级；正向 CLI 布尔关闭需明确编辑保存配置 |
+| RB-013 配置、路径与并发编辑 | 部分实现 | 系统目录/便携根、Windows/Unicode/保留字符路径编码、0600 文件、资源 CAS、服务锁、配置保存 | 全面继承/清空/禁用语义、数据根迁移和配置升级；正向 CLI 布尔关闭需明确编辑保存配置 |
 | RB-014 去中心插件安装 | 部分实现 | 本机受信任 manifest 安装、可执行文件摘要、工作区独立实例、包目录 | 仓库 URL/安装包下载、可选目录索引、签名链、兼容索引与离线安装缓存 |
 | RB-015 按需运行时与进程监管 | 部分实现 | Rust 核心无 Python/Node/.NET 常驻；Unix 私有 UDS、握手/调用限时、取消及进程组回收测试 | Windows named pipe/ACL 和原生进程树、恶意代码沙箱；运行时自动安装未实现 |
 | RB-016 四语言 SDK | 部分实现 | Rust、Python、TypeScript、C# SDK；同一 5 项协议向量，四种真实进程共 20 项通过；C# net8.0 在 .NET 8.0.33 运行 | 完整事件/模型/平台/后台任务等所有扩展类型的等价验收；三平台运行时覆盖 |

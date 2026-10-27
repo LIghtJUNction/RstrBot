@@ -1,8 +1,8 @@
 {
   "version": "0.1.2",
-  "captured_at_utc": "2026-10-27T22:35:50.717961+00:00",
-  "scope": "Frozen core/library/worker inputs and final verified WebUI inputs; core bytes unchanged since release compilation",
-  "aggregate_sha256": "22700b780ac13ce8e9c2cf82e59f2690aebc9361d82c833a54dcee7f6d90dd76",
+  "captured_at_utc": "2026-10-27T22:52:30.024957+00:00",
+  "scope": "Frozen final core/library/worker and WebUI inputs after cross-platform SQLite file-URL correction",
+  "aggregate_sha256": "4ff739672409e60e180a1f71ee4e655acd1af158d0ca946f28e9a74743596ca4",
   "files": {
     "Cargo.lock": "00b209d8f0a1e0f5b180e21f05a850955c6d90eded9e9dab9bfc6599ab4aad59",
     "Cargo.toml": "49e5979fe947bced2f7f9bb933a3eaaa1aa26a28e4bb11e504111ee13a8037fe",
@@ -22,13 +22,13 @@
     "crates/rstrbot-store/src/backup.rs": "a08c2aa57a9beeb7c0adef820f4d63713534af9306aa03ff7837b747979d9116",
     "crates/rstrbot-store/src/budget.rs": "5595c6b2b2c4f1e86a10bf89707b5b1a37815dc39602c236e6ac3976494c0426",
     "crates/rstrbot-store/src/lib.rs": "8104efed6747b557ae14ccae3ddd91ed9845c368d02844342b46d1da46794723",
-    "crates/rstrbot-store/src/probe.rs": "ee7bd9ba035308938cb7981bcec48b6dc7503be6e0a93e9d4152f190a44d4cf0",
+    "crates/rstrbot-store/src/probe.rs": "4840cf47c314d70137137abfef845e0d915f213a70709d6ee8b6ab67364d1da9",
     "crates/rstrbot-store/src/resources.rs": "2b96d8837d937e061ed9443b3c27fac972f2eb745bf4bae2a4bf076fdeb008ef",
     "crates/rstrbot-store/src/workspaces.rs": "3a3a2671b1d125d79c3847a2b4c169b0af0d3354dd54ecfdfb65551126d3ee8b",
-    "crates/rstrbot-store/tests/behavior.rs": "96251ffee0f63e77440acbc1fbaefffe96d28f7240737f6bb1fce9b65b3f99a2",
+    "crates/rstrbot-store/tests/behavior.rs": "f08c3d88c98f6104534771af018e612fa8ded492bdf12c542c03ae0710693d83",
     "docs/openapi.json": "cee4df33c015336be5f49a397b07293809a716ccef15b408fa452e434562e10f",
     "rust-toolchain.toml": "638924b15afb3b6f88b83713e356162659987378c6731a2ea3403b90e31ae0eb",
-    "src/api.rs": "ba8f7d1392935c8fd786d11eb56ba836b431935e92d85fb1df8abc7c88367ecd",
+    "src/api.rs": "c988df068f2af32699fd16d6d2dc9b2b9a144ec73493d2792c2e36d6b55d8661",
     "src/cache.rs": "b62ac7a5930f5dad844c99e258ad833adf01b8450b677f824ce40761974701d2",
     "src/delivery.rs": "a47144023ca2cbfb507304dbc0848dbbf7201c0db34936f445b860ab218cea20",
     "src/engine.rs": "a3db694558fa94d0f7b479ecb08e1abf34220078352adcca6954508ef87a9551",
@@ -36,7 +36,7 @@
     "src/lib.rs": "65cef493002ca11022971cb779b22648047ba7a731a5b2b81efedf10b797b6ae",
     "src/main.rs": "84d0147b39b5a82bc5794ce1a0f6474111ce508ac6d27c8fe1ee9a2db6839f49",
     "src/schedule.rs": "9b59556686e3ec2eb7fc8b1ca44f2923c6934a9b09aa821fcccedaffaa389d97",
-    "src/state.rs": "28fc32856f3aa523c2c1d4312841e37f37f175b88bf26b776fbbc9f9af4f9503",
+    "src/state.rs": "c79f21c697281a2e5a34c48b5456cf93a27a80f3d83a8934b1161624da6d75e3",
     "web/index.html": "e14fe0f0167b1ea26ebb4844935ee1f37cd23ad705ee4cd9fed7d648b06e15e3",
     "web/package-lock.json": "84fa755c5a8f755fb38c63cc059f5298e7d80b84c821a22ea4cb8a33a947368a",
     "web/package.json": "d8868166b51d3e7b069a3fed12427e95321a77b0688cc94b0cd8896f95fcde36",
@@ -58,5 +58,6 @@
     "web/src/vite-env.d.ts": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
     "web/tsconfig.json": "9444aa5303b290c0db660c1a39452c3480e3bf24a08ab682e5be579a4b247e0f",
     "web/vite.config.ts": "dc0ffacfee2fa3ca986810e589858c340bfdba8a771b30209ff21afe4d36c4f7"
-  }
+  },
+  "aggregate_format": "SHA-256 of files mapping serialized as sorted compact JSON (ensure_ascii=True)"
 }
