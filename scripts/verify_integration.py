@@ -105,6 +105,8 @@ def main():
         ("session-revocation-postgres","tests/session_revocation.py",True,None,[]),
         ("model-target-authority-sqlite","tests/model_target_authority.py",False,None,[]),
         ("model-target-authority-postgres","tests/model_target_authority.py",True,None,[]),
+        ("model-test-revocation-sqlite","tests/model_test_revocation.py",False,None,[]),
+        ("model-test-revocation-postgres","tests/model_test_revocation.py",True,None,[]),
     ]
     report["planned_cases"] = [case[0] for case in cases]
     previous = {}

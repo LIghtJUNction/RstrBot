@@ -101,6 +101,7 @@ jobs:
       - run: python3 tests/schedule_authority.py --output test-results/schedule-authority.json
       - run: python3 tests/session_revocation.py --output test-results/session-revocation.json
       - run: python3 tests/model_target_authority.py --output test-results/model-target-authority.json
+      - run: python3 tests/model_test_revocation.py --output test-results/model-test-revocation.json
       - name: SQLite streamed fragments survive concurrent writes and restart
         if: matrix.database == 'sqlite' && matrix.valkey == 'off'
         run: python3 tests/stream_persistence.py --output test-results/stream-persistence-sqlite.json

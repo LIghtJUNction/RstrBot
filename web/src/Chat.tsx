@@ -71,19 +71,23 @@ export default function Chat({ workspace, user, goModels }: { workspace: Workspa
   const restoreReadingPosition = useRef(false);
   const justRestoredReadingPosition = useRef(false);
   const olderPageAnchor = useRef<{ id: string; firstMessage?: string; height: number; top: number } | null>(null);
+  // Leaving this page is also a view change. Pending mutations cannot start a
+  // second operation or overwrite persisted drafts after their view is gone.
+  useLayoutEffect(() => () => { viewGeneration.current += 1; }, []);
+  const unavailable = conversation.unavailable || history.unavailable;
   const chosenModel = useResource(wid, model || null);
   const selectableModels = models.data ?? [];
   const modelOptions = chosenModel.data?.kind === 'models' && !selectableModels.some(item => item.id === model) ? [...selectableModels, chosenModel.data] : selectableModels;
   const activeRunId = value(conversation.data?.data ?? {}, 'active_run');
   const activeRunQuery = useResource(wid, activeRunId || null, activeRunId ? 1500 : undefined);
-  const activeRun = activeRunQuery.data && ['queued', 'running'].includes(value(activeRunQuery.data.data, 'status')) ? activeRunQuery.data : runs.data?.find(run => value(run.data, 'conversation_id') === selected && ['queued', 'running'].includes(value(run.data, 'status')));
-  const latestRun = runs.data?.filter(run => value(run.data, 'conversation_id') === selected).sort((a, b) => Number(b.created_at) - Number(a.created_at))[0];
+  const activeRun = unavailable ? undefined : activeRunQuery.data && ['queued', 'running'].includes(value(activeRunQuery.data.data, 'status')) ? activeRunQuery.data : runs.data?.find(run => value(run.data, 'conversation_id') === selected && ['queued', 'running'].includes(value(run.data, 'status')));
+  const latestRun = unavailable ? undefined : runs.data?.filter(run => value(run.data, 'conversation_id') === selected).sort((a, b) => Number(b.created_at) - Number(a.created_at))[0];
   const runError = latestRun && !activeRun && ['failed', 'unknown', 'interrupted'].includes(value(latestRun.data, 'status')) ? new Error(value(latestRun.data, 'error', t('运行未完成，请到运行记录中核对。', 'The run did not complete. Review its execution record.'))) : null;
   const { live, error: eventError } = useEvents(wid, !!activeRun);
-  const messages = normalizeMessages(history.data?.pages.slice().reverse().flatMap(page => page.items));
+  const messages = unavailable ? [] : normalizeMessages(history.data?.pages.slice().reverse().flatMap(page => page.items));
   const stream = activeRun ? live[activeRun.id] ?? value(activeRun.data, 'content') : '';
   const visibleConversations = conversations.data?.filter(c => value(c.data, 'title').toLocaleLowerCase().includes(search.toLocaleLowerCase())) ?? [];
-  const writable = selected ? !!conversation.data && canWriteResource(workspace.role, user, conversation.data) : roleAllows(workspace.role, 'member');
+  const writable = !unavailable && (selected ? !!conversation.data && canWriteResource(workspace.role, user, conversation.data) : roleAllows(workspace.role, 'member'));
   const sharedConversation = (selected ? conversation.data?.visibility : visibility) === 'workspace';
   const availableAgents = (agents.data ?? []).filter(candidate => !sharedConversation || candidate.visibility === 'workspace');
   useEffect(() => {
@@ -103,7 +107,7 @@ export default function Chat({ workspace, user, goModels }: { workspace: Workspa
     restoreReadingPosition.current = true; olderPageAnchor.current = null;
     const text = safePreference(`${draftPrefix}:${id ?? 'new'}`);
     viewGeneration.current += 1; draftVersion.current = { text, revision: draftVersion.current.revision + 1 };
-    setBusy(false); setSelected(id); setDraft(text); follow.current = true; setHasNew(false); idempotency.current = null; setSidebar(false); setError(null);
+    setBusy(false); setSelected(id); setDraft(text); follow.current = true; setHasNew(false); idempotency.current = null; setSidebar(false); setError(null); setConfirm(null); setBranch(null);
   }
   const lastMessage = messages.at(-1);
   const latestMessageIdentity = `${lastMessage?.id ?? ''}:${lastMessage?.content ?? ''}`;
@@ -133,10 +137,11 @@ export default function Chat({ workspace, user, goModels }: { workspace: Workspa
   }, [selected, latestMessageIdentity, stream]);
   async function loadOlderMessages() {
     if (!selected || !messagesRef.current) return;
-    olderPageAnchor.current = { id: selected, firstMessage: messages[0]?.id, height: messagesRef.current.scrollHeight, top: messagesRef.current.scrollTop };
+    const anchor = { id: selected, firstMessage: messages[0]?.id, height: messagesRef.current.scrollHeight, top: messagesRef.current.scrollTop };
+    olderPageAnchor.current = anchor;
     const result = await history.fetchNextPage();
     // Clear a failed request's anchor without changing the reader's position.
-    if (result.isError) olderPageAnchor.current = null;
+    if (result.isError && olderPageAnchor.current === anchor) olderPageAnchor.current = null;
   }
   function updateDraft(text: string) { draftVersion.current = { text, revision: draftVersion.current.revision + 1 }; setDraft(text); savePreference(`${draftPrefix}:${selected ?? 'new'}`, text); }
   async function createConversation() {
@@ -153,16 +158,20 @@ export default function Chat({ workspace, user, goModels }: { workspace: Workspa
       let conversationId = selected;
       if (!conversationId) {
         const created = await createConversation(); conversationId = created.id;
-        if (viewGeneration.current === generation) {
-          setSelected(created.id);
-          savePreference(`${draftPrefix}:${created.id}`, draftVersion.current.text);
-          savePreference(`${draftPrefix}:new`, '');
-        }
-        client.setQueryData([wid, 'resource', created.id], created); void client.invalidateQueries({ queryKey: [wid, 'resources', 'conversations'] });
+        void client.invalidateQueries({ queryKey: [wid, 'resources', 'conversations'] });
+        // Creating an empty conversation may have completed, but changing the
+        // view before its acknowledgement cancels the not-yet-sent message.
+        if (viewGeneration.current !== generation) return;
+        setSelected(created.id);
+        savePreference(`${draftPrefix}:${created.id}`, draftVersion.current.text);
+        savePreference(`${draftPrefix}:new`, '');
+        client.setQueryData([wid, 'resource', created.id], created);
       }
       const response = await post<{ run: Resource; conversation: Resource }>(`${workspacePath(wid)}/chat`, { conversation_id: conversationId, content: text, model_id: model, idempotency_key: intent.key, ...(agent ? { agent_id: agent } : {}) });
-      client.setQueryData([wid, 'resource', conversationId], response.conversation);
       if (viewGeneration.current === generation) {
+        // A delayed write receipt is not a fresh permission check. Keep a
+        // subsequent read denial until the invalidated query succeeds again.
+        client.setQueryData<Resource | null>([wid, 'resource', conversationId], cached => cached === null ? null : response.conversation);
         const remaining = acknowledgeDraft(draftVersion.current, submittedRevision);
         draftVersion.current = { text: remaining, revision: draftVersion.current.revision + 1 };
         setDraft(remaining); savePreference(`${draftPrefix}:${conversationId}`, remaining); idempotency.current = null; follow.current = true;
@@ -172,25 +181,29 @@ export default function Chat({ workspace, user, goModels }: { workspace: Workspa
   }
   async function cancel() {
     if (!activeRun) return; setError(null);
-    try { await post(`${workspacePath(wid)}/runs/${activeRun.id}/cancel`); void client.invalidateQueries({ queryKey: [wid] }); } catch (e) { setError(e); }
+    const generation = viewGeneration.current;
+    try { await post(`${workspacePath(wid)}/runs/${activeRun.id}/cancel`); void client.invalidateQueries({ queryKey: [wid] }); } catch (e) { if (viewGeneration.current === generation) setError(e); }
   }
   async function alterConversation() {
     if (!selected || !conversation.data) return; setBusy(true); setError(null);
+    const generation = viewGeneration.current;
     try {
-      if (confirm === 'delete') { await remove(resourcePath(wid, selected), conversation.data.version); selectConversation(null); }
+      if (confirm === 'delete') { await remove(resourcePath(wid, selected), conversation.data.version); if (viewGeneration.current === generation) selectConversation(null); }
       else await post(`${workspacePath(wid)}/conversations/${selected}/reset`);
-      setConfirm(null); void client.invalidateQueries({ queryKey: [wid] });
-    } catch (e) { setError(e); } finally { setBusy(false); }
+      if (viewGeneration.current === generation) setConfirm(null);
+      void client.invalidateQueries({ queryKey: [wid] });
+    } catch (e) { if (viewGeneration.current === generation) setError(e); } finally { if (viewGeneration.current === generation) setBusy(false); }
   }
   async function createBranch(e: React.FormEvent) {
     e.preventDefault(); if (!selected || !branch?.id) return; setBusy(true); setError(null);
-    try { const created = unwrap(await post<Resource>(`${workspacePath(wid)}/conversations/${selected}/branch`, { message_id: branch.id, content: branchText })); selectConversation(created.id); setBranch(null); void client.invalidateQueries({ queryKey: [wid] }); }
-    catch (e) { setError(e); } finally { setBusy(false); }
+    const generation = viewGeneration.current;
+    try { const created = unwrap(await post<Resource>(`${workspacePath(wid)}/conversations/${selected}/branch`, { message_id: branch.id, content: branchText })); if (viewGeneration.current === generation) selectConversation(created.id); void client.invalidateQueries({ queryKey: [wid] }); }
+    catch (e) { if (viewGeneration.current === generation) setError(e); } finally { if (viewGeneration.current === generation) setBusy(false); }
   }
   return <section className="chat-layout"><aside className={`conversation-sidebar ${sidebar ? 'mobile-open' : ''}`} aria-label={t('对话列表', 'Conversations')}><div className="conversation-heading"><h2>{t('对话', 'Conversations')}</h2><Button variant="ghost icon" aria-label={t('新建对话', 'New conversation')} onClick={() => { selectConversation(null); }}><Plus size={19} /></Button><Button variant="ghost icon mobile-only" aria-label={t('关闭列表', 'Close list')} onClick={() => setSidebar(false)}><X size={18} /></Button></div><label className="search compact"><Search size={15} /><input aria-label={t('搜索已加载的会话标题', 'Search loaded conversation titles')} placeholder={t('搜索已加载的对话', 'Search loaded conversations')} value={search} onChange={e => setSearch(e.target.value)} /></label><div className="conversation-items">{conversations.isPending ? <Loading /> : visibleConversations.map(c => <button key={c.id} className={`conversation-link ${selected === c.id ? 'active' : ''}`} onClick={() => { selectConversation(c.id); }}><span>{value(c.data, 'title', t('新对话', 'New conversation'))}</span>{c.visibility === 'private' ? <LockKeyhole size={12} /> : <Users size={12} />}</button>)}{!conversations.isPending && visibleConversations.length === 0 && <p className="muted small conversation-hint">{search ? t('没有匹配的对话。', 'No conversations match.') : t('每个新想法，都可以从这里开始。', 'Every new idea can start here.')}</p>}<LoadMore query={conversations} label={t('加载更早的对话', 'Load older conversations')} /></div><p className="conversation-note"><LockKeyhole size={13} />{t('私有会话只对你开放', 'Private conversations are only yours')}</p></aside>
-    <div className="chat-main"><header className="chat-heading"><div className="row"><Button variant="ghost icon mobile-only" aria-label={t('显示对话列表', 'Show conversations')} onClick={() => setSidebar(true)}><ChevronLeft size={18} /></Button><h1>{selected ? value(conversation.data?.data ?? {}, 'title', t('对话', 'Conversation')) : t('新对话', 'New conversation')}</h1></div><div className="row"><span className="privacy-label">{sharedConversation ? <><Users size={14} />{t('共享', 'Shared')}</> : <><LockKeyhole size={14} />{t('私有', 'Private')}</>}</span>{!selected && <Button variant="ghost icon" aria-label={t('对话设置', 'Conversation settings')} onClick={() => setSettings(true)}><Settings2 size={17} /></Button>}{selected && writable && <><Button variant="ghost icon" aria-label={t('重置上下文', 'Reset context')} onClick={() => setConfirm('reset')}><RotateCcw size={16} /></Button><Button variant="ghost icon" aria-label={t('删除会话', 'Delete conversation')} onClick={() => setConfirm('delete')}><Trash2 size={16} /></Button></>}</div></header>
+    <div className="chat-main"><header className="chat-heading"><div className="row"><Button variant="ghost icon mobile-only" aria-label={t('显示对话列表', 'Show conversations')} onClick={() => setSidebar(true)}><ChevronLeft size={18} /></Button><h1>{selected ? value(unavailable ? {} : conversation.data?.data ?? {}, 'title', t('对话', 'Conversation')) : t('新对话', 'New conversation')}</h1></div><div className="row"><span className="privacy-label">{sharedConversation ? <><Users size={14} />{t('共享', 'Shared')}</> : <><LockKeyhole size={14} />{t('私有', 'Private')}</>}</span>{!selected && <Button variant="ghost icon" aria-label={t('对话设置', 'Conversation settings')} onClick={() => setSettings(true)}><Settings2 size={17} /></Button>}{selected && writable && <><Button variant="ghost icon" aria-label={t('重置上下文', 'Reset context')} onClick={() => setConfirm('reset')}><RotateCcw size={16} /></Button><Button variant="ghost icon" aria-label={t('删除会话', 'Delete conversation')} onClick={() => setConfirm('delete')}><Trash2 size={16} /></Button></>}</div></header>
       <div className="messages" ref={messagesRef} onScroll={() => { const el = messagesRef.current; if (el) { follow.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100; if (follow.current) setHasNew(false); } }}>
-        {selected && (conversation.isPending || history.isPending) ? <Loading /> : !messages.length ? <div className="chat-welcome"><span className="welcome-mark" aria-hidden="true">↗</span><p className="eyebrow">SPACE TO THINK. ROOM TO DO.</p><h2>{t('今天，想推进什么？', 'What would you like to move forward?')}</h2><p>{t('从一个问题、一份资料，或还没成形的想法开始。', 'Start with a question, a document, or an idea still taking shape.')}</p><div className="suggestions">{[[t('理清一个想法', 'Think through an idea'), t('帮我理清这个想法：', 'Help me think through this idea: ')], [t('从资料中找答案', 'Find an answer in my knowledge'), t('请根据我的知识库，回答：', 'Using my knowledge, answer: ')], [t('列出下一步', 'Plan the next step'), t('帮我把目标分成可以执行的步骤：', 'Help me break this goal into actionable steps: ')]].map(([label, text]) => <button key={label} onClick={() => { updateDraft(text); document.getElementById('composer-input')?.focus(); }}>{label}<ArrowUp size={14} /></button>)}</div></div> : <div className="message-column">{history.hasNextPage && <Button variant="ghost" busy={history.isFetchingNextPage} onClick={() => void loadOlderMessages()}>{t('显示更早的消息', 'Show earlier messages')}</Button>}{messages.map((message, index) => <MessageView key={message.id ?? `${message.role}:${index}`} message={message} onBranch={message.role === 'user' && message.id && writable && !activeRun ? () => { setBranch(message); setBranchText(message.content); } : undefined} />)}{activeRun && <article className="message assistant"><div className="message-byline"><Brand small /><Status state={value(activeRun.data, 'status')} /></div><div className="message-body">{stream || t('正在准备…', 'Preparing…')}<span className="stream-caret" aria-hidden="true" /></div></article>}</div>}
+        {unavailable ? <Empty title={t('这段对话已不可用', 'This conversation is no longer available')} description={t('对话可能已删除，或你的访问权限已被撤销。请从列表选择其他对话。', 'It may have been deleted or your access was revoked. Choose another conversation from the list.')} /> : selected && (conversation.isPending || history.isPending) ? <Loading /> : !messages.length ? <div className="chat-welcome"><span className="welcome-mark" aria-hidden="true">↗</span><p className="eyebrow">SPACE TO THINK. ROOM TO DO.</p><h2>{t('今天，想推进什么？', 'What would you like to move forward?')}</h2><p>{t('从一个问题、一份资料，或还没成形的想法开始。', 'Start with a question, a document, or an idea still taking shape.')}</p><div className="suggestions">{[[t('理清一个想法', 'Think through an idea'), t('帮我理清这个想法：', 'Help me think through this idea: ')], [t('从资料中找答案', 'Find an answer in my knowledge'), t('请根据我的知识库，回答：', 'Using my knowledge, answer: ')], [t('列出下一步', 'Plan the next step'), t('帮我把目标分成可以执行的步骤：', 'Help me break this goal into actionable steps: ')]].map(([label, text]) => <button key={label} onClick={() => { updateDraft(text); document.getElementById('composer-input')?.focus(); }}>{label}<ArrowUp size={14} /></button>)}</div></div> : <div className="message-column">{history.hasNextPage && <Button variant="ghost" busy={history.isFetchingNextPage} onClick={() => void loadOlderMessages()}>{t('显示更早的消息', 'Show earlier messages')}</Button>}{messages.map((message, index) => <MessageView key={message.id ?? `${message.role}:${index}`} message={message} onBranch={message.role === 'user' && message.id && writable && !activeRun ? () => { setBranch(message); setBranchText(message.content); } : undefined} />)}{activeRun && <article className="message assistant"><div className="message-byline"><Brand small /><Status state={value(activeRun.data, 'status')} /></div><div className="message-body">{stream || t('正在准备…', 'Preparing…')}<span className="stream-caret" aria-hidden="true" /></div></article>}</div>}
       </div>
       {hasNew && <Button className="new-content" onClick={() => { follow.current = true; messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: 'smooth' }); setHasNew(false); }}><ArrowDown size={16} />{t('有新内容', 'New content')}</Button>}
       <div className="composer-wrap"><ErrorNotice error={error || runError || history.error || conversation.error || conversations.error || models.error || agents.error || chosenModel.error || activeRunQuery.error} />{!!eventError && <p className="connection-warning" role="status">{t('连接暂时中断，正在按记录游标恢复。', 'Connection interrupted. Resuming from the saved event cursor.')}</p>}

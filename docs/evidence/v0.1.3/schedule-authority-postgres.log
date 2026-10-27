@@ -1,0 +1,18 @@
+{
+  "database": "postgresql",
+  "model": "diagnostic process fixture, not a live AI provider",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-27T23:46:28.960505+00:00",
+  "binary_sha256": "9b9b49efd4e07161e3bb7a81ff5cf9a97ad6520482a1aa38933e8bb701d8328b",
+  "harness_sha256": "ddbff3b5af26746d914911bde005546795bd58cc854b6d125a136bc4881331fc",
+  "checks": [
+    "operator/admin/other-owner may read a shared schedule but cannot change, re-enable, no-op update or trigger its owner's intention",
+    "owner updates use CAS and the real scheduler/provider executes exactly the approved prompt with a private run receipt",
+    "moderation can delete shared jobs but cannot reach the owner's private jobs",
+    "instance/workspace owner cannot replace a member's schedule; demotion blocks new claims and automatically pauses due jobs without model execution",
+    "full membership revocation denies schedule update/trigger and preserves the paused intention"
+  ],
+  "status": "passed",
+  "duration_seconds": 4.14,
+  "passed_checks": 5
+}

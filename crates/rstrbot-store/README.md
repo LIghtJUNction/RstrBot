@@ -13,6 +13,12 @@ plugin code inside a database transaction.
 - Passwords use Argon2 with individual random salts. Random 256-bit session
   tokens are returned once and only their SHA-256 digests are stored. Sessions
   expire after seven days. `Debug` redacts tokens.
+- Argon2 verification and hashing run outside transactions. Session issuance and
+  password replacement then recheck the verified credential and active account
+  under the user row's write lock. A password change/recovery cannot be undone
+  by a login or password change that verified the old password earlier. Password
+  changes revoke all sessions in the same transaction without issuing a
+  temporary verification session.
 - HTTP/CLI must verify the short-lived setup proof before calling `bootstrap`.
   A transactional unique initialization marker prevents a second initialization.
 - Current membership is checked on every user operation. Reads query both
@@ -112,7 +118,7 @@ can create schemas:
 
 ```sh
 RSTRBOT_TEST_DATABASE_URL=postgresql://test@127.0.0.1/rstrbot_test \
-  cargo test -p rstrbot-store --test behavior
+  cargo test -p rstrbot-store --all-targets
 ```
 
 Each test creates a unique schema. Schemas remain available for failure diagnosis;
@@ -125,6 +131,11 @@ event payloads, racing reservations, unknown funds, overrun debt, request claims
 restore quarantine, late revoked-actor receipts, scans beyond 10,000 historical
 records, stable continuation after deletion, bounded concurrent growth and large
 payload page limits.
+
+Authentication regressions deterministically pause between password verification
+and commit to cover password change/recovery, late replacement attempts, account
+disablement, and an administrator role changed while login was in flight. They
+run against the same selected SQLite or disposable PostgreSQL database.
 
 PostgreSQL RLS policies, separate migration/runtime accounts, service identities,
 scoped personal API keys, OIDC/Passkey and full external-state disaster recovery

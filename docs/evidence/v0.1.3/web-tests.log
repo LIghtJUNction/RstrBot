@@ -1,0 +1,27 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @rstrbot/web@0.1.3 test
+> node --test --test-isolation=none tests/*.test.mjs
+
+✔ malformed records cannot prevent valid history from rendering (1.112352ms)
+✔ duplicate stable message IDs are rendered only once (0.12619ms)
+✔ raw model text remains text, including HTML payloads (0.108443ms)
+✔ a delayed or invalid cursor never rolls event replay backwards (1.125171ms)
+✔ reconnect overlap and terminal receipts do not repeat or retain generated text (0.920724ms)
+✔ historical replay releases terminal streams and bounds missing-terminal buffers (23.480225ms)
+✔ unordered duplicate delivery is consumed in ID order and cannot revive terminal text (0.205238ms)
+✔ a delayed send acknowledgement preserves text entered while the request was pending (0.171027ms)
+✔ pagination reaches resources beyond the old 200-item window despite page overlap (0.477437ms)
+✔ an overlapping resource page keeps the newest resource revision (0.369114ms)
+✔ instance administration does not imply workspace write permission (0.152399ms)
+✔ shared resources are writable by their member owner or an operator (0.143186ms)
+✔ private ownership and unknown roles fail closed (0.137627ms)
+✔ workspace administrators can moderate approved routes without approving new destinations (0.127091ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80.770782

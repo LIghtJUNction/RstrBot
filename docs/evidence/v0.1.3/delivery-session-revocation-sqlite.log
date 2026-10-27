@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "checks": [
+    "queued logout revocation prevents first outbound request; independent credentials finish; retry preserves the original conservative receipt without dispatch",
+    "queued password revocation prevents first outbound request; independent credentials finish; retry preserves the original conservative receipt without dispatch",
+    "queued expiry revocation prevents first outbound request; independent credentials finish; retry preserves the original conservative receipt without dispatch",
+    "an already observed external send remains unknown after logout and identical retries do not repeat it"
+  ],
+  "database": "sqlite",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-27T23:45:36.695810+00:00",
+  "harness_sha256": "6cebcc52f4962ee906e7edf09b7ac5d38c9fad834e63f9efeb4991cea154c697",
+  "binary_sha256": {
+    "rstrbot": "9b9b49efd4e07161e3bb7a81ff5cf9a97ad6520482a1aa38933e8bb701d8328b",
+    "rstrbot-webhook": "71563e72fbc4989bb6cd6352009aa88680e3a55ae9c82c54631dbb354dcb1fed"
+  },
+  "scope": "real authenticated HTTP and actual eight-slot worker queue with local receiver barriers; synthetic credentials only",
+  "duration_seconds": 9.914,
+  "passed_checks": 4
+}

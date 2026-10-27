@@ -243,6 +243,151 @@ try {
     } finally { release(); await page.unroute(pattern); }
   });
 
+  await check('a chat acknowledgement from an unmounted view cannot erase a replacement draft', async () => {
+    await nav('Conversations');
+    await page.getByRole('button', { name: privateConversation.data.title, exact: true }).click();
+    let received, release;
+    const ready = new Promise(resolve => { received = resolve; });
+    const released = new Promise(resolve => { release = resolve; });
+    const pattern = '**/api/v1/workspaces/*/chat';
+    await page.route(pattern, async route => {
+      const response = await route.fetch();
+      assert.equal(response.status(), 200);
+      received(); await released;
+      await route.fulfill({ response });
+    });
+    try {
+      await page.getByLabel('Message', { exact: true }).fill('Old view submitted this message');
+      await page.getByRole('button', { name: 'Send message', exact: true }).click();
+      await Promise.race([ready, wait(15000).then(() => { throw new Error('Chat response was not intercepted'); })]);
+      await nav('Knowledge'); await nav('Conversations');
+      await page.getByRole('button', { name: privateConversation.data.title, exact: true }).click();
+      await page.getByLabel('Message', { exact: true }).fill('PRESERVE DRAFT FROM THE REPLACEMENT VIEW');
+      const acknowledged = page.waitForResponse(response => new URL(response.url()).pathname === `/api/v1${wp()}/chat` && response.status() === 200);
+      release(); await acknowledged;
+      await nav('Knowledge'); await nav('Conversations');
+      await page.getByRole('button', { name: privateConversation.data.title, exact: true }).click();
+      assert.equal(await page.getByLabel('Message', { exact: true }).inputValue(), 'PRESERVE DRAFT FROM THE REPLACEMENT VIEW');
+    } finally { release(); await page.unroute(pattern); }
+  });
+
+  await check('switching workspace before conversation creation returns does not launch the abandoned chat', async () => {
+    const target = await api('POST', '/workspaces', { name: 'Deferred request destination' }, [200, 201]);
+    const targetId = target.workspace?.id ?? target.id;
+    assert.ok(targetId);
+    // Reload so the server-created workspace is available in the actual picker.
+    await page.reload(); await page.locator('.app-shell').waitFor();
+    await page.getByLabel('Switch workspace', { exact: true }).selectOption(workspace);
+    await page.getByLabel('Select model').selectOption(firstModel.id);
+    await page.getByLabel('Message', { exact: true }).fill('ABANDONED BEFORE MODEL REQUEST');
+    let received, release, created;
+    let chatRequests = 0;
+    const ready = new Promise(resolve => { received = resolve; });
+    const released = new Promise(resolve => { release = resolve; });
+    const pattern = '**/api/v1/workspaces/*/resources/conversations';
+    const observe = request => { if (request.method() === 'POST' && new URL(request.url()).pathname === `/api/v1${wp()}/chat`) chatRequests++; };
+    page.on('request', observe);
+    await page.route(pattern, async route => {
+      if (route.request().method() !== 'POST') return route.continue();
+      const response = await route.fetch();
+      assert.ok([200, 201].includes(response.status()));
+      created = await response.json(); received(); await released;
+      await route.fulfill({ response });
+    });
+    try {
+      await page.getByRole('button', { name: 'Send message', exact: true }).click();
+      await Promise.race([ready, wait(15000).then(() => { throw new Error('Conversation creation was not intercepted'); })]);
+      await page.getByLabel('Switch workspace', { exact: true }).selectOption(targetId);
+      await page.locator('.topbar-workspace').filter({ hasText: 'Deferred request destination' }).waitFor();
+      const acknowledged = page.waitForResponse(response => response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/resources/conversations'));
+      release(); await acknowledged;
+      // The failure mode adds a new HTTP operation after the delayed response.
+      // Observe a bounded quiet interval, then also inspect the real DB-backed resource.
+      await wait(500);
+      assert.equal(chatRequests, 0, 'A departed view must not initiate a model request');
+      const empty = await api('GET', `${wp()}/resource/${created.id}`);
+      assert.equal(empty.data.active_run ?? '', '');
+      assert.equal(empty.data.messages?.length ?? 0, 0);
+      assert.equal(await page.getByLabel('Message', { exact: true }).inputValue(), '');
+      await page.getByLabel('Switch workspace', { exact: true }).selectOption(workspace);
+      assert.equal(await page.getByLabel('Message', { exact: true }).inputValue(), 'ABANDONED BEFORE MODEL REQUEST');
+    } finally { release(); page.off('request', observe); await page.unroute(pattern); }
+  });
+
+  await check('a deleted conversation cannot retain cached messages or write controls', async () => {
+    const deleted = await create('conversations', { title: 'Deleted conversation cache sentinel' });
+    const started = await api('POST', `${wp()}/chat`, { conversation_id: deleted.id, model_id: firstModel.id, content: 'REMOVE THIS CACHED MESSAGE', idempotency_key: randomUUID() }, [200]);
+    await until(async () => (await api('GET', `${wp()}/resource/${started.run.id}`)).data.status === 'completed', 'deleted conversation fixture');
+    await nav('Knowledge'); await nav('Conversations');
+    await page.getByRole('button', { name: deleted.data.title, exact: true }).click();
+    await page.locator('.message.user .message-body').filter({ hasText: /^REMOVE THIS CACHED MESSAGE$/ }).waitFor();
+    const current = await api('GET', `${wp()}/resource/${deleted.id}`);
+    await api('DELETE', `${wp()}/resource/${deleted.id}?version=${current.version}`, undefined, [200, 204]);
+    await page.getByText('This conversation is no longer available', { exact: true }).waitFor();
+    assert.equal(await page.locator('.message-body').count(), 0);
+    assert.equal(await page.getByRole('button', { name: 'Reset context', exact: true }).count(), 0);
+    assert.equal(await page.getByRole('button', { name: 'Delete conversation', exact: true }).count(), 0);
+    assert.equal(await page.getByRole('button', { name: 'Send message', exact: true }).isDisabled(), true);
+    await page.getByRole('button', { name: privateConversation.data.title, exact: true }).click();
+    await page.locator('.message.user .message-body').first().waitFor();
+  });
+
+  await check('denied caches stay empty through 503 and remount, then recover after a successful read', async () => {
+    const guarded = await create('conversations', { title: 'Cache denial recovery conversation' });
+    const started = await api('POST', `${wp()}/chat`, { conversation_id: guarded.id, model_id: firstModel.id, content: 'AUTHORIZED CACHE RECOVERY SENTINEL', idempotency_key: randomUUID() }, [200]);
+    await until(async () => (await api('GET', `${wp()}/resource/${started.run.id}`)).data.status === 'completed', 'cache denial fixture');
+    await nav('Knowledge'); await nav('Conversations');
+    await page.getByRole('button', { name: guarded.data.title, exact: true }).click();
+    const body = page.locator('.message.user .message-body').filter({ hasText: /^AUTHORIZED CACHE RECOVERY SENTINEL$/ });
+    await body.waitFor();
+    let mode = 'denied';
+    const metadataPath = `/api/v1${wp()}/resource/${guarded.id}`;
+    const historyPath = `/api/v1${wp()}/conversations/${guarded.id}/messages`;
+    const metadataPattern = `**${metadataPath}*`;
+    const historyPattern = `**${historyPath}*`;
+    // Only failures are injected. The initial and recovered content comes from
+    // the real authenticated server. Exercise metadata and message-page caches.
+    const intercept = deniedStatus => route => mode === 'allowed' ? route.continue() : route.fulfill({
+      status: mode === 'denied' ? deniedStatus : 503, contentType: 'application/json',
+      body: JSON.stringify({ error: { code: mode === 'denied' ? 'access_denied' : 'temporary_outage', message: 'Synthetic cache recovery response' } }),
+    });
+    const changed = () => create('memories', { title: `Cache refresh ${randomUUID()}`, content: 'Synthetic event to invalidate the active workspace reads.', enabled: false });
+    await page.route(metadataPattern, intercept(403));
+    await page.route(historyPattern, intercept(404));
+    try {
+      const deniedReads = Promise.all([[metadataPath, 403], [historyPath, 404]].map(([pathname, status]) => page.waitForResponse(response => new URL(response.url()).pathname === pathname && response.status() === status)));
+      await changed(); await deniedReads;
+      await page.getByText('This conversation is no longer available', { exact: true }).waitFor();
+      mode = 'offline';
+      const failedReads = Promise.all([metadataPath, historyPath].map(pathname => page.waitForResponse(response => new URL(response.url()).pathname === pathname && response.status() === 503)));
+      await changed(); await failedReads;
+      assert.equal(await body.count(), 0, 'An outage cannot restore content after an explicit denial');
+      await nav('Knowledge'); await nav('Conversations');
+      await page.getByRole('button', { name: guarded.data.title, exact: true }).click();
+      await page.getByText('This conversation is no longer available', { exact: true }).waitFor();
+      assert.equal(await body.count(), 0, 'A new observer cannot restore denied content');
+      mode = 'allowed'; await changed(); await body.waitFor();
+    } finally { await page.unroute(metadataPattern); await page.unroute(historyPattern); }
+
+    const memory = await create('memories', { title: 'DENIED COLLECTION CACHE SENTINEL', content: 'Collection cache fixture.', enabled: false });
+    await nav('Memory');
+    const row = page.getByRole('button', { name: memory.data.title, exact: true });
+    await row.waitFor();
+    const listPattern = `**/api/v1${wp()}/resources/memories*`;
+    mode = 'denied'; await page.route(listPattern, intercept(403));
+    try {
+      await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+      await row.waitFor({ state: 'hidden' });
+      mode = 'offline';
+      const offline = page.waitForResponse(response => new URL(response.url()).pathname.endsWith('/resources/memories') && response.status() === 503);
+      await page.getByRole('button', { name: 'Refresh', exact: true }).click(); await offline;
+      assert.equal(await row.count(), 0);
+      await nav('Knowledge'); await nav('Memory');
+      assert.equal(await row.count(), 0, 'Collection cache stays empty after a new observer mounts');
+      mode = 'allowed'; await page.getByRole('button', { name: 'Refresh', exact: true }).click(); await row.waitFor();
+    } finally { await page.unroute(listPattern); }
+  });
+
   await check('knowledge form imports text, exposes indexed state and displays source safely', async () => {
     await nav('Knowledge');
     await page.getByRole('button', { name: 'Add', exact: true }).first().click();

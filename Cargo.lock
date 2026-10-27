@@ -1917,7 +1917,7 @@ dependencies = [
 
 [[package]]
 name = "rstrbot"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "axum",
  "base64 0.22.1",
@@ -1953,7 +1953,7 @@ dependencies = [
 
 [[package]]
 name = "rstrbot-plugin"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "eventsource-stream",
  "futures-util",
@@ -1973,7 +1973,7 @@ dependencies = [
 
 [[package]]
 name = "rstrbot-store"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "argon2",
  "chrono",

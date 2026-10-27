@@ -1,0 +1,23 @@
+{
+  "status": "failed",
+  "checks": [],
+  "database": "sqlite",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-27T23:41:14.371445+00:00",
+  "binary_sha256": "8e4fc6c5dde77008dd13c18902eb932da7330b86a4c65f2e956ea0405d8b7af2",
+  "harness_sha256": "861ef163245fbbff40f95d0ee50155993cbf405243dfcfb66e1f17cce1279881",
+  "scope": "real local HTTP and provider workers with a barrier-controlled mock upstream; no commercial account",
+  "error": "Traceback (most recent call last):\n  File \"/workspace/scratch/fabcc3e8404c/RstrBot/tests/model_test_revocation.py\", line 227, in main\n    exercise(options, report)\n  File \"/workspace/scratch/fabcc3e8404c/RstrBot/tests/model_test_revocation.py\", line 151, in exercise\n    joined(queued, success=False)\n  File \"/workspace/scratch/fabcc3e8404c/RstrBot/tests/model_test_revocation.py\", line 87, in joined\n    assert \"error\" in result and not result.get(\"success\"), result\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'cost_microusd': 11, 'fixture': False, 'message': {'content': 'OK', 'role': 'assistant'}, 'success': True, 'usage': {'completion_tokens': 1, 'prompt_tokens': 10}}\n",
+  "upstream_requests": [
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "revoked-in-queue"
+  ],
+  "exit_code": 1
+}

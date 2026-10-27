@@ -1,7 +1,7 @@
 //! Durable, bounded conversation runs. Models propose; the core authorizes.
 use crate::state::{ActiveRun, AppError, AppState, sanitize_resource};
 use axum::http::StatusCode;
-use rstrbot_plugin::{InstanceContext, Manifest, RpcEvent};
+use rstrbot_plugin::{InstanceContext, Manifest, PluginError, RpcEvent};
 use rstrbot_store::{Resource, Role, RunAdmissionRequest, Store, User, Visibility};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -497,13 +497,21 @@ impl Execution {
         let call_token = self.token.child_token();
         let mut stream_saved = true;
         let result = {
-            let call = self.state.host.call(
+            let call = self.state.host.call_authorized(
                 manifest,
                 context,
-                method,
-                params,
+                (method, params),
                 call_token.clone(),
                 Some(tx),
+                || async {
+                    // Queueing and the protocol handshake can outlive the
+                    // original grant. Polling an in-flight call is not a gate:
+                    // authorize again before the worker receives this RPC.
+                    self.authorize_instance(instance).await.map_err(|_| {
+                        self.token.cancel();
+                        PluginError::Cancelled
+                    })
+                },
             );
             // Poll database checks beside the RPC, so a database wait cannot
             // hide cancellation, the run deadline, or an already known receipt.
@@ -1381,11 +1389,36 @@ pub async fn reload_plugin(
     }
     Ok(())
 }
-pub async fn test_model(
+async fn authorize_model_test(
+    state: &AppState,
+    db: &Store,
+    user: &User,
+    model: &Resource,
+    credential: &str,
+) -> Result<(), AppError> {
+    if state.shutdown.is_cancelled() {
+        return Err(cancelled());
+    }
+    require_session(db, user, Some(credential)).await?;
+    db.require_role(&model.workspace_id, &user.id, Role::Admin)
+        .await?;
+    let current = db
+        .get_resource(&model.workspace_id, &user.id, &model.id)
+        .await?;
+    if current.version != model.version {
+        return Err(AppError::conflict(
+            "Model configuration changed during this test; test the current configuration again",
+        ));
+    }
+    Ok(())
+}
+
+pub async fn test_model_authenticated(
     state: AppState,
     user: &User,
     workspace: &str,
     id: &str,
+    credential: &str,
 ) -> Result<Value, AppError> {
     let _permit = state.capacity.clone().try_acquire_owned().map_err(|_| {
         AppError::new(
@@ -1395,6 +1428,7 @@ pub async fn test_model(
         )
     })?;
     let db = state.store().await;
+    require_session(&db, user, Some(credential)).await?;
     db.require_role(workspace, &user.id, Role::Admin).await?;
     if db.recovery_mode().await? {
         return Err(AppError::conflict("Recovery mode prevents model calls"));
@@ -1439,23 +1473,27 @@ pub async fn test_model(
         .await?;
     let test_token = state.shutdown.child_token();
     let result = {
-        let call = state.host.call(
+        let call = state.host.call_authorized(
             &manifest,
             &context,
-            "model.test",
-            params,
+            ("model.test", params),
             test_token.clone(),
             None,
+            || async {
+                authorize_model_test(&state, &db, user, &model, credential)
+                    .await
+                    .map_err(|_| PluginError::Cancelled)
+            },
         );
         let monitor = async {
             let mut check = tokio::time::interval(Duration::from_millis(250));
             check.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
             loop {
                 check.tick().await;
-                db.require_role(workspace, &user.id, Role::Admin).await?;
-                let current = db.get_resource(workspace, &user.id, id).await?;
-                if current.version != model.version {
-                    return Err::<(), rstrbot_store::Error>(rstrbot_store::Error::Conflict);
+                if let Err(error) =
+                    authorize_model_test(&state, &db, user, &model, credential).await
+                {
+                    return error;
                 }
             }
         };
@@ -1465,7 +1503,7 @@ pub async fn test_model(
             response = &mut call => Ok(response.map_err(AppError::from)),
             _ = state.shutdown.cancelled() => Err(cancelled()),
             _ = tokio::time::sleep(Duration::from_secs(180)) => Err(deadline_exceeded()),
-            current = &mut monitor => Err(current.err().map(AppError::from).unwrap_or_else(cancelled)),
+            error = &mut monitor => Err(error),
         };
         match outcome {
             Ok(result) => result,
@@ -1486,13 +1524,7 @@ pub async fn test_model(
     db.settle(&reservation.id, cost).await?;
     db.internal_append_event(id, "model.tested", json!({"success":result.is_ok(),"reservation_id":reservation.id,"usage":result.as_ref().ok().map(|result| &result["usage"]),"cost_microusd":cost,"error":result.as_ref().err().map(|error| &error.code)})).await?;
     let result = result?;
-    db.require_role(workspace, &user.id, Role::Admin).await?;
-    let current = db.get_resource(workspace, &user.id, id).await?;
-    if current.version != model.version {
-        return Err(AppError::conflict(
-            "Model configuration changed during this test; test the current configuration again",
-        ));
-    }
+    authorize_model_test(&state, &db, user, &model, credential).await?;
     Ok(
         json!({"success":true,"message":result["message"],"usage":result["usage"],"cost_microusd":cost,"fixture":provider=="diagnostic"}),
     )

@@ -944,7 +944,9 @@ async fn test_model(
         .await
         .require_role(&wid, &user.id, Role::Admin)
         .await?;
-    Ok(Json(engine::test_model(state, &user, &wid, &id).await?))
+    Ok(Json(
+        engine::test_model_authenticated(state, &user, &wid, &id, &token(&headers)?).await?,
+    ))
 }
 async fn reload_plugin(
     State(state): State<AppState>,

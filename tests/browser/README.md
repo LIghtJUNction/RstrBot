@@ -19,8 +19,11 @@ The harness can also load the exact pinned Playwright version from
 `CODEX_PRIMARY_RUNTIME_NODE_MODULES` when that runtime is available.
 
 The run checks setup, model and plugin forms, the actual diagnostic worker/tool
-round trip, a delayed **real** chat HTTP response, draft preservation, knowledge
-editing, resource pagination beyond 200 entries, an agent's default model,
+round trip, delayed **real** chat HTTP responses, draft preservation after page
+unmount/remount, workspace changes while conversation creation is pending,
+removal of deleted conversation content from the visible cache, denied caches
+remaining empty across 503 errors and remounts until a successful read, knowledge editing,
+resource pagination beyond 200 entries, an agent's default model,
 account switching after session expiry, explicit credential clearing when a model
 destination changes, mobile navigation, locale and theme.
 Snapshots and hashes are written to `artifacts/screenshots/` and

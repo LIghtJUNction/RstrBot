@@ -20,7 +20,7 @@ Resources have `{id,workspace_id,owner_id,kind,visibility,version,data,created_a
 - agents: `{name,system_prompt,model_id,max_steps:6,knowledge:true,memory:true}`. Frozen per run.
 - runs (read only): `{conversation_id,status:"queued|running|completed|failed|cancelled|interrupted|unknown",stage,content,error?,usage?,cost_microusd?,steps,delivery,persistence,created_at}`. Unknown cost is null.
 
-POST `/workspaces/:wid/chat` `{conversation_id,content,model_id,idempotency_key,agent_id?}` -> `{run,conversation}`; returns accepted asynchronously. GET `/events?after=cursor&limit=100` -> `{items,cursor}` durable ordered events `{id,kind,data,resource_id,...}`; data includes run_id/conversation_id, delta on `run.delta`. Poll 700 ms while active, 3s idle; switch context aborts all old requests. POST `/runs/:id/cancel`. GET `/runs/:id` resource. Every poll rechecks membership and private visibility. SSE optional, polling provides reliable recovery.
+POST `/workspaces/:wid/chat` `{conversation_id,content,model_id,idempotency_key,agent_id?}` -> `{run,conversation}`; returns accepted asynchronously. GET `/events?after=cursor&limit=100` -> `{items,cursor}` durable ordered events `{id,kind,data,resource_id,...}`; data includes run_id/conversation_id, delta on `run.delta`. Poll 700 ms while active, 3s idle; switching context cancels old read requests and invalidates their view updates; an already submitted mutation is not implicitly cancelled. POST `/runs/:id/cancel`. GET `/runs/:id` resource. Every poll rechecks membership and private visibility. SSE optional, polling provides reliable recovery.
 
 GET `/workspaces/:wid/export` exports only caller-visible resources, model secrets removed. GET `/admin/backup` administrator-only offline-consistent snapshot (does not contain key); CLI restore into empty database, pauses external work. GET `/workspaces/:wid/audit` -> `{items}` metadata only, no private message content.
 
@@ -103,3 +103,34 @@ Implementation references: [delivery authority](../src/delivery.rs),
 [worker dispatch checks](../crates/rstrbot-plugin/src/host.rs),
 [bounded internal scans](../crates/rstrbot-store/src/resources.rs), and
 [startup ordering](../src/main.rs).
+
+
+## 0.1.3 authentication and model-test dispatch
+
+Login commits a session only while the account still has the password hash that
+was actually verified and is still enabled. Password changes atomically replace
+that verified hash and revoke the account's sessions. A concurrent password
+change or local recovery invalidates older verified login/change requests; they
+return 401 rather than issuing a post-revocation session or overwriting a newer
+password. Argon2 work runs outside the short database transaction. No database
+schema or HTTP request shape changed.
+
+Model tests use the exact presented session as an in-memory lease, just like
+HTTP chat. Current workspace administrator permission and the tested model's
+version are checked before admission, after a worker slot becomes available,
+after its handshake, while it runs, and before exposing its result. Normal model
+and tool calls also recheck their current execution authority at both dispatch
+gates. A second valid session does not revive a revoked queued request.
+
+Cancellation does not undo an upstream request already sent. Known usage is
+settled before the final response authorization; missing receipts retain unknown
+cost and are never automatically replayed. These checks narrow the dispatch
+race but do not claim an atomic transaction with an external provider.
+
+The WebUI invalidates asynchronous view updates when leaving a conversation,
+page or workspace. If only empty-conversation creation was submitted, leaving
+that view prevents the subsequent model request. An already submitted chat may
+finish in the original conversation; its late response cannot overwrite the new
+view or clear its draft. Explicit access/not-found responses hide denied cached
+content, and a later network failure cannot make it visible again. A successful
+authorized read is required to restore it.

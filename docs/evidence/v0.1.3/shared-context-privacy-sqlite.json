@@ -1,0 +1,47 @@
+{
+  "database": "sqlite",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "scope": "real local HTTP/SSE and diagnostic processes; synthetic source data; no commercial model",
+  "started_at": "2026-10-27T23:46:17.119706+00:00",
+  "binary_sha256": {
+    "rstrbot": "9b9b49efd4e07161e3bb7a81ff5cf9a97ad6520482a1aa38933e8bb701d8328b",
+    "rstrbot-openai": "a6b7e84a0e5e503ba36027fef90cadeec8f17edee9bdde10199151888bdba2a8",
+    "rstrbot-diagnostic": "89de9bcafbf5cffae87c46bc94c5d332c36719e680359803f919b63d2b12643d"
+  },
+  "harness_sha256": "b0257f0b624a1096bbbcbf02fc848dbda4e8ba0a819e4c0a4225eb0b2df0e79a",
+  "checks": [
+    "owner: shared model inputs, tools, messages, run, events and ordinary export contain no private source",
+    "owner: private chat and personal search retain authorized private context; other members cannot read derived output",
+    "member: shared model inputs, tools, messages, run, events and ordinary export contain no private source",
+    "member: private chat and personal search retain authorized private context; other members cannot read derived output",
+    "real diagnostic tool execution is excluded from shared conversations and preserved for its owner's private conversation",
+    "private agent cannot be published through shared run admission; rejection leaves no history and the key can be retried; private chat still accepts it"
+  ],
+  "observations": [
+    {
+      "initiator": "owner",
+      "conversation_audience": "workspace",
+      "private_document_sent_to_provider": false,
+      "private_memory_sent_to_provider": false,
+      "private_tool_advertised": false,
+      "shared_document_sent_to_provider": true,
+      "shared_memory_sent_to_provider": true,
+      "other_member_private_document_surfaces": [],
+      "other_member_private_memory_surfaces": []
+    },
+    {
+      "initiator": "member",
+      "conversation_audience": "workspace",
+      "private_document_sent_to_provider": false,
+      "private_memory_sent_to_provider": false,
+      "private_tool_advertised": false,
+      "shared_document_sent_to_provider": true,
+      "shared_memory_sent_to_provider": true,
+      "other_member_private_document_surfaces": [],
+      "other_member_private_memory_surfaces": []
+    }
+  ],
+  "status": "passed",
+  "duration_seconds": 2.195,
+  "passed_checks": 6
+}

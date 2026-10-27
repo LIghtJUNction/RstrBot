@@ -14,6 +14,12 @@ export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
 }
 
+// A network failure may leave a readable cached view. An explicit access or
+// existence failure must not keep showing a resource that the server denied.
+export function isResourceUnavailable(error: unknown): boolean {
+  return error instanceof ApiError && [401, 403, 404].includes(error.status);
+}
+
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`/api/v1${path}`, {
     ...options, credentials: 'same-origin',

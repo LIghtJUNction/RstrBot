@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "started_at": "2026-10-27T23:45:23.925943+00:00",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "database": "sqlite",
+  "checks": [
+    "three simultaneous SQLite runs preserve final content and known usage while authorization ticks share the pool",
+    "all 150 actual HTTP/SSE fragments are durably replayed in order without loss or duplication",
+    "core restart preserves identical durable fragments and final receipts without another provider request"
+  ],
+  "scope": "actual local HTTP/SSE worker with synthetic fragments, not a commercial model",
+  "harness_sha256": "02d85affcbae9c2e06dbd07faddfd00b4e405072437f0974b22a5b80e079eff3",
+  "binary_sha256": {
+    "rstrbot": "9b9b49efd4e07161e3bb7a81ff5cf9a97ad6520482a1aa38933e8bb701d8328b",
+    "rstrbot-openai": "a6b7e84a0e5e503ba36027fef90cadeec8f17edee9bdde10199151888bdba2a8",
+    "rstrbot-diagnostic": "89de9bcafbf5cffae87c46bc94c5d332c36719e680359803f919b63d2b12643d",
+    "rstrbot-webhook": "71563e72fbc4989bb6cd6352009aa88680e3a55ae9c82c54631dbb354dcb1fed"
+  },
+  "duration_seconds": 1.707,
+  "passed_checks": 3
+}

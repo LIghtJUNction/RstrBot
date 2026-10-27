@@ -1,0 +1,217 @@
+{
+  "status": "passed",
+  "started_at": "2026-10-27T23:49:24.411Z",
+  "environment": {
+    "os": "linux",
+    "architecture": "x64",
+    "node": "v24.22.1",
+    "playwright": "1.62.1",
+    "browser": "156.0.8078.47",
+    "database": "SQLite",
+    "valkey": "off",
+    "locale": "en-US",
+    "reduced_motion": true
+  },
+  "input_sha256": {
+    "rstrbot": "9b9b49efd4e07161e3bb7a81ff5cf9a97ad6520482a1aa38933e8bb701d8328b",
+    "rstrbot-diagnostic": "89de9bcafbf5cffae87c46bc94c5d332c36719e680359803f919b63d2b12643d",
+    "rstrbot-openai": "a6b7e84a0e5e503ba36027fef90cadeec8f17edee9bdde10199151888bdba2a8",
+    "rstrbot-webhook": "71563e72fbc4989bb6cd6352009aa88680e3a55ae9c82c54631dbb354dcb1fed",
+    "web/dist/assets/Sculpture-B8VWdMpL.js": "e80a72605fac8b280e094958736378eb02d8f6c5b5b28b307b7e4d140da0c775",
+    "web/dist/assets/Sculpture-B8VWdMpL.js.map": "015b41f07012812a74516752b1c704e490fcaad7a734243c95d873c2f0e091af",
+    "web/dist/assets/Sculpture-C3eeg3J2.js": "d4cc3463f1a2a3325f54567376e7811d066cbfb4c9515ec416ab8b383d943130",
+    "web/dist/assets/Sculpture-C3eeg3J2.js.map": "ee6afd95f2406726020cc306d83055be689f525297a2558e9238ac2e818d10c8",
+    "web/dist/assets/index-B6160oSh.js": "8acdd4cc755f4209139ec7645168cf47a054e3d80522677dffe47ef6d3acb54c",
+    "web/dist/assets/index-B6160oSh.js.map": "c86abb44caaf4b1fd1b377f99e98e618c5404a4732d1e7b9d5ef49921af201f5",
+    "web/dist/assets/index-BBfQMujr.js": "242abe86c2673ffdb6b31f4342281c05a95e2930095afe4842b4b677834b89b6",
+    "web/dist/assets/index-BBfQMujr.js.map": "7d8be50c4b0b5c664f17407256c012014a73476d693cccc9a26dc9c44bc783e8",
+    "web/dist/assets/index-Cowbjskd.css": "faef481d088bb8ca3b7af563c6888378fef7a8b8e54cd6e886410bffbd0678b1",
+    "web/dist/favicon.svg": "30d23952afff1d9a19085077ca0a20a4c6df4ed5e6aa923ed3602240277e494c",
+    "web/dist/index.html": "3e48d252288d69811f956b1f8befb59707391be79d9eaf6a8f403126610e17e7"
+  },
+  "harness_sha256": "13da9b30827bdf4457af8dfc36e2db45b01c625eb8dda9ff7610c0d19798ff38",
+  "checks": [
+    {
+      "name": "320px first-run setup exposes both database choices and prevents an unapplied switch",
+      "status": "passed",
+      "duration_ms": 498
+    },
+    {
+      "name": "actual first-run form creates an authenticated administrator and workspace",
+      "status": "passed",
+      "duration_ms": 1970
+    },
+    {
+      "name": "model and plugin forms save real diagnostic connections and invoke their worker",
+      "status": "passed",
+      "duration_ms": 677
+    },
+    {
+      "name": "chat completes a real model-tool-model loop and shows the tool result",
+      "status": "passed",
+      "duration_ms": 3388
+    },
+    {
+      "name": "a delayed real chat acknowledgement preserves a newly typed draft",
+      "status": "passed",
+      "duration_ms": 3251
+    },
+    {
+      "name": "a chat acknowledgement from an unmounted view cannot erase a replacement draft",
+      "status": "passed",
+      "duration_ms": 404
+    },
+    {
+      "name": "switching workspace before conversation creation returns does not launch the abandoned chat",
+      "status": "passed",
+      "duration_ms": 846
+    },
+    {
+      "name": "a deleted conversation cannot retain cached messages or write controls",
+      "status": "passed",
+      "duration_ms": 3640
+    },
+    {
+      "name": "denied caches stay empty through 503 and remount, then recover after a successful read",
+      "status": "passed",
+      "duration_ms": 9921
+    },
+    {
+      "name": "knowledge form imports text, exposes indexed state and displays source safely",
+      "status": "passed",
+      "duration_ms": 356
+    },
+    {
+      "name": "visible pagination reaches conversations beyond 200 resources",
+      "status": "passed",
+      "duration_ms": 2848
+    },
+    {
+      "name": "selecting an agent applies its default model and preserves a later explicit override",
+      "status": "passed",
+      "duration_ms": 242
+    },
+    {
+      "name": "changing a model destination requires a replacement or an explicit credential clear",
+      "status": "passed",
+      "duration_ms": 613
+    },
+    {
+      "name": "desktop light theme and 320px Chinese navigation fit without horizontal overflow",
+      "status": "passed",
+      "duration_ms": 596
+    },
+    {
+      "name": "expired session can sign in as another member without cached private resources or drafts",
+      "status": "passed",
+      "duration_ms": 1605
+    },
+    {
+      "name": "a member can read another owners shared conversation without write controls",
+      "status": "passed",
+      "duration_ms": 772
+    },
+    {
+      "name": "a live administrator downgrade removes management navigation and its open page",
+      "status": "passed",
+      "duration_ms": 19124
+    },
+    {
+      "name": "browser runtime and request isolation remain clean",
+      "status": "passed",
+      "duration_ms": 120
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "artifacts/screenshots/00-setup-dark-320.png",
+      "sha256": "53cdb972757c1f9592c991aacfec822bccfba6a076084ad29844fc2be293f6ca",
+      "bytes": 153373,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/01-setup-dark-desktop.png",
+      "sha256": "8b16459b7b8e0a4c97829a3ed37a312ee010ebf1de41321aa680c0df9d007d07",
+      "bytes": 231260,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/02-chat-dark-desktop.png",
+      "sha256": "ba55ec43c96571e623b82d60bddb33df4ddd2a78caee9f3dbd0c5cc43e975c22",
+      "bytes": 92003,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/03-chat-light-desktop.png",
+      "sha256": "dfab2a7bda402cdcf1081ee423c76bcb48de4dd927052a4323c150f4ca45b594",
+      "bytes": 134063,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/04-chat-dark-zh-320.png",
+      "sha256": "9e3f5f57e78202d9e5c7da69dd93716ce9f0b4aa757f9b0db9eef1d06ab1e47f",
+      "bytes": 37631,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/05-knowledge-zh-320.png",
+      "sha256": "7c4b091124c446d6e3d14c7c0e1e7faabe5be309c8bae3b04d5bd60ce3842d19",
+      "bytes": 35875,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/06-knowledge-actions-zh-320.png",
+      "sha256": "eaac31297f11d002ad1c541e6c43fe536ad1dfb201a1c40322e762691a4a19b6",
+      "bytes": 37143,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/07-shared-member-read-only.png",
+      "sha256": "5ea36f5ca34c6623ae0f4311a69a549ec7c45608d5a05483b7f7e4d42434fe4b",
+      "bytes": 89874,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/08-role-downgrade.png",
+      "sha256": "d7cc89d2152cb0f26dd59b9c6b125cfee440731fc7746e63ae10f75e43b5ccc5",
+      "bytes": 95850,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    }
+  ],
+  "console_errors": [],
+  "network_errors": [],
+  "limitations": [
+    "Diagnostic worker only; no commercial model or external account.",
+    "Chromium only. No screen-reader, native desktop, production load or full browser-matrix acceptance.",
+    "List search covers loaded pages; resource pagination uses the existing offset API."
+  ],
+  "finished_at": "2026-10-27T23:50:15.671Z",
+  "inputs_unchanged": true
+}
