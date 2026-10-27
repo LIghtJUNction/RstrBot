@@ -1,0 +1,30 @@
+[package]
+name = "rstrbot-desktop"
+version = "0.1.2"
+description = "RstrBot desktop launcher and isolated web workspace"
+edition = "2024"
+rust-version = "1.90"
+license = "MIT"
+
+# Desktop is deliberately a separate workspace: server-only builds do not
+# download WebKit, GTK, or platform application dependencies.
+[workspace]
+
+[dependencies]
+tauri = { version = "=2.12.5" }
+serde = { version = "1", features = ["derive"] }
+url = "2"
+directories = "6"
+tokio = { version = "1", features = ["sync"] }
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.30", features = ["signal", "process"] }
+
+[build-dependencies]
+tauri-build = { version = "=2.7.4" }
+
+[profile.release]
+strip = true
+lto = "thin"
+codegen-units = 1
+

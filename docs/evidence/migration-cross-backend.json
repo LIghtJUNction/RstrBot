@@ -1,0 +1,26 @@
+{
+  "database": "SQLite <-> PostgreSQL",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "provider": "local OpenAI-compatible HTTP protocol fixture, not a commercial provider",
+  "started_at": "2026-10-27T21:23:38.039522+00:00",
+  "binary_sha256": {
+    "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+    "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f"
+  },
+  "harness_sha256": "88162d746b81496ab188eedf6008e63ffd51d0838564f9e54a5c7924a35215ed",
+  "checks": [
+    "sqlite -> postgresql: real CLI snapshot contains encrypted provider configuration, stable identities and no authentication sessions",
+    "sqlite -> postgresql: empty-target import preserves user/workspace/resource IDs, private ownership and same-workspace access denial",
+    "sqlite -> postgresql: old sessions fail and recovery quarantine prevents both chat and provider tests before explicit resume",
+    "sqlite -> postgresql: original encryption key decrypts the migrated credential and the real OpenAI-compatible worker sends authenticated HTTP after resume",
+    "sqlite -> postgresql: source snapshot checksum remains unchanged after target restore and invocation",
+    "postgresql -> sqlite: real CLI snapshot contains encrypted provider configuration, stable identities and no authentication sessions",
+    "postgresql -> sqlite: empty-target import preserves user/workspace/resource IDs, private ownership and same-workspace access denial",
+    "postgresql -> sqlite: old sessions fail and recovery quarantine prevents both chat and provider tests before explicit resume",
+    "postgresql -> sqlite: original encryption key decrypts the migrated credential and the real OpenAI-compatible worker sends authenticated HTTP after resume",
+    "postgresql -> sqlite: source snapshot checksum remains unchanged after target restore and invocation"
+  ],
+  "status": "passed",
+  "duration_seconds": 5.796,
+  "passed_checks": 10
+}

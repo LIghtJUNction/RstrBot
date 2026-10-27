@@ -1,0 +1,40 @@
+{
+  "database": "sqlite",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "scope": "real local HTTP/SSE and diagnostic processes; synthetic source data; no commercial model",
+  "started_at": "2026-10-27T21:33:57.302568+00:00",
+  "binary_sha256": {
+    "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+    "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+    "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344"
+  },
+  "harness_sha256": "b0257f0b624a1096bbbcbf02fc848dbda4e8ba0a819e4c0a4225eb0b2df0e79a",
+  "checks": [],
+  "observations": [
+    {
+      "initiator": "owner",
+      "conversation_audience": "workspace",
+      "private_document_sent_to_provider": true,
+      "private_memory_sent_to_provider": true,
+      "private_tool_advertised": true,
+      "shared_document_sent_to_provider": true,
+      "shared_memory_sent_to_provider": true,
+      "other_member_private_document_surfaces": [
+        "run",
+        "messages",
+        "events",
+        "export"
+      ],
+      "other_member_private_memory_surfaces": [
+        "run",
+        "messages",
+        "events",
+        "export"
+      ]
+    }
+  ],
+  "status": "failed",
+  "error": "Shared conversation sent a private document to the model",
+  "duration_seconds": 2.607,
+  "passed_checks": 0
+}

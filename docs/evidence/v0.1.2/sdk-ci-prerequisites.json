@@ -1,0 +1,19 @@
+{
+  "reviewed_at_utc": "2026-10-27T22:25:38.994438+00:00",
+  "scope": "Local package-index and package-content validation of the CI Valkey fixture setup, plus workflow syntax review; not an executed GitHub Actions result",
+  "workflow_sha256": {
+    ".github/workflows/browser.yml": "8fd895276fbf70ddc37b17e41ea6fe5b2653cd56f1400752ec2471fcd9b95319",
+    ".github/workflows/ci.yml": "4dc757d62b3316550a07c85b114483bac13b4e09dbfc11de1bff99153b9090cc"
+  },
+  "ubuntu_target": "ubuntu-24.04",
+  "apt_policy": "valkey-tools:\n  Installed: (none)\n  Candidate: 7.2.13+dfsg1-0ubuntu0.1\n  Version table:\n     7.2.13+dfsg1-0ubuntu0.1 500\n        500 https://snapshot.ubuntu.com/ubuntu/20260828T000000Z noble-updates/universe amd64 Packages\n     7.2.12+dfsg1-0ubuntu0.1 500\n        500 https://snapshot.ubuntu.com/ubuntu/20260828T000000Z noble-security/universe amd64 Packages\n",
+  "observed_valkey_package": "7.2.13+dfsg1-0ubuntu0.1",
+  "checks": [
+    "Official Ubuntu noble-updates/universe package-index entry exists for valkey-tools",
+    "valkey-tools includes the actual valkey-check-rdb multicall executable and valkey-cli",
+    "valkey-server package itself supplies a valkey-server symlink to valkey-check-rdb; CI recreates that basename without installing a daemon service",
+    "CI invokes real cache-recovery.py, whose PID comparison rejects an unrelated server before FLUSHDB",
+    "YAML syntax checks passed; runner images and package repositories remain external CI dependencies"
+  ],
+  "actual_ci_run": "not_run_by_this_subtask"
+}

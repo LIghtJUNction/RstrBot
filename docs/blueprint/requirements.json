@@ -1,0 +1,635 @@
+{
+  "schema_version": "1.0",
+  "project": "RstrBot",
+  "date": "2026-10-28",
+  "status": "design_only",
+  "priority_note": "P0 是对应能力发布时的正确性门槛；P1 为完整可用产品目标；P2 为保留的后续扩展，均不是已完成状态。",
+  "requirements": [
+    {
+      "id": "RB-001",
+      "title": "独立品牌与部署模式",
+      "priority": "P1",
+      "goal": "产品、命令、界面与新 API 统一为 RstrBot；个人桌面与团队服务使用相同领域规则。",
+      "acceptance": [
+        "本机模式重启恢复工作区；远程模式连接既有服务且不另建本地运行实例。",
+        "产品入口和文案独立；旧生态名称仅在兼容、迁移与来源说明出现。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-002",
+      "title": "初始化、认证与恢复",
+      "priority": "P0",
+      "goal": "首次管理员安全建立；SQLite/PG 与可选 Valkey 在初始化可选择、可测试、可回退。",
+      "acceptance": [
+        "两个客户端并发尝试初始化，只持有有效初始化证明的一方可建立管理员；初始化后不可再次接管。",
+        "连接失败与中途取消不覆盖已有数据；恢复账户需独立证明并记录审计。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-003",
+      "title": "原生用户、工作区与私人资源",
+      "priority": "P0",
+      "goal": "多工作区和同一工作区内的个人私有资源都有明确归属。",
+      "acceptance": [
+        "两个工作区创建同名资源；切换 ID、分页、搜索、附件、导出和事件流均不能越界。",
+        "同工作区所有者和成员各有私聊，普通管理页面及导出不隐式读取对方内容。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-004",
+      "title": "角色、授权与撤权",
+      "priority": "P0",
+      "goal": "五类工作区角色、实例运维角色、服务身份及运行授权分别定义。",
+      "acceptance": [
+        "同一操作从 HTTP/CLI/MCP/SDK 发起，允许和拒绝的业务结果一致。",
+        "成员降权、移出工作区、插件停用后，排队任务和新请求使用最新权限；个人 key 同步缩权，服务身份按独立授权处理。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-005",
+      "title": "凭据及外部身份",
+      "priority": "P0",
+      "goal": "个人与工作区密钥分开，提供受限使用能力；外部账号绑定可验证。",
+      "acceptance": [
+        "验证一种代理注入认证和一种受信任签名/刷新组件；其他插件、工作区及日志拿不到秘密。",
+        "昵称冲突不能合并用户；凭据轮换、撤销、恢复及 OAuth 失败不会静默切换计费身份。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-006",
+      "title": "文件、网络与不可信内容",
+      "priority": "P0",
+      "goal": "附件、下载、解压、文件工具和渲染使用真实授权与资源边界。",
+      "acceptance": [
+        "从 shell、文件工具、缩略图和下载链接尝试读取其他私有会话附件均被拒绝。",
+        "验证重定向、内网目标、路径穿越、符号/硬链接、超大解码输入；TLS 错误不自动关闭校验。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-007",
+      "title": "统一业务 API",
+      "priority": "P0",
+      "goal": "公开操作有稳定身份、类型、权限、副作用、错误与版本契约。",
+      "acceptance": [
+        "新操作能经不同入口得到相同业务结果，入口不能覆盖可信身份上下文。",
+        "能力发现区分服务支持、调用者获准、当前可用；全局管理与运行上下文操作分别有约束。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-008",
+      "title": "事件、终态与恢复",
+      "priority": "P0",
+      "goal": "接受、执行、工具、投递和保存是独立事实，事件有序且可恢复。",
+      "acceptance": [
+        "预算内合法完成但消费者延迟、真正执行超时、终态保存失败分别分类。",
+        "重复/乱序/旧代事件不产生第二个执行终态；断线按游标续传，过期游标要求重新同步。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-009",
+      "title": "SQLite 正确性与容量",
+      "priority": "P0",
+      "goal": "SQLite 提供完整多人语义，采用有界写入、短事务与可观察耐久策略。",
+      "acceptance": [
+        "并发建会话、写消息和任务认领不丢失已确认记录；长读造成检查点滞后有明确诊断。",
+        "磁盘满和锁等待分别报告；暂停/停止不被写队列永久堵住，不靠无限增池通过压力测试。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-010",
+      "title": "PostgreSQL 功能对等",
+      "priority": "P0",
+      "goal": "PostgreSQL 从首次安装可选，与 SQLite 使用相同业务验收。",
+      "acceptance": [
+        "相同输入、授权、排序分页、冲突和恢复用例，在两种数据库产生相同可见语义。",
+        "连接池复用不串工作区；迁移账号与运行账号分开，RLS 例外和连接上下文复位被测试。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-011",
+      "title": "Valkey 可选与可降级",
+      "priority": "P0",
+      "goal": "Valkey 只承担可重建加速，关闭时无核心功能缺失。",
+      "acceptance": [
+        "分别关闭、超时、清空与重启 Valkey，任务和权限记录仍在数据库，事件可恢复。",
+        "权限与硬预算无法确认时拒绝危险操作；缓存击穿有界，软提示可以降级但不得伪报在线。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-012",
+      "title": "迁移、备份与灾备",
+      "priority": "P0",
+      "goal": "双数据库转换和完整备份具有一致性边界、校验、恢复模式与回滚。",
+      "acceptance": [
+        "在附件发布、插件写入、工具执行和回执提交交界备份；恢复无悬空引用，未知副作用不自动重放。",
+        "SQLite↔PG 迁移核对记录、归属、索引身份和资源清单；失败保留来源，可再次尝试。",
+        "必要插件状态缺失标记备份不完整；恢复先暂停平台和计划任务，核对后启用。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-013",
+      "title": "配置、路径与并发编辑",
+      "priority": "P0",
+      "goal": "遵循系统目录规范；继承/清空/禁用明确；配置有版本与校验。",
+      "acceptance": [
+        "从不同启动目录运行不改变数据位置；可迁移数据根，代码更新不覆盖用户数据。",
+        "两个客户端保存同一配置，旧快照不得覆盖新版本；无效迁移不删除安静时段或扩大授权。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-014",
+      "title": "去中心插件发现与安装",
+      "priority": "P1",
+      "goal": "支持直接仓库、包和可选索引；来源、校验、权限与更新状态清楚。",
+      "acceptance": [
+        "没有中心服务时仍可安装固定来源包；失败、取消、离线缓存有准确状态。",
+        "兼容 astrbot_plugin 清单标识及现有索引，GitHub topic 按实际合法语法声明；同名来源不混淆。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-015",
+      "title": "按需语言运行时与进程监管",
+      "priority": "P0",
+      "goal": "核心不强制携带各语言运行时，工作进程按需启动且有配额与信任等级。",
+      "acceptance": [
+        "无 Python/Node/.NET 环境仍能启动核心；安装对应运行时后才加载相应插件。",
+        "工作进程崩溃、初始化超时、取消及退出回收完整所属进程树，核心保持健康。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-016",
+      "title": "四语言 SDK 与公共协议",
+      "priority": "P1",
+      "goal": "Python/Rust/C#/TypeScript SDK 提供等价的公开能力和可诊断错误。",
+      "acceptance": [
+        "同一组工具、事件、流、取消、配置、后台任务与错误样本在四种 SDK 通过相同验收。",
+        "协议版本不兼容给明确原因；Python 入口点可发现，uv 依赖隔离；不要求导入核心内部模块。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-017",
+      "title": "插件生命周期与安全更新",
+      "priority": "P0",
+      "goal": "包、实例、运行状态分开；权限变更、重载、回滚和卸载原子或可恢复。",
+      "acceptance": [
+        "准备新代失败时旧能力保持原样或显示受控停机；卸载移除工具/路由/命令/任务/租约。",
+        "依赖准备、启动、握手、调用独立限时；同配置可重试，永久错误停止自动重启。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-018",
+      "title": "插件配置、数据与实例隔离",
+      "priority": "P0",
+      "goal": "同插件跨工作区、机器人和配置组的状态与凭据不混用。",
+      "acceptance": [
+        "同一插件包在两个工作区采用冲突依赖/不同配置，分别运行且数据不可见。",
+        "插件升级和卸载按用户选定策略保留或删除数据；版本数据迁移不可逆时不能虚假承诺回滚。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-019",
+      "title": "钩子、命令与扩展权限",
+      "priority": "P1",
+      "goal": "公开扩展覆盖触发、上下文、压缩、模型、工具、出站、发送后和清理。",
+      "acceptance": [
+        "流式/非流式、主动/被动消息均触发正确钩子；取消不变普通错误再走回退。",
+        "父命令过滤、别名、参数类型和平台命令目录一致；Runner 选择与工具/监听器/命令授权独立。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-020",
+      "title": "旧插件兼容加载器",
+      "priority": "P1",
+      "goal": "用一个可选兼容组件承接旧插件行为，并明确冻结版本范围。",
+      "acceptance": [
+        "真实未修改样本覆盖旧 LLM hook、多轮工具、媒体、旧内部对象代理和跨会话后台推送。",
+        "逐项报告发现/导入/行为/恢复/清理的通过与失败，不以 import 成功声称完整兼容。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-021",
+      "title": "旧 HTTP、数据和可选旧界面",
+      "priority": "P1",
+      "goal": "旧协议通过独立适配层兼容，导入数据必须建立新所有权。",
+      "acceptance": [
+        "路由清单覆盖方法、认证、参数、错误、分页、流与副作用；所有缺口逐项可见。",
+        "旧单用户记录导入需选工作区和所有者；若提供旧 WebUI，实际浏览器全流程可用而非端点返回空成功。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-022",
+      "title": "OpenCode 与 Pi 生态加载",
+      "priority": "P1",
+      "goal": "提供分别可安装的加载器，以行为映射承接外部插件。",
+      "acceptance": [
+        "冻结真实插件与生态 SDK 版本，验证钩子、工具、生命周期和配置；不支持的环境能力明确拒绝。",
+        "兼容插件不能透过宿主 API 越权，不把新核心内部结构改成外部生态的内部结构。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-023",
+      "title": "模型供应商协议",
+      "priority": "P0",
+      "goal": "供应商均为插件，公开能力保留工具、多模态、签名、状态和流事件。",
+      "acceptance": [
+        "工具调用 ID/结果、稀疏流碎片与供应商私有字段经持久化和续轮无损；跨协议转换不伪造签名。",
+        "工具禁用收尾仍有合法模型请求并保留完成证据，不能再次执行副作用。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-024",
+      "title": "模型发现、选择和重试",
+      "priority": "P1",
+      "goal": "任务路由、配置继承、代理、超时、认证与回退都真实生效。",
+      "acceptance": [
+        "配置测试区分可连接、可发现、可调用；测试和正式调用使用相同有效配置。",
+        "尚未输出与已输出重试不同；实际 HTTP 尝试受总上限限制，失败不重复已确认工具。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-025",
+      "title": "用量、成本与预算",
+      "priority": "P0",
+      "goal": "逐次调用归因，未知用量/价格不当零；并发预算先预留再结算。",
+      "acceptance": [
+        "失败、取消、缓存、回退和快速决策调用都在统计内，并显示统计覆盖度。",
+        "并发请求不能绕过硬配额；计费信息不足时明确预算保证范围，并允许拒绝不可控费用请求。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-026",
+      "title": "会话投影、摘要与记忆",
+      "priority": "P0",
+      "goal": "永久历史、请求工作集、滚动摘要和长期记忆各自有来源与恢复语义。",
+      "acceptance": [
+        "生成摘要后重启，核对实际模型输入恢复来源范围；编辑/删除原文使相应派生数据失效。",
+        "归档、停用、删除、权重衰减和恢复不同；固定重要记忆不因短期未召回被删除。",
+        "reset 后旧轮次迟到不得写回；stop、新会话与删除保留各自含义。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-027",
+      "title": "群聊触发与静默消费",
+      "priority": "P1",
+      "goal": "群/私聊/会话分别配置；昂贵规划前可轻量门控，避免回声和积压。",
+      "acceptance": [
+        "持续判定不回复仍推进消费游标且保留历史；已消费不伪装已回答。",
+        "机器人自身回声不再次启动规划；引用自身旧消息仍可正常处理，群聊安静不影响私聊响应。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-028",
+      "title": "完整 Agent 与无进展终止",
+      "priority": "P0",
+      "goal": "流式、多轮工具、收尾、预算、取消和终态完整衔接。",
+      "acceptance": [
+        "模型仅输出工具名称文本时不执行；重复无效调用在独立纠错上限内终止。",
+        "达到工具上限后只收尾，不产生悬空调用；用户取消能穿过慢钩子与工具等待。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-029",
+      "title": "工具副作用与审批",
+      "priority": "P0",
+      "goal": "按资源授权具体操作，区分可重试与结果未知，确认绑定参数。",
+      "acceptance": [
+        "在批准后、发送前及返回前撤权/失租约，核对实际保证范围；未知结果不自动重放。",
+        "重复入口、模型重复调用与网络重试不造成已确认操作再次执行；不同合法意图不能误被全局去重。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-030",
+      "title": "子代理与后台协作",
+      "priority": "P1",
+      "goal": "子代理只取得父运行可授予的上下文、媒体与权限，并有清楚结果交付。",
+      "acceptance": [
+        "前台/后台交接保留获准音视频与来源，最新人格影响新运行而非修改在途快照。",
+        "父任务取消、子任务失败和预算耗尽正确传播；跨人收集信息仅写显式共享任务空间。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-031",
+      "title": "主动推送与持久投递",
+      "priority": "P0",
+      "goal": "后台消息路由可恢复，生成、平台接受与保存状态分别呈现。",
+      "acceptance": [
+        "重启后仍向已授权目标投递；用户即时回复能使用已发消息上下文。",
+        "平台接受后数据库失败显示真实投递与保存状态，不以整个任务失败触发重复发送。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-032",
+      "title": "计划任务与时间语义",
+      "priority": "P0",
+      "goal": "一次性、固定间隔、时区日历任务持久化；补跑、暂停与重复认领可控。",
+      "acceptance": [
+        "模拟夏令时、时钟跳变、重启与漏跑，行为符合已显示的下一次触发与错过策略。",
+        "多执行者仅一个有效认领；恢复默认核对模式，未知操作不作为新任务补跑；多目标分别有回执。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-033",
+      "title": "MCP 接入与连接恢复",
+      "priority": "P1",
+      "goal": "统一 stdio/网络生命周期、授权、结果上限、自动重连和 OAuth。",
+      "acceptance": [
+        "首次初始化超时后同配置可重试并最终就绪；服务永久坏配置不无限重启或拖垮核心。",
+        "同代多调用失败合并重连；非幂等工具断线标记未知，隔离 UI 资源不自动获得网络和执行权限。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-034",
+      "title": "技能、文件资源与沙箱",
+      "priority": "P0",
+      "goal": "读取已授权资源与执行代码分别授权，沙箱以真实可用性判断就绪。",
+      "acceptance": [
+        "不启动执行沙箱也能读取获准文本/二进制资源；图片/PDF 验证真正被消费而非只返回路径。",
+        "隔离准备失败不回退宿主；导出未确认交付的文件不被清空，Windows/Linux/macOS 分别验证支持范围。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-035",
+      "title": "知识库导入与索引一致性",
+      "priority": "P0",
+      "goal": "原文、分块、向量、稀疏索引与版本可恢复且有一致归属。",
+      "acceptance": [
+        "同库并发上传、取消和删除不覆盖其他已提交结果，恢复保留索引身份。",
+        "单条过长或坏文档隔离报告，其余可处理；更换嵌入模型按代重建并可从检查点恢复。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-036",
+      "title": "检索、引用与后端扩展",
+      "priority": "P1",
+      "goal": "组合精确/语义检索、重排、外部知识库并保留权限与可解释引用。",
+      "acceptance": [
+        "同名跨工作区文档不召回；重排失败保留已授权候选并显示降级。",
+        "固定相关性数据集验证精确命中、多库融合、标题/原文章节与引用定位，报告质量和时延。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-037",
+      "title": "媒体与文件传输",
+      "priority": "P1",
+      "goal": "图片、语音、视频、引用、文件、转发、转换与恢复上传有明确能力。",
+      "acceptance": [
+        "断点续传仅补缺块，取消不覆盖已发布文件；单文件/解码/历史常驻内存均有上限。",
+        "HTTP 错误不写成媒体；语音失败可文字兜底；文转图 URL 与路径类型、长文组件顺序保持契约。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-038",
+      "title": "平台适配器与连接恢复",
+      "priority": "P1",
+      "goal": "适配器全部插件化，多机器人、接收/发送、回执、命令与平台限制可观察。",
+      "acceptance": [
+        "旧连接退出不清掉新连接；按正确机器人与投递目标发出，重连去重不丢合法重试。",
+        "按平台/会话能力选择富文本、引用、主动/被动消息；流式合并节流不丢尾段或额外刷屏。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-039",
+      "title": "平台独立 MCP 服务",
+      "priority": "P1",
+      "goal": "同一适配器能脱离完整聊天系统，以受限身份提供 MCP 能力。",
+      "acceptance": [
+        "在不启动完整代理/知识库时独立完成获准平台查询和投递。",
+        "调用者换目标/工作区标识不能越权；凭据、回执与撤销规则和集成模式相同。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-040",
+      "title": "WebChat 与历史操作",
+      "priority": "P1",
+      "goal": "支持流式、工具轨迹、附件、编辑分支、重试、模型切换和分页搜索。",
+      "acceptance": [
+        "刷新、断网、后台恢复与切换会话不混流；重复或坏记录不让整页崩溃。",
+        "草稿、阅读位置与偏好持久，长历史按需加载；共享/嵌入链接有单独可撤销范围。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-041",
+      "title": "管理页面与动态能力",
+      "priority": "P1",
+      "goal": "配置、插件、模型、成员、任务、备份和诊断均有完整可操作页面。",
+      "acceptance": [
+        "界面显示真实生效值和继承来源；旧请求不覆盖新工作区/新配置。",
+        "插件失败仍可配置恢复；安装/禁用改变真实导航与操作能力，后端持续独立授权。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-042",
+      "title": "原创粒子品牌设计",
+      "priority": "P1",
+      "goal": "采用墨色折线方向，粒子限于品牌展示并有清楚生命周期与回退。",
+      "acceptance": [
+        "静态、动态、中间态、反向切换和最宽姿态在手机/桌面不遮挡主要内容。",
+        "动画关闭、离屏、后台及销毁后停止；主要操作不依赖 Canvas，粒子不冒充真实系统状态。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-043",
+      "title": "可访问性与国际化",
+      "priority": "P1",
+      "goal": "中文/英文、深浅色、键盘、读屏、减少动作和手机视口完整可用。",
+      "acceptance": [
+        "320px 和 200% 缩放可完成核心任务，无横向主流程溢出；触摸操作区足够大。",
+        "输入法不误发送，屏幕阅读器不逐 token 刷屏；翻译缺失合理回退而不显示内部键。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-044",
+      "title": "原生桌面产品",
+      "priority": "P1",
+      "goal": "Tauri 与 rstrbot sidecar 复用受测业务逻辑，三平台有真实安装与升级验收。",
+      "acceptance": [
+        "安装后真实启动、新建对话、切换工作区、退出/进程树回收、卸载数据策略均验证。",
+        "本机与远程模式不会启动重复核心；签名/权限/自动更新失败可诊断且不破坏用户数据。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-045",
+      "title": "性能、背压与诊断",
+      "priority": "P0",
+      "goal": "资源有界，区分核心与插件占用，按工作区公平调度。",
+      "acceptance": [
+        "固定 1 vCPU/1 GiB 场景报告空闲/峰值内存及完整插件开销，不以关闭功能作弊。",
+        "索引/学习/媒体负载不堵住实时消息；观察模型、队列、投递、落库耗时并给出独立错误。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-046",
+      "title": "三平台 CI 与可验证发行",
+      "priority": "P1",
+      "goal": "每个发布声明连接真实 CI、源码和产物；平台差异实际运行。",
+      "acceptance": [
+        "Windows named pipe ACL、子进程树，macOS 权限/退出，Linux 安装分别有原生证据。",
+        "工作流语法通过不等于 CI 通过；桌面工程不等于安装器通过；缺证据标为未执行。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-047",
+      "title": "插件开发与运维文档",
+      "priority": "P1",
+      "goal": "四语言 SDK、协议、错误、权限、迁移、兼容与恢复文档随版本维护。",
+      "acceptance": [
+        "从干净环境按文档完成原生插件、供应商、平台和独立 MCP 服务的最小完整过程。",
+        "公开示例与规范能被验证，机器可读索引与面向人的说明同版，不泄露密钥。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-048",
+      "title": "可视化编排与无副作用调试",
+      "priority": "P2",
+      "goal": "可选工作流组织节点、插件顺序和诊断，调试有真实边界。",
+      "acceptance": [
+        "预览不能调用生产写入或发消息；模拟步骤与真实步骤清楚区分。",
+        "保存前检查无效引用与权限，版本变更不污染在途运行。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-049",
+      "title": "外部模型/工作流与搜索扩展",
+      "priority": "P2",
+      "goal": "通过插件接入外部工作流、本地网关、搜索、快速决策和专用媒体服务。",
+      "acceptance": [
+        "按实际端点与能力映射认证、流、工具、引用和用量；不靠一个预设名字声称已经兼容。",
+        "外部知识更新/错误/超时有可解释来源，供应商专属功能在能力矩阵中可发现。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-050",
+      "title": "人格与配置继承",
+      "priority": "P1",
+      "goal": "人格、系统规则、示例、会话覆盖和子代理配置明确分层。",
+      "acceptance": [
+        "继承、清空和禁用有不同结果；人格更新影响后续运行，在途使用冻结快照。",
+        "示例不写成真实聊天，临时提醒不无限累积；导入说明格式与冲突处理。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-051",
+      "title": "日常运维与多节点条件",
+      "priority": "P1",
+      "goal": "安装、网络来源、升级、数据根迁移、健康、诊断和可选分布式有明确契约。",
+      "acceptance": [
+        "本机依赖缺失有修复入口；更新失败保持数据，版本锁和回滚按真实可逆范围执行。",
+        "多副本仅在 PostgreSQL、资源共享、认领及故障恢复通过后宣称支持；Valkey 不作为唯一协调事实。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    },
+    {
+      "id": "RB-052",
+      "title": "需求追踪与真实性",
+      "priority": "P0",
+      "goal": "新需求和第一阶段需求可双向追踪，完成状态只由证据更新。",
+      "acceptance": [
+        "215 个需求族及 287 个验收条目均保留原编号、来源和新归属，变更/延期有理由。",
+        "本轮所有实现状态均为未开始；来源关闭不当作本项目通过，未验证兼容不写成全量支持。"
+      ],
+      "implementation_status": "not_started",
+      "design_status": "specified"
+    }
+  ]
+}

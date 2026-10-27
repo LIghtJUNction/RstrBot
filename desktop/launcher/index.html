@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RstrBot</title>
+    <link rel="stylesheet" href="launcher.css">
+    <script src="launcher.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <svg aria-hidden="true" viewBox="0 0 32 32" width="52" height="52"><path d="M7 26V6h14l5 7-11 6 11 7h-8L7 18l14-6h-8v14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>
+        <span class="eyebrow">RstrBot · Desktop preview</span>
+      </header>
+      <h1>打开你的工作区</h1>
+      <p class="intro">在这台电脑上运行，或者连接你已有的服务器。聊天、资料和权限遵循同一套规则。</p>
+      <section aria-labelledby="local-title">
+        <div class="section-heading"><span class="number">01</span><h2 id="local-title">本机工作区</h2></div>
+        <p>启动随应用提供的后端。数据保留在系统的 RstrBot 数据目录；关闭工作区时会停止本次启动的进程。</p>
+        <button id="start-local" type="button">启动本机工作区 <span aria-hidden="true">↗</span></button>
+      </section>
+      <section aria-labelledby="remote-title">
+        <div class="section-heading"><span class="number">02</span><h2 id="remote-title">连接已有服务器</h2></div>
+        <p>直接登录远程 RstrBot。此模式不会启动本地后端，也不会建立另一个本地数据库。</p>
+        <form id="remote-form">
+          <label for="server">服务器地址</label>
+          <div class="connection"><input id="server" type="url" name="server" placeholder="https://bot.example.com" autocomplete="url" required><button type="submit">连接</button></div>
+        </form>
+      </section>
+      <section id="session" hidden aria-labelledby="session-title">
+        <h2 id="session-title">工作区已打开</h2>
+        <p id="session-description"></p>
+        <div id="setup-proof" hidden>
+          <label for="proof">首次设置凭据 · 15 分钟内有效</label>
+          <p>复制下面的凭据，粘贴到工作区的首次设置页面。初始化完成后该凭据失效。</p>
+          <input id="proof" type="text" readonly spellcheck="false" aria-label="首次设置凭据">
+          <button id="select-proof" type="button">选中凭据</button>
+        </div>
+        <button id="disconnect" class="secondary" type="button">断开并停止本机进程</button>
+      </section>
+      <p id="status" role="status" aria-live="polite"></p>
+      <footer>预览工程。原生安装、升级和操作系统权限仍需逐平台验收；Windows 当前使用远程连接模式。</footer>
+    </main>
+  </body>
+</html>
+

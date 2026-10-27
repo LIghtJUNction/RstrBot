@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-10-27T21:17:55.427851+00:00",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "postgresql": {
+    "server_version": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit",
+    "bind": "127.0.0.1",
+    "port": 55433,
+    "scope": "disposable schemas in dedicated local test cluster"
+  },
+  "valkey": {
+    "server_name": "valkey",
+    "valkey_version": "7.2.13",
+    "redis_version": "7.2.4",
+    "arch_bits": "64",
+    "multiplexing_api": "epoll"
+  },
+  "valkey_bind": "127.0.0.1",
+  "valkey_port": 56380,
+  "scope": "temporary local test services; no external application accounts"
+}

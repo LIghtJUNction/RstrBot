@@ -1,0 +1,36 @@
+{
+  "database": "sqlite",
+  "valkey": "off",
+  "model": "diagnostic process fixture, not a live AI provider",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-27T21:21:10.716841+00:00",
+  "binary_sha256": {
+    "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+    "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+    "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+    "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+  },
+  "harness_sha256": "3c658cb2827a0e27b93285f4ee292dd82cf7f37d1591d91c53f4d1b7263778e2",
+  "checks": [
+    "setup database connectivity probe is read-only and never migrates an unrelated SQLite database",
+    "optional Valkey reports its actual disabled state",
+    "served OpenAPI matches the shipped contract; one-time setup proof, HttpOnly-cookie session and CSRF/origin rejection",
+    "two-user, cross-workspace and same-workspace private isolation across read/export/events",
+    "real provider/tool subprocess loop, stream events, persisted tool result and stable request idempotency",
+    "in-flight request retry keeps its run and a rejected busy request can later reuse its key",
+    "tool names in ordinary model text do not execute tools",
+    "cancellation, reset generations and current-membership revocation cancel owned running work",
+    "plugin disable revokes active capabilities and stale configuration cannot overwrite the new generation",
+    "changing a model configuration version revokes the running worker's old configuration lease",
+    "real lexical indexing, references, private knowledge filtering and deletion from retrieval",
+    "persisted one-time schedule actually dispatches once through the model worker",
+    "credential responses are redacted and database snapshot contains no plaintext provider secret",
+    "hard-killed core restarts with interrupted receipt and no run or schedule redispatch",
+    "conversation deletion cascades through run payloads and replayable event bodies",
+    "CLI backup, empty-target restore, preserved identities/records, recovery quarantine and explicit resume"
+  ],
+  "status": "passed",
+  "valkey_observed": "disabled",
+  "duration_seconds": 8.885,
+  "passed_checks": 16
+}

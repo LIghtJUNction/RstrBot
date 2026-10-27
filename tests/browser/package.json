@@ -1,0 +1,12 @@
+{
+  "name": "@rstrbot/browser-acceptance",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node verify_ui.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

@@ -1,0 +1,21 @@
+
+running 16 tests
+test actual_cost_over_reservation_is_recorded_as_debt ... ok
+test admission_uses_current_resource_permissions_and_snapshots ... ok
+test bootstrap_is_atomic_and_cannot_be_repeated ... ok
+test concurrent_reservations_cannot_overspend_and_unknown_stays_frozen ... ok
+test deletion_removes_replayable_private_payloads ... ok
+test idempotency_preserves_unknown_intent_and_compares_fingerprint ... ok
+test invalid_admission_rolls_back_receipt_and_history_before_retry ... ok
+test membership_revocation_shrinks_existing_tokens_and_event_replay ... ok
+test populated_database_probe_and_reconnect_preserve_records ... ok
+test private_resources_are_private_even_from_workspace_owner ... ok
+test privileged_resource_writes_recheck_current_role_inside_transaction ... ok
+test revoked_actor_receipts_can_be_recorded_without_reviving_deleted_runs ... ok
+test roles_cannot_escalate_or_remove_last_owner ... ok
+test run_admission_is_atomic_and_busy_keys_remain_retryable ... ok
+test snapshot_restore_keeps_ownership_unknown_funds_and_quarantines_effects ... ok
+test stale_configuration_cannot_overwrite_a_concurrent_edit ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.09s
+

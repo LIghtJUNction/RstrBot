@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-27T21:21:49.328761+00:00",
+  "database": "postgresql",
+  "prior_failure_evidence": "http-postgres-restart-retained.json",
+  "retained_fixture": "/tmp/rstrbot-http-z8n84iyx",
+  "retained_schema": "rstrbot_http_a5a253417a67442bb13fc59bd2cc946c",
+  "binary_sha256": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+  "checks": [
+    "The exact populated PostgreSQL schema that failed on the earlier binary now starts and authenticates successfully",
+    "Every unfinished run from the retained crash becomes interrupted and no new run is created"
+  ],
+  "status": "passed",
+  "before_statuses": {
+    "1ab687c8-b438-48ba-91b8-9b24e027ef24": "running"
+  },
+  "after_statuses": {
+    "1ab687c8-b438-48ba-91b8-9b24e027ef24": "interrupted"
+  },
+  "duration_seconds": 0.548,
+  "passed_checks": 2
+}

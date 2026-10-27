@@ -1,0 +1,47 @@
+{
+  "protocol_version": "1.0",
+  "passed": 20,
+  "failed": 0,
+  "sdks": {
+    "python": {
+      "status": "passed",
+      "cases": [
+        "tool discovery",
+        "unicode and structured framing",
+        "unknown method",
+        "invalid argument",
+        "invalid initialization proof rejected"
+      ]
+    },
+    "typescript": {
+      "status": "passed",
+      "cases": [
+        "tool discovery",
+        "unicode and structured framing",
+        "unknown method",
+        "invalid argument",
+        "invalid initialization proof rejected"
+      ]
+    },
+    "rust": {
+      "status": "passed",
+      "cases": [
+        "tool discovery",
+        "unicode and structured framing",
+        "unknown method",
+        "invalid argument",
+        "invalid initialization proof rejected"
+      ]
+    },
+    "csharp": {
+      "status": "passed",
+      "cases": [
+        "tool discovery",
+        "unicode and structured framing",
+        "unknown method",
+        "invalid argument",
+        "invalid initialization proof rejected"
+      ]
+    }
+  }
+}

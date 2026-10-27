@@ -1,0 +1,8 @@
+  RstrBot.Plugin -> /dev/shm/rstrbot-9ebc43336305/dotnet-artifacts/bin/RstrBot.Plugin/debug/RstrBot.Plugin.dll
+  EchoPlugin -> /dev/shm/rstrbot-9ebc43336305/dotnet-artifacts/bin/EchoPlugin/debug/EchoPlugin.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.27

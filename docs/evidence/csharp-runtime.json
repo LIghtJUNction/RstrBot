@@ -1,0 +1,13 @@
+{
+  "verified_at": "2026-10-27T21:39:45.254902+00:00",
+  "metadata_url": "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/8.0/releases.json",
+  "release_date": "2026-10-25",
+  "runtime_version": "8.0.33",
+  "artifact_url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.33/dotnet-runtime-8.0.33-linux-x64.tar.gz",
+  "sha512": "b314039d337a8c5c4be6a6f99712a2618cbeb5e1ab7cac7a5c1cbf1c97bd355f5d116b9932a8cfc604ac7849f74638896eba0534892c6518311908aba29b4f7b",
+  "archive_size_bytes": 31318724,
+  "hash_matches_official_metadata": true,
+  "installed_to": "/dev/shm/rstrbot-9ebc43336305/dotnet8",
+  "runtimes": "Microsoft.NETCore.App 8.0.33 [/dev/shm/rstrbot-9ebc43336305/dotnet8/shared/Microsoft.NETCore.App]",
+  "scope": "isolated .NET 8 runtime for existing net8.0 SDK protocol verification; prior toolchain unchanged"
+}

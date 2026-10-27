@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "checks": [
+    "logout cancels only runs leased to that credential; another session of the same user remains active",
+    "password change revokes all user sessions and stops their in-flight runs without publishing late assistant output",
+    "explicit schedule delegation survives browser logout and remains cancellable under current owner permissions"
+  ],
+  "database": "postgresql",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-27T22:34:27.413456+00:00",
+  "binary_sha256": "9a1a9330899b6c76259976828ef16fbf53d29dc01f8f0a42f051430418460c17",
+  "harness_sha256": "02e321f351dfbbaa497ef669b0b8153fa05d6b23498f3abd238cc0f791330d4a",
+  "scope": "local real HTTP, isolated database and diagnostic process; no commercial model account"
+}

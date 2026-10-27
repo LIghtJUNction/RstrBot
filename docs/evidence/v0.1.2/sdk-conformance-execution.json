@@ -1,0 +1,37 @@
+{
+  "started_at_utc": "2026-10-27T22:33:30.219258+00:00",
+  "scope": "Same five protocol vectors against each of four actual SDK processes; not full SDK feature equivalence",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "tests/plugin_conformance.py",
+    "--require-all",
+    "--rust-bin",
+    "/tmp/rstrbot-d286-target/release/rstrbot-diagnostic"
+  ],
+  "candidate_and_harness_sha256": {
+    "/tmp/rstrbot-d286-target/release/rstrbot-diagnostic": "8293cf41104140ea8d0d9d4cf62cfd476bb82ba0c10b13f94fad63c34b1e41fd",
+    "tests/plugin_conformance.py": "2c2171dc503a75e0f28064fafb5f9ecfe483660b50a703975cf39d99ff6c48bc",
+    "sdk/conformance.json": "e8f385aa454823e27ece5f0a5ce08ada57422169e51fcbc4d859088de917076d",
+    "sdk/typescript/dist/index.js": "4af86d23994dfe84701750e657821086e3070a168357a43d88c2832a882a58cc",
+    "sdk/csharp/EchoPlugin/bin/Debug/net8.0/EchoPlugin.dll": "02d89d7266893fc550c07b007750b1fde3a16cc84e8bd84107a0d12f91199694",
+    "sdk/csharp/EchoPlugin/bin/Debug/net8.0/RstrBot.Plugin.dll": "cdce763d1b6b64bfb2d5a64eee3b00b81d383afba7e51a64c02d8bbc636e1e14",
+    "sdk/python/examples/echo.py": "0fde6b83d2bf3eef1041432e6e4b797195195219c7c1647cd24e501ef71b3fb5",
+    "sdk/python/rstrbot_sdk/__init__.py": "ac82d47157be010b617122aaae710a696ef9fe326189a80c413da7fed5c1aed2",
+    "sdk/typescript/examples/echo.mjs": "1d60a8a712664410fbe9da78c19d11d93259cc7f5eaeb77dbf01c7a6c2d70471",
+    "sdk/csharp/EchoPlugin/Program.cs": "58d31577224ffcceaf859b9c1e4c3d647e0ea2a0dac61146f7fa18c70b4ea1aa",
+    "sdk/csharp/EchoPlugin/obj/Debug/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs": "ae41ca1e67556e4b0622d82a2122a04f17722c0c19d3b2f1fbcab8a2aaf16d2e",
+    "sdk/csharp/EchoPlugin/obj/Debug/net8.0/EchoPlugin.AssemblyInfo.cs": "95a53d2b36f1fb88b284d790ca2be5211dc71d83b5604aee77caebf30f52e6a9",
+    "sdk/csharp/EchoPlugin/obj/Debug/net8.0/EchoPlugin.GlobalUsings.g.cs": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592",
+    "sdk/csharp/RstrBot.Plugin/PluginServer.cs": "f1671a3b9e8b861ea66c88372d8d7850a0b35c64f0b9947682d43f70a07a4372",
+    "sdk/csharp/RstrBot.Plugin/obj/Debug/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs": "ae41ca1e67556e4b0622d82a2122a04f17722c0c19d3b2f1fbcab8a2aaf16d2e",
+    "sdk/csharp/RstrBot.Plugin/obj/Debug/net8.0/RstrBot.Plugin.AssemblyInfo.cs": "d454a7eaddd9c1f4ce3030b8ad1856c1c6c8bd9cbfab054c1adf083536782636",
+    "sdk/csharp/RstrBot.Plugin/obj/Debug/net8.0/RstrBot.Plugin.GlobalUsings.g.cs": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+  },
+  "dotnet_runtime": "Microsoft.NETCore.App 8.0.33",
+  "status": "passed",
+  "exit_code": 0,
+  "duration_seconds": 2.128,
+  "candidate_unchanged": true,
+  "passed_vectors": 20,
+  "report_sha256": "a95bafc7763ebaaf6ad5ff78b1403a742c85e7cdb48eba0b7df88d38a45caf94"
+}

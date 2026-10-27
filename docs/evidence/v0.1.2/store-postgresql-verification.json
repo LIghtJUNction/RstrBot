@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "behavior_tests": 23,
+  "sqlite_probe_tests": 2,
+  "failed": 0,
+  "backend": "PostgreSQL 16.15",
+  "scope": "Same storage behavior suite in isolated schemas, including budget, ACL and >10k recovery; two SQLite read-only probe tests also run",
+  "log": "store-postgresql.log"
+}

@@ -1,0 +1,22 @@
+{
+  "database": "sqlite",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "destination": "local HTTP receiver; no third-party messaging account",
+  "started_at": "2026-10-27T21:13:40.152577+00:00",
+  "binary_sha256": {
+    "rstrbot": "43ebecd97e918cf7346dd1f7415850484320aa9fcba59c0c937df2f67532329b",
+    "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+  },
+  "harness_sha256": "a82c6fdcbacf1728ac3f78d330d092ba2109b3c087618ff2864f043f9e948518",
+  "checks": [
+    "workspace membership and administrator-approved destinations are required; body target override is rejected",
+    "actual HTTP delivery stores an accepted receipt and identical retries do not resend",
+    "a workspace owner cannot inspect another member's private delivery receipt or replay text",
+    "receiver-side effect followed by a lost response stays unknown and is not retried",
+    "hard restart preserves accepted/unknown receipts and neither is redispatched",
+    "revoked membership blocks new external sends"
+  ],
+  "status": "passed",
+  "duration_seconds": 2.641,
+  "passed_checks": 6
+}

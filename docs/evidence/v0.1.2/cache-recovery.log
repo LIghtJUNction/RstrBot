@@ -1,0 +1,17 @@
+{
+  "database": "sqlite",
+  "cache": "real disposable Valkey",
+  "started_at": "2026-10-27T22:33:56.981246+00:00",
+  "checks": [
+    "real Valkey availability was observed before storing a task and revoking a member",
+    "cache flush and process shutdown preserve revocation; a durable scheduled run completes while cache is offline",
+    "empty-cache restart restores reported availability without restoring revoked access or duplicating the completed task",
+    "core restart keeps the same task receipt and authorization after the cache failure sequence"
+  ],
+  "status": "passed",
+  "harness_sha256": "401f9bb7e2401c970e6014d5131f4d44cb9b43e2835af9825dd024ec6da638f7",
+  "binary_sha256": "9a1a9330899b6c76259976828ef16fbf53d29dc01f8f0a42f051430418460c17",
+  "valkey_version": "Server v=7.2.13 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=d168676aca4db8ba",
+  "duration_seconds": 15.3,
+  "passed_checks": 4
+}

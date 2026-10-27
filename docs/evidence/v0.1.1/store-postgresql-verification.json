@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "verified_at": "2026-10-27T21:52:08.254968+00:00",
+  "scope": "same optimized 20-test storage behavior executable from the final cargo release gate, using disposable PostgreSQL schemas",
+  "command": [
+    "/dev/shm/rstrbot-9ebc43336305/target/release/deps/behavior-9e4edced47061a74",
+    "--test-threads=1"
+  ],
+  "environment_keys": [
+    "RSTRBOT_TEST_DATABASE_URL",
+    "LD_LIBRARY_PATH"
+  ],
+  "exit_code": 0,
+  "passed": 20,
+  "failed": 0,
+  "duration_seconds": 2.121,
+  "postgresql_version": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "postgresql_port": 48607,
+  "test_executable_sha256": "8e9788fc48fad298df1e548c8f3107adaf4ceb771b2abfcd9b3bd345613a21be",
+  "test_source_sha256": "eb25e0a58139697cf0162fa9060019c1c5959c993bca6c4ca1f2e389c91ec243",
+  "cargo_lock_sha256": "827de3119a3c8bc59ff56254baba0764516f7ffc94e4d2ac99ef5bd8cfe42643",
+  "binary_sha256": {
+    "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+    "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a",
+    "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+    "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753"
+  },
+  "log": "store-postgresql-tests.log",
+  "fixture_cleanup": {
+    "created_schema_count": 22,
+    "removed_schema_count": 22,
+    "all_created_schemas_removed": true,
+    "services_still_running": true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "started_at_utc": "2026-10-27T22:33:30.878728+00:00",
+  "scope": "Actual local webhook MCP stdio and loopback HTTP delivery fixture, including replay after process restart; no live messaging account",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "tests/plugin_mcp.py",
+    "--binary",
+    "/tmp/rstrbot-d286-target/release/rstrbot-webhook"
+  ],
+  "candidate_and_harness_sha256": {
+    "/tmp/rstrbot-d286-target/release/rstrbot-webhook": "150650620edbe0522190b79c5d35d725a4ca3904e1355da38dd992c3ec37c1ec",
+    "tests/plugin_mcp.py": "95a38b37b1934b122ad86d5b9780addc3686f94cd7db9ffa3a467420d64907d1"
+  },
+  "status": "passed",
+  "exit_code": 0,
+  "duration_seconds": 0.572,
+  "candidate_unchanged": true,
+  "passed_checks": 7,
+  "report_sha256": "52e848b548f765493c267f2e96187496df1c4d0c8f500dcf475b1b7930976688"
+}

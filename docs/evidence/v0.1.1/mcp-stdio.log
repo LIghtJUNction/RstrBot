@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checks": [
+    "initialization required",
+    "tool discovery",
+    "destination override refused",
+    "actual HTTP delivery",
+    "duplicate not resent",
+    "restart not resent",
+    "changed parameters refused"
+  ]
+}

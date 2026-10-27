@@ -1,0 +1,11 @@
+{
+  "performed_at": "2026-10-27T21:25:32.474450+00:00",
+  "status": "completed",
+  "actions": [
+    "Dropped the one retained test-only PostgreSQL schema after its recovery passed",
+    "Removed the retained disposable HTTP failure directory and its synthetic secrets",
+    "Stopped the owned Valkey 56380 process after checking its process ID",
+    "Stopped the owned PostgreSQL 55433 cluster after checking its data directory and port"
+  ],
+  "scope": "Only this integration agent's PostgreSQL 55433, Valkey 56380 and retained failure fixture; unrelated port 55432 untouched"
+}

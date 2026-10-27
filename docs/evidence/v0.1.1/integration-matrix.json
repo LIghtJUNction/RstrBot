@@ -1,0 +1,183 @@
+{
+  "started_at": "2026-10-27T21:51:16.767791+00:00",
+  "runner_sha256": "1a006231185c22334edd21edf2dd17e50f7ecc71af11ba978352398a6a8ff0d1",
+  "scope": "Real SQLite/PostgreSQL, real Valkey and local HTTP receivers; diagnostic model subprocess and local OpenAI-compatible protocol fixture, not a paid model provider or live messaging account",
+  "database_endpoint": {
+    "scheme": "postgresql",
+    "hostname": "127.0.0.1",
+    "port": 48607
+  },
+  "cache_endpoint": {
+    "scheme": "redis",
+    "hostname": "127.0.0.1",
+    "port": 49367
+  },
+  "candidate_sha256": {
+    "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753",
+    "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+    "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+    "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a"
+  },
+  "cases": [
+    {
+      "case": "http-sqlite-off",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/9ebc43336305/RstrBot/tests/integration.py",
+        "--binary",
+        "/dev/shm/rstrbot-9ebc43336305/target/release/rstrbot",
+        "--expected-cache-state",
+        "disabled",
+        "--output",
+        "/workspace/scratch/9ebc43336305/RstrBot/docs/evidence/v0.1.1/http-sqlite-off.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 6.419,
+      "binary_sha256": {
+        "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753",
+        "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+        "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+        "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a"
+      },
+      "evidence": "http-sqlite-off.json",
+      "log": "http-sqlite-off.log",
+      "error": null
+    },
+    {
+      "case": "http-postgres-off",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/9ebc43336305/RstrBot/tests/integration.py",
+        "--binary",
+        "/dev/shm/rstrbot-9ebc43336305/target/release/rstrbot",
+        "--expected-cache-state",
+        "disabled",
+        "--output",
+        "/workspace/scratch/9ebc43336305/RstrBot/docs/evidence/v0.1.1/http-postgres-off.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_DATABASE_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 6.66,
+      "binary_sha256": {
+        "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753",
+        "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+        "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+        "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a"
+      },
+      "evidence": "http-postgres-off.json",
+      "log": "http-postgres-off.log",
+      "error": null
+    },
+    {
+      "case": "http-sqlite-valkey",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/9ebc43336305/RstrBot/tests/integration.py",
+        "--binary",
+        "/dev/shm/rstrbot-9ebc43336305/target/release/rstrbot",
+        "--expected-cache-state",
+        "available",
+        "--output",
+        "/workspace/scratch/9ebc43336305/RstrBot/docs/evidence/v0.1.1/http-sqlite-valkey.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_VALKEY_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 6.354,
+      "binary_sha256": {
+        "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753",
+        "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+        "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+        "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a"
+      },
+      "evidence": "http-sqlite-valkey.json",
+      "log": "http-sqlite-valkey.log",
+      "error": null
+    },
+    {
+      "case": "http-postgres-valkey",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/9ebc43336305/RstrBot/tests/integration.py",
+        "--binary",
+        "/dev/shm/rstrbot-9ebc43336305/target/release/rstrbot",
+        "--expected-cache-state",
+        "available",
+        "--output",
+        "/workspace/scratch/9ebc43336305/RstrBot/docs/evidence/v0.1.1/http-postgres-valkey.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_DATABASE_URL",
+        "RSTRBOT_TEST_VALKEY_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 6.613,
+      "binary_sha256": {
+        "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753",
+        "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+        "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+        "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a"
+      },
+      "evidence": "http-postgres-valkey.json",
+      "log": "http-postgres-valkey.log",
+      "error": null
+    },
+    {
+      "case": "http-sqlite-degraded-valkey",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/9ebc43336305/RstrBot/tests/integration.py",
+        "--binary",
+        "/dev/shm/rstrbot-9ebc43336305/target/release/rstrbot",
+        "--expected-cache-state",
+        "degraded",
+        "--output",
+        "/workspace/scratch/9ebc43336305/RstrBot/docs/evidence/v0.1.1/http-sqlite-degraded-valkey.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_VALKEY_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 1,
+      "status": "failed",
+      "passed_checks": 4,
+      "duration_seconds": 2.293,
+      "binary_sha256": {
+        "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753",
+        "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+        "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+        "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a"
+      },
+      "evidence": "http-sqlite-degraded-valkey.json",
+      "log": "http-sqlite-degraded-valkey.log",
+      "error": ""
+    }
+  ],
+  "status": "failed",
+  "duration_seconds": 28.896,
+  "total_case_duration_seconds": 28.339,
+  "scenario_group_executions": 68,
+  "scenario_count_note": "Repeated across database/cache modes; these are scenario groups, not counts of distinct requirements or individual assertions"
+}

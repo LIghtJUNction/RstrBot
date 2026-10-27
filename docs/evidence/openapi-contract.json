@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-10-27T21:20:53.860434+00:00",
+  "scope": "Static OpenAPI/router/DTO/reference/example checks; not native execution or a full external OpenAPI meta-schema validator.",
+  "spec_sha256": "7cde998214953e1ef4ad2eb6137c2e754ffd0fb83ac68a39be942e6762875ab0",
+  "router_sha256": "aee5b9e6272ac4ea23fa0b68e9a4f0672abb9a2e35084bb171770c5c960ef59a",
+  "registered_paths": 37,
+  "registered_operations": 46,
+  "api_v1_operations": 44,
+  "health_operations": 2,
+  "schema_count": 96,
+  "resolved_references": 587,
+  "validated_examples": 100,
+  "request_schema_type_checks": 14,
+  "operation_ids_unique": true,
+  "all_declared_router_methods_covered": true,
+  "status": "passed"
+}

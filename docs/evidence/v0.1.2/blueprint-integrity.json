@@ -1,0 +1,102 @@
+{
+  "status": "passed",
+  "files": [
+    {
+      "file": "BOOTSTRAP_TRACEABILITY.json",
+      "sha256": "5fa1f9692824049d54b92c0394f31e38c41d4825c2ce00cdd455731890ae2f5e",
+      "matches": true
+    },
+    {
+      "file": "BOOTSTRAP_TRACEABILITY.md",
+      "sha256": "251350fc43f2abc7c84391a4521d252b64c911b9fcb8bd55a0e5fc57badce0c7",
+      "matches": true
+    },
+    {
+      "file": "BUILD_PROMPT.md",
+      "sha256": "a379110284c02d5abf151a2313ecd961ad5ea8415b92e898f03cf4ac14b24f11",
+      "matches": true
+    },
+    {
+      "file": "ENGINEERING_GOALS.md",
+      "sha256": "ba7fc5a25dc19cf555a579f89d67b37157b7da12f7d17802805946f4b0a4585f",
+      "matches": true
+    },
+    {
+      "file": "FRONTEND_DESIGN.md",
+      "sha256": "a73613e4457fa8b388970efe6ce810bbbf1b1a1b6f1ff5b4280f26becd249df4",
+      "matches": true
+    },
+    {
+      "file": "PRODUCT_BLUEPRINT.md",
+      "sha256": "63c6bba6d98869c3ee2025d21300a8e9628bc231cdcb614cc2da5a4d759fac01",
+      "matches": true
+    },
+    {
+      "file": "README.md",
+      "sha256": "b9872c12e1c8a22ae46119499d97b42ca39ecbf189c0cc3b589a33553d8dbb44",
+      "matches": true
+    },
+    {
+      "file": "REQUIREMENTS_AND_ACCEPTANCE.md",
+      "sha256": "36e78cb548fc0f8a99593810c31fdf082bb17dd90e322009687fe2d6ecaa92f4",
+      "matches": true
+    },
+    {
+      "file": "RESEARCH_AND_DECISIONS.md",
+      "sha256": "5df6508da0d846029b477e5945b8ca8f411074bd998cd8f9b2899ed931706b06",
+      "matches": true
+    },
+    {
+      "file": "SOURCES.md",
+      "sha256": "2cc4acb5a038408feb2bb8f146cf3ba28bb16c1dc6c2f7ae820729818f709821",
+      "matches": true
+    },
+    {
+      "file": "VALIDATION.md",
+      "sha256": "85d889efc893c9855b1242c1f0f7e8b3b47cba8ef57fbc2929632c52af8af3ea",
+      "matches": true
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "601aba8032bdd281369c87745d4503d5d16c8f8d8a27d993b95e3ee9749b4924",
+      "matches": true
+    },
+    {
+      "file": "requirements.json",
+      "sha256": "6e0f4245461462eb9f8b5c85a92137859dbbefabdfe65ea561a8fe9891bf4806",
+      "matches": true
+    },
+    {
+      "file": "research/langbot-issues.json",
+      "sha256": "29f8ece9fe6d1d17b510b800aae2d250a1fcff6419ff1553186e885423d14522",
+      "matches": true
+    },
+    {
+      "file": "research/langbot-issues.md",
+      "sha256": "8dc840135409daf7b4ed95fd0d5ebeae51e23edcf9d284a0c4e059e1e03fe9f4",
+      "matches": true
+    },
+    {
+      "file": "research/maibot-issues.json",
+      "sha256": "8e5e3c9120efd99218ecc9d4201ce9a12b0ee6e9a74e567dd4db480014f6b3b1",
+      "matches": true
+    },
+    {
+      "file": "research/maibot-issues.md",
+      "sha256": "6d4ec1a9cd95c1e5f7889f9adb4619edc2b7156d314c6c168ce21b2598d9a83d",
+      "matches": true
+    },
+    {
+      "file": "research/openclaw-issues.json",
+      "sha256": "2b634c0415ad8722d136692246e471ae50cb78d989cf2a3a09bfec966ffe7bce",
+      "matches": true
+    },
+    {
+      "file": "research/openclaw-issues.md",
+      "sha256": "6f2acfa235bde2755cba3091b8523305395c4f98a8a147091fe1a69294ea9626",
+      "matches": true
+    }
+  ],
+  "count": 19,
+  "scope": "byte-for-byte match with the supplied stage-two blueprint SHA256SUMS; BUILD_PROMPT and REQUIREMENTS hashes independently read back from Drive"
+}

@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "recorded_at_utc": "2026-10-27T22:05:22.025068+00:00",
+  "source_sha256": {
+    "src/engine.rs": "20038deaa024ae04a25830e84d106245cf19a6ac35cf94035f9c8e9a281a056c"
+  },
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "rstrbot",
+    "stream_write_",
+    "--",
+    "--nocapture"
+  ],
+  "tests_passed": 2,
+  "tests_failed": 0,
+  "tests": [
+    "engine::tests::stream_write_polls_monitor_holding_only_connection",
+    "engine::tests::stream_write_observes_revocation_while_persistence_waits"
+  ],
+  "proof": "The first test primes a monitor until it holds the sole semaphore permit. The original sequential-await scheduling times out; the production helper polls both futures and saves successfully. The second test verifies revocation interrupts a pending save. The semaphore represents the single pooled-connection scheduling dependency; actual HTTP/SSE acceptance has a separate receipt.",
+  "format_check": "passed",
+  "strict_all_target_clippy": "passed",
+  "scope": "Deterministic async scheduling regression; release executable acceptance is recorded separately."
+}

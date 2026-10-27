@@ -1,0 +1,22 @@
+{
+  "database": "sqlite",
+  "valkey": "off",
+  "model": "diagnostic process fixture, not a live AI provider",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-27T21:00:29.146434+00:00",
+  "binary_sha256": {
+    "rstrbot": "4b9d63f0c7325965ee1a7082350cb17a39e2636c9c51319363654417cecda5a6",
+    "rstrbot-openai": "f1ebb5e2245242987aec80381bd9c94eded9a9872b6213fd07cf7bc385793ea4",
+    "rstrbot-diagnostic": "75644cc934bb6aa1fa728b86ed78299fbba724ec65f92a59f26908360ba8620e",
+    "rstrbot-webhook": "d445b6cd7a9a4c92eb230ddec4611a61d91039312aa0260066fba1d7e7196fad"
+  },
+  "checks": [
+    "one-time setup proof, HttpOnly-cookie session and CSRF/origin rejection",
+    "two-user, cross-workspace and same-workspace private isolation across read/export/events",
+    "real provider/tool subprocess loop, stream events, persisted tool result and stable request idempotency"
+  ],
+  "status": "failed",
+  "error": "POST /api/v1/workspaces/61627662-93aa-4919-9be8-761bd0cc62c9/chat: expected (200,), got 409: {'error': {'code': 'conflict', 'message': 'The record changed or this operation is already in progress; reload before retrying'}}",
+  "duration_seconds": 1.655,
+  "passed_checks": 3
+}

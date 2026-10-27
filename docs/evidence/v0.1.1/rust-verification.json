@@ -1,0 +1,89 @@
+{
+  "scope": "Final 0.1.1 Linux release build and Rust gates",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "commands": [
+    {
+      "name": "format",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.176,
+      "log": "format.log"
+    },
+    {
+      "name": "release-build",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--workspace",
+        "--bins",
+        "--locked",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "seconds": 102.567,
+      "log": "release-build.log"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 3.129,
+      "log": "clippy.log"
+    },
+    {
+      "name": "release-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "seconds": 61.798,
+      "log": "release-tests.log",
+      "tests_passed": 53,
+      "tests_failed": 0
+    },
+    {
+      "name": "rustdoc",
+      "command": [
+        "cargo",
+        "doc",
+        "--workspace",
+        "--no-deps",
+        "--locked",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "seconds": 3.121,
+      "log": "rustdoc.log"
+    }
+  ],
+  "status": "passed",
+  "binary_sha256": {
+    "rstrbot-openai": "b9f448704522caeedf064c14e244c6269f417e7dee5f745b2a9ff59de12d473c",
+    "rstrbot-webhook": "2976acd1bb164da178c4389e4b5c0fd2bf8f8b1c2f0309e1d862a199c4d6426a",
+    "rstrbot-diagnostic": "b7f71d793fc09d6ef099fd643a858417ec55e302454caa73b406817fe07fd0b2",
+    "rstrbot": "74ecae622961eb6e41942c7858855e425245f7cd8b8dab5b6dcbb51a975d8753"
+  }
+}

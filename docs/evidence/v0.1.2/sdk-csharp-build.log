@@ -1,0 +1,11 @@
+  Determining projects to restore...
+  Restored /workspace/scratch/d2860555bebf/RstrBot/sdk/csharp/EchoPlugin/EchoPlugin.csproj (in 163 ms).
+  1 of 2 projects are up-to-date for restore.
+  RstrBot.Plugin -> /workspace/scratch/d2860555bebf/RstrBot/sdk/csharp/RstrBot.Plugin/bin/Debug/net8.0/RstrBot.Plugin.dll
+  EchoPlugin -> /workspace/scratch/d2860555bebf/RstrBot/sdk/csharp/EchoPlugin/bin/Debug/net8.0/EchoPlugin.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.40

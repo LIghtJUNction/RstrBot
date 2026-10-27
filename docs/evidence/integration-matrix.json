@@ -1,0 +1,304 @@
+{
+  "started_at": "2026-10-27T21:23:22.438931+00:00",
+  "runner_sha256": "70ca7352d5e8df733a85b3066065c4f1b79b7ec01d699022c9c13353b0fc9aec",
+  "scope": "Real SQLite/PostgreSQL, real Valkey and local HTTP receivers; diagnostic model subprocess and local OpenAI-compatible protocol fixture, not a paid model provider or live messaging account",
+  "database_endpoint": {
+    "scheme": "postgresql",
+    "hostname": "127.0.0.1",
+    "port": 55433
+  },
+  "cache_endpoint": {
+    "scheme": "redis",
+    "hostname": "127.0.0.1",
+    "port": 56380
+  },
+  "candidate_sha256": {
+    "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+    "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+    "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+    "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+  },
+  "cases": [
+    {
+      "case": "http-sqlite-off",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--expected-cache-state",
+        "disabled",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/http-sqlite-off.json",
+        "--keep-on-failure"
+      ],
+      "environment_keys": [
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 8.885,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+        "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "http-sqlite-off.json",
+      "log": "http-sqlite-off.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "http-postgres-off",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--expected-cache-state",
+        "disabled",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/http-postgres-off.json",
+        "--keep-on-failure"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_DATABASE_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 9.183,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+        "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "http-postgres-off.json",
+      "log": "http-postgres-off.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "http-sqlite-valkey",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--expected-cache-state",
+        "available",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/http-sqlite-valkey.json",
+        "--keep-on-failure"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_VALKEY_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 8.908,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+        "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "http-sqlite-valkey.json",
+      "log": "http-sqlite-valkey.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "http-postgres-valkey",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--expected-cache-state",
+        "available",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/http-postgres-valkey.json",
+        "--keep-on-failure"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_DATABASE_URL",
+        "RSTRBOT_TEST_VALKEY_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 9.046,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+        "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "http-postgres-valkey.json",
+      "log": "http-postgres-valkey.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "http-sqlite-degraded-valkey",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--expected-cache-state",
+        "degraded",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/http-sqlite-degraded-valkey.json",
+        "--keep-on-failure"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_VALKEY_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 16,
+      "duration_seconds": 8.814,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f",
+        "rstrbot-diagnostic": "97fa968ebbaf6d92463139e4b51ebf457b8304a534c7f4cd2333e385225b2344",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "http-sqlite-degraded-valkey.json",
+      "log": "http-sqlite-degraded-valkey.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "delivery-sqlite",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/delivery_integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/delivery-sqlite.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 6,
+      "duration_seconds": 2.827,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "delivery-sqlite.json",
+      "log": "delivery-sqlite.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "delivery-postgres",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/delivery_integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/delivery-postgres.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_DATABASE_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 6,
+      "duration_seconds": 2.909,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-webhook": "d506e5306809fba53422ac14858feb51671501d26076b3912dc5dc37518d690a"
+      },
+      "evidence": "delivery-postgres.json",
+      "log": "delivery-postgres.log",
+      "error": null,
+      "reused_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json"
+    },
+    {
+      "case": "cache-recovery",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/cache_recovery.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--valkey-server",
+        "/tmp/rstrbot-valkey-runtime/usr/bin/valkey-server",
+        "--valkey-cli",
+        "/tmp/rstrbot-valkey-runtime/usr/bin/valkey-cli",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/cache-recovery.json"
+      ],
+      "environment_keys": [
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 4,
+      "duration_seconds": 15.304,
+      "binary_sha256": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+      "evidence": "cache-recovery.json",
+      "log": "cache-recovery.log",
+      "error": null
+    },
+    {
+      "case": "migration-cross-backend",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/tests/migration_integration.py",
+        "--binary",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/target/debug/rstrbot",
+        "--output",
+        "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/migration-cross-backend.json",
+        "--keep-on-failure"
+      ],
+      "environment_keys": [
+        "RSTRBOT_TEST_DATABASE_URL",
+        "RSTRBOT_PSQL",
+        "LD_LIBRARY_PATH"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "passed_checks": 10,
+      "duration_seconds": 5.796,
+      "binary_sha256": {
+        "rstrbot": "b50354cb9b904e0f2280a56ba0e2f64205756a118ed2d33a8b2883c7e72e2673",
+        "rstrbot-openai": "feb9e10e673104997df4d15d3dcf60e5a72f3814d2faad436dc522283c50d92f"
+      },
+      "evidence": "migration-cross-backend.json",
+      "log": "migration-cross-backend.log",
+      "error": null
+    }
+  ],
+  "status": "passed",
+  "resumed_from": "/workspace/scratch/777a1eb9bd2b/RstrBot/docs/evidence/integration-matrix-harness-path-before.json",
+  "duration_seconds": 21.452,
+  "total_case_duration_seconds": 71.672,
+  "scenario_group_executions": 106,
+  "scenario_count_note": "Repeated across database/cache modes; these are scenario groups, not counts of distinct requirements or individual assertions"
+}

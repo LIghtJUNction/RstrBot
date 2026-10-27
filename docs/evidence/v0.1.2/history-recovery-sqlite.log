@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "started_at": "2026-10-27T22:33:50.151760+00:00",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "database": "sqlite",
+  "checks": [
+    "over 10,000 historical runs, deliveries and schedules seeded with tied creation timestamps while the core is stopped",
+    "restart scans beyond the old limit, interrupts the pending run, clears its active lease and preserves uncertain delivery outcomes",
+    "valid in-flight schedules beyond the old limit retain their original claim and parameters; all history remains and no new operation or run is admitted"
+  ],
+  "scope": "real SQLite restart with synthetic historical receipts; no model or destination calls",
+  "harness_sha256": "3721644536c1f3dbe3c8c032299d8fdb81c250f635ef79646246479166af1018",
+  "binary_sha256": {
+    "rstrbot": "9a1a9330899b6c76259976828ef16fbf53d29dc01f8f0a42f051430418460c17",
+    "rstrbot-openai": "10c8833122c604a9d55cf4c60d111e5cda00a2fad6059dd80e9dd32b04591784",
+    "rstrbot-diagnostic": "8293cf41104140ea8d0d9d4cf62cfd476bb82ba0c10b13f94fad63c34b1e41fd",
+    "rstrbot-webhook": "150650620edbe0522190b79c5d35d725a4ca3904e1355da38dd992c3ec37c1ec"
+  },
+  "records_per_kind": 10025,
+  "restart_seconds": 1.421,
+  "duration_seconds": 1.727,
+  "passed_checks": 3
+}
