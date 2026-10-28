@@ -1,6 +1,0 @@
-{
-  "valkey": "Server v=7.2.13 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=d168676aca4db8ba",
-  "postgres": "postgres (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
-  "valkey_health": "PONG",
-  "scope": "dedicated synthetic localhost test services"
-}

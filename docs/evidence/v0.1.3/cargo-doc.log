@@ -1,7 +1,0 @@
-    Checking rstrbot-plugin v0.1.3 (/workspace/scratch/fabcc3e8404c/RstrBot/crates/rstrbot-plugin)
- Documenting rstrbot-plugin v0.1.3 (/workspace/scratch/fabcc3e8404c/RstrBot/crates/rstrbot-plugin)
-    Checking rstrbot-store v0.1.3 (/workspace/scratch/fabcc3e8404c/RstrBot/crates/rstrbot-store)
- Documenting rstrbot v0.1.3 (/workspace/scratch/fabcc3e8404c/RstrBot)
- Documenting rstrbot-store v0.1.3 (/workspace/scratch/fabcc3e8404c/RstrBot/crates/rstrbot-store)
-    Finished `dev` profile [unoptimized] target(s) in 1.91s
-   Generated /tmp/rstrbot-d286-target/doc/rstrbot/index.html and 5 other files

@@ -1,0 +1,25 @@
+# 持久业务存储
+
+Rust 实现 SQLite 与 PostgreSQL 下相同的业务语义。采用维护中的数据库驱动与事务，不规定复制旧表结构。操作系统、SQLite库、PostgreSQL服务及可选Valkey均是外部前提，无配方递归依赖。Valkey从不拥有授权、硬预算、是否执行过的事实。
+
+## 身份与隔离
+
+用户、会话令牌、工作区成员、资源所有者分别建模；实例管理员不是自动的工作区成员。角色 viewer/member/operator/admin/owner 按明确阈值授权，未知角色拒绝；保护最后所有者。每次资源访问、分页、检索、事件及导出重新检查当前成员资格。private仅本人当前获准访问，workspace共享按角色和所有者/管理操作判断；管理者不因此看见别人的私聊。
+
+密码用成熟抗暴力破解哈希，令牌过期可撤销。注销撤销该凭据，改密/密码恢复撤销旧会话；独立计划授权不依赖创建时浏览器会话。邮箱验证、Google稳定sub、Passkey多凭据与一次性挑战持久化，验证状态变更和凭据替换原子提交。最近认证窗口5分钟，不能延长登录期限。
+
+## 资源与并发
+
+资源含id、workspace_id、owner_id、kind、visibility、version、data、created_at、updated_at；版本保护CAS，旧版本改/删冲突。私有默认，编辑不隐式共享。runs/deliveries为核心写入事实，通用资源接口不得伪造或改写。会话历史保留，generation重置仅改变上下文投影；分支产生新会话。消息/事件用稳定ID去重和排序，持久化流片段先于依赖其恢复的回执。
+
+只有计划所有者可改配置或启用；管理角色可按授权删除共享计划，不得替换他人执行意图。认领基于数据库CAS并检查当前权限；一次、间隔、IANA时区cron及missed_policy=skip分别建模。
+
+预算使用整数微美元和并发预留；limit可为空，缺usage/价格不能变为0费用；已知费用仍入账，不确定收费不得仅因撤权释放为零。短事务不包含网络、插件或用户等待。
+
+## 备份与恢复
+
+数据库快照 rstrbot-db-v2 / schema 2，兼容导入历史v1；包含持久身份绑定与加密配置，排除活跃会话、认证挑战和邮件token。密钥文件secrets.key、附件和外部插件数据单独保护；当前数据库备份不冒充完整灾备。仅导入空目标，恢复后暂停外部执行，管理员核对未知费用/投递后显式解除恢复模式。
+
+启动监听前恢复全部runs、deliveries、schedule claims。稳定(created_at,id)游标，页128条、存储JSON批次16MiB（至少一条保证推进）、首批确定上界。不是公开分页token也不是事务快照。unfinished run变interrupted，prepared delivery变not_sent，sending delivery变unknown，在途schedule禁用并needs_reconciliation。恢复不新建替代操作，不重放外部副作用。
+
+探测数据库只读不迁移；拒绝无关schema。单数据根实例锁、Unix目录0700与凭据0600由宿主层配合。SQLite单核心；PG并不自动证明多副本支持。数据库URL必须保留Unicode、空格和特殊字符路径的真实含义。

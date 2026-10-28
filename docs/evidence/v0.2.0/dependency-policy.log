@@ -1,7 +1,0 @@
-warning[license-not-encountered]: license was not encountered
-   ┌─ /workspace/scratch/fabcc3e8404c/RstrBot/deny.toml:10:42
-   │
-10 │   "BSD-3-Clause", "ISC", "Unicode-3.0", "Unicode-DFS-2016", "Zlib",
-   │                                          ━━━━━━━━━━━━━━━━ unmatched license allowance
-
-advisories ok, licenses ok, sources ok
