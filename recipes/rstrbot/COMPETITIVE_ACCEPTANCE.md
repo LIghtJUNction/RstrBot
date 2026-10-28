@@ -1,10 +1,10 @@
 # 端到端对比与上游问题改进合同
 
-用户目标是比AstrBot、MainBot更好用并全面超越OpenClaw。本文件将愿景转为可验证工作，不预设对比结论。当前只有RstrBot局部临时实例证据，尚未执行跨产品对比，比较状态一律not_executed。
+用户目标是比AstrBot、MainBot更好用并全面超越OpenClaw。本文件将愿景转为可验证工作，不预设对比结论。已取得三款产品各自的部分本地正常路径证据；12项完整共同任务尚未通过，不能声称总体领先。
 
 ## 来源和比较边界
 
-AstrBot候选为AstrBotDevs/AstrBot，OpenClaw为openclaw/openclaw；MainBot准确项目仍待用户确认，暂以麦麦MaiBot（Mai-with-u/MaiBot，旧组织URL重定向）作为有标注的候选。未确认的候选不能冒充已指定或已胜出的对手。
+AstrBot为AstrBotDevs/AstrBot，OpenClaw为openclaw/openclaw；用户于2026-10-29确认其所说 MainBot 是麦麦 MaiBot，对应官方仓库 Mai-with-u/MaiBot。身份确认只解除项目识别疑问，不代表运行过或胜出。
 
 执行前记录每个产品的release/commit、包/二进制摘要、OS/CPU/RAM、数据库/缓存/浏览器、配置与插件版本、数据规模、网络/供应商模型/参数、成本前提和测试日期。各自使用独立数据根、账号和端口，保留正式配置，按公开文档从普通用户入口操作，不使用开发者内幕替代新手流程。不下载无关私有数据，不动现有服务或真实聊天平台。
 

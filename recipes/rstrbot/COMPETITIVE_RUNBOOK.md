@@ -8,14 +8,14 @@
 
 2026-10-28（Asia/Taipei）读取了以下官方 release API 和 tag 对应 commit。它们是可复现候选版本，不是安装成功证据；开始实测时可以沿用，或另开一轮重新冻结，不能运行一半静默更新。
 
-| 产品 | 固定候选 | commit / 输入身份 | 当前比较状态 | 官方来源 |
+| 产品 | 固定候选 | commit / 输入身份 | 初始整卡状态 | 官方来源 |
 | --- | --- | --- | --- | --- |
 | RstrBot | 应用 0.2.0 预览；本次配方 1.13 | Drive r2 的 Git 基线 `25c36e26ab1a0abe12393bd0480a373cf801c714` 加未提交输入；具体生成实现摘要待重建后填写 | not_executed | 本任务 `14-manifest.md`、[SOURCE_EVIDENCE.md](SOURCE_EVIDENCE.md)；Git HEAD 单独不足以重建该快照 |
 | AstrBot | `v4.29.3` | `f61a7f42696da6df25dc7a249ec9b8d54ed9da18` | not_executed | [release](https://github.com/AstrBotDevs/AstrBot/releases/tag/v4.29.3)、[固定 README](https://github.com/AstrBotDevs/AstrBot/blob/f61a7f42696da6df25dc7a249ec9b8d54ed9da18/README.md) |
 | OpenClaw | `v2026.10.8` | `dc2523e5a5c7a309517fd7fa834add938231d526` | not_executed | [release](https://github.com/openclaw/openclaw/releases/tag/v2026.10.8)、[固定 README](https://github.com/openclaw/openclaw/blob/dc2523e5a5c7a309517fd7fa834add938231d526/README.md) |
-| MainBot | 身份未确认；MaiBot 仅候选 `v1.3.17` | 候选 `Mai-with-u/MaiBot`：`6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3` | not_executed | [候选 release](https://github.com/Mai-with-u/MaiBot/releases/tag/v1.3.17)、[固定 README](https://github.com/Mai-with-u/MaiBot/blob/6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3/README.md)；身份未确认不得称其为用户指定对手 |
+| MaiBot（用户所说 MainBot） | `v1.3.17` | `Mai-with-u/MaiBot`：`6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3` | not_executed | [release](https://github.com/Mai-with-u/MaiBot/releases/tag/v1.3.17)、[固定 README](https://github.com/Mai-with-u/MaiBot/blob/6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3/README.md)；身份由用户于2026-10-29确认 |
 
-release/tag 解析只证明版本身份。下载后另记录源包/容器镜像/安装包摘要、构建命令、锁文件摘要、插件与运行时版本、原生签名验证结果；尚未下载的摘要填 `unknown`。不同部署方式分别报告，例如源码服务与桌面安装器不能混为同一体验样本。MainBot 的身份问题只阻断它的正式比较，不阻断 RstrBot 配方、AstrBot/OpenClaw准备与通用夹具。
+release/tag 解析只证明版本身份。下载后另记录源包/容器镜像/安装包摘要、构建命令、锁文件摘要、插件与运行时版本、原生签名验证结果；尚未下载的摘要填 `unknown`。不同部署方式分别报告，例如源码服务与桌面安装器不能混为同一体验样本。用户确认 MaiBot 身份后即可在相同边界内继续准备和测试；不得把身份确认写成测试通过。
 
 ### 环境和模型矩阵
 
@@ -34,22 +34,22 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 
 ### 初始能力与执行状态
 
-`partial`/`gap` 是 RstrBot 输入材料描述，不是本轮实测分数；外部产品统一 `unverified`，只能在逐项阅读固定文档并运行后改为 `supported`/`unsupported`/`misconfigured`，不得用未准备账号推断功能缺失。
+`partial`/`gap` 表示能力范围，不是本轮实测分数；竞品只在阅读固定文档和运行后更新实际观察，不得用未准备账号推断功能缺失。正常回复和重启读回仅覆盖整卡的一部分，故整卡仍为 not_executed。
 
-| 任务 | RstrBot 输入能力 | AstrBot | OpenClaw | MainBot / MaiBot 候选 | 四产品本轮执行 |
+| 任务 | RstrBot 输入能力 | AstrBot | OpenClaw | MaiBot（已确认） | 四产品本轮执行 |
 | --- | --- | --- | --- | --- | --- |
-| CMP-01 | partial：本地初次对话；真实提供方未验 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-02 | partial：发现/保存/选择；完整路由回退未实现 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-05 | partial：原生工作区/私聊；组合路径待验 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-06 | partial：计划/预览/skip；完整故障组合待验 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-07 | partial：Webhook意图/回执；真实平台/多目标缺口 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-08 | partial：RFB局部修复；读屏/跨浏览器待验 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-09 | gap：通用附件/媒体未实现 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-10 | gap：群聊/双向平台未实现 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-11 | gap：子代理/写工具审批/编排未完整实现 | unverified | unverified | identity_pending / unverified | not_executed |
-| CMP-12 | partial：数据库备份/单节点；附件灾备/多节点/原生待验 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-01 | partial：本地初次对话；真实提供方未验 | partial：本地回复及重启读回 | partial：本地回复及重启读回 | unverified | not_executed（整卡） |
+| CMP-02 | partial：发现/保存/选择；完整路由回退未实现 | unverified | unverified | unverified | not_executed |
+| CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | unverified | not_executed |
+| CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | unverified | not_executed |
+| CMP-05 | partial：原生工作区/私聊；组合路径待验 | unverified | unverified | unverified | not_executed |
+| CMP-06 | partial：计划/预览/skip；完整故障组合待验 | unverified | unverified | unverified | not_executed |
+| CMP-07 | partial：Webhook意图/回执；真实平台/多目标缺口 | unverified | unverified | unverified | not_executed |
+| CMP-08 | partial：RFB局部修复；读屏/跨浏览器待验 | unverified | unverified | unverified | not_executed |
+| CMP-09 | gap：通用附件/媒体未实现 | unverified | unverified | unverified | not_executed |
+| CMP-10 | gap：群聊/双向平台未实现 | unverified | unverified | unverified | not_executed |
+| CMP-11 | gap：子代理/写工具审批/编排未完整实现 | unverified | unverified | unverified | not_executed |
+| CMP-12 | partial：数据库备份/单节点；附件灾备/多节点/原生待验 | unverified | unverified | unverified | not_executed |
 
 ## 2. 合成夹具与故障控制合同
 
@@ -215,4 +215,8 @@ limitations: [not_run]
 
 `R13-CMP-GATE`：收集所有12任务与各P0反例、缺口、blocked/not_executed；校验版本/fixture/证据摘要、下游读回与配置差异；任何权限隔离、数据正确性、取消后越权、预算误报、unknown重放失败均阻断领先声明。先证明功能/安全正确，再比较体验/速度；不能靠加权总分抵消P0失败。
 
-只在同一冻结范围中没有未解释倒退、指定优势有足量同条件证据、缺失能力已显式列出时，才能使用“在这些任务/版本/环境下领先”。12个共同任务不是所有产品全部能力，哪怕全过也不能据此直接宣称“全面超越OpenClaw”。全面目标仍需建立并冻结额外特有能力目录、逐项无缺口证据和用户确认的用途范围。MainBot身份未确认时，不能对MainBot出结论。当前本文件的完成含义仅为可执行合同已交付，比较结果未产生。
+只在同一冻结范围中没有未解释倒退、指定优势有足量同条件证据、缺失能力已显式列出时，才能使用“在这些任务/版本/环境下领先”。12个共同任务不是所有产品全部能力，哪怕全过也不能据此直接宣称“全面超越OpenClaw”。全面目标仍需建立并冻结额外特有能力目录、逐项无缺口证据和用户确认的用途范围。MaiBot未完成实际测试时，不能对MaiBot出结论。当前本文件的完成含义仅为可执行合同已交付，比较结果未产生。
+
+## 2026-10-29 本地初次对话请求差异
+
+冻结版 AstrBot 在相同单一模型夹具、首次发送一次的局部路径返回 READY；独立账本为两次调用（流式回复及非流式请求），实际日志和会话标题显示另一次生成标题；重启并重新登录打开历史后仍为两次。此前 RstrBot 和 OpenClaw 同一夹具分别记录一次；三者安装、模型配置和运行环境不同，且夹具有限，这不是费用、性能或总体胜负结论。相关截图和脱敏账本及范围见仓库文档 `docs/E2E_2026-10-29.md`；配方内验收为 RSTRBOT-22。
