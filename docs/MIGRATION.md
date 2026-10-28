@@ -6,6 +6,12 @@
 
 用户要求远程包含 generated 源码子模块；旧版“Git忽略”的描述仅为本记录创建时的历史事实，现已由独立源码仓库和 `generated/rstrbot-implementation/` gitlink 取代。配方仍不依赖源码或把它打入归档。源码仓库为 [rstrbot-implementation](https://github.com/LIghtJUNction/rstrbot-implementation)，固定提交 `4fe18fdb2dbd5ae1892c11e503811801bd463287`，父提交为原基线 `ead5bf2cea735078e1a37655dcc136485f781b7f`。运行中的旧路径由本机未跟踪的兼容链接维持，递归克隆不包含该链接。
 
+### 2026-10-29 子模块验证
+
+从主仓库本地提交 `053d1836ae0a09b69097379950fd6f70f77010e2` 新建临时克隆，执行 `git submodule update --init --recursive`：11 个共享技能及生成源码共 12 个子模块均成功检出；源码 gitlink 为模式 `160000`，实际检出 `4fe18fdb2dbd5ae1892c11e503811801bd463287`，工作区干净。临时移开源码目录后，根配方检查、递归打包、归档检查和中文构建提示词生成均通过；归档 91 个普通文件均为 Markdown，不包含源码或 Git 元数据。测试克隆是隔离环境，不代表其他平台软件验收。
+
+本机原路径 `generated/rstrbot` 为未提交的临时兼容链接，供迁移前已运行的本机实例继续读取资源；干净克隆不含此链接。旧实例停止后可移除该链接。迁移期间该实例的 HTTP 页面仍返回 200，不代表其使用了最新构建。
+
 ## 实际完成的检查
 
 | 检查 | 本次结果 | 范围 |
