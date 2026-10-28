@@ -1,5 +1,7 @@
 # RstrBot
 
+![软件与依赖汇聚为可重建的配方](https://raw.githubusercontent.com/recipkg/recipkg/main/assets/recipkg-cover.png)
+
 面向个人与团队的私有AI工作区。这个仓库以Recipkg配方保存产品行为、接口、依赖和验收，供Agent在独立生成目录重建实现。
 
 从[完整重建入口](recipes/rstrbot/BUILD_PROMPT.md)开始。配方覆盖多用户与工作区、对话和工具、模型/渠道、知识与记忆、计划任务、可靠投递、四语言SDK、Web与桌面目标；完整第二阶段蓝图仍有待实现范围，见[当前范围](recipes/rstrbot/CURRENT_SCOPE.md)。
