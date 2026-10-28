@@ -41,3 +41,5 @@ In 1.17, R13-OC-185423 checks optional failover with one admitted user message, 
 In 1.18, restore the last admitted model per conversation, require an explicit choice for missing or inaccessible models, and reject private models in shared conversations. Verify destination, restart, privacy and idempotency under RSTRBOT-24.
 
 1.19 按 RSTRBOT-25 检查长草稿视口重排，区分末尾编辑与手动滚动阅读；模拟浏览器单路径不能代替输入法、实体手机和全矩阵验收。
+
+1.20 按 RSTRBOT-26 核对已接纳但确认丢失后的刷新、参数/身份隔离和显式新意图；实际消息/运行/模型请求计数不可由浏览器提示代替。
