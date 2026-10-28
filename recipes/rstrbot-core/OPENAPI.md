@@ -1,6 +1,6 @@
 # 完整声明式 HTTP 接口
 
-来自当前工作区docs/openapi.json。保留完整对象，作为数据格式、枚举、响应及约束的可离线输入；它不是实现源码。API操作66个，健康操作2个。示例均为示例，未在本迁移中执行。
+来自当前工作区docs/openapi.json。保留完整对象，作为数据格式、枚举、响应及约束的可离线输入；它不是实现源码。API操作67个，健康操作2个。示例均为示例，未在本迁移中执行。
 
 ## 操作索引
 
@@ -65,6 +65,7 @@
 | GET | `/api/v1/workspaces/{wid}/knowledge/search` | search_knowledge | Search authorized text chunks |
 | POST | `/api/v1/workspaces/{wid}/schedules/preview` | preview_schedule | Preview next calendar/interval times without dispatch |
 | POST | `/api/v1/workspaces/{wid}/schedules/{id}/run` | trigger_schedule | Manually claim and dispatch an owned schedule |
+| POST | `/api/v1/workspaces/{wid}/schedules/{id}/reconcile` | reconcile_schedule | Record review without executing or enabling |
 | GET | `/api/v1/workspaces/{wid}/events` | events | Replay authorized durable events |
 | GET | `/api/v1/workspaces/{wid}/audit` | audit | Read authorized audit metadata |
 | GET | `/api/v1/workspaces/{wid}/budget` | budget | Read current durable budget totals |
@@ -4517,6 +4518,88 @@
             "$ref": "#/components/parameters/Origin"
           }
         ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/schedules/{id}/reconcile": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/WorkspaceId"
+        },
+        {
+          "$ref": "#/components/parameters/ResourceId"
+        }
+      ],
+      "post": {
+        "operationId": "reconcile_schedule",
+        "summary": "Record review of an uncertain schedule and keep it paused",
+        "description": "Only the schedule owner with current member permission can acknowledge review. It records an unknown outcome and does not dispatch, send or enable. Active known runs and stale versions are rejected.",
+        "tags": [
+          "Scheduling"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "version",
+                  "acknowledge"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "acknowledge": {
+                    "const": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reviewed, paused schedule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
       }
     },
     "/api/v1/workspaces/{wid}/events": {

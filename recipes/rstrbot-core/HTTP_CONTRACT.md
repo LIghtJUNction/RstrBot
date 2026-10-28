@@ -162,3 +162,5 @@ authorized read is required to restore it.
 ## 模型上游拒绝的安全分类（1.14）
 
 上游实际返回401/403/429时，模型调用的安全错误分类分别为 `provider_authentication_failed`、`provider_access_denied`、`provider_rate_limited`。HTTP v1向调用方仍为502错误封套，不是本机401/403；持久化run数据可含可选`error_code`及不含秘密的`error`。未知码保留原有通用插件错误，网络/响应未知不得归入已拒绝；不透传原始上游响应、认证信息或地址。旧记录不含`error_code`时保持可读，旧客户端可忽略附加字段。
+
+POST `/schedules/:id/reconcile` 接受 `{version,acknowledge:true}`；仅有当前执行权限的计划所有者可确认，CAS 检查旧版本及待核对状态，已知活动运行拒绝。返回已确认但暂停的计划，保留旧事实，操作不调用模型或投递。
