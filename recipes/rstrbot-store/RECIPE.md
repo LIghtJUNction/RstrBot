@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-store"
-version = "0.2.0-recipe.2"
+version = "0.2.0-recipe.3"
 kind = "software"
 description = "双数据库的身份、权限、资源、预算、事件与恢复存储"
 entry = "BUILD_PROMPT.md"

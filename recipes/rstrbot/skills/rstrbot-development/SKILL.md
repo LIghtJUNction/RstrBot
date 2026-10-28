@@ -37,3 +37,5 @@ The 1.15 generated implementation is the `generated/rstrbot-implementation/` sou
 In 1.16, the user confirmed MaiBot as the comparison target. Default local titles must not cause an extra model request; any optional model title requires explicit user opt-in and cost/data disclosure. Check RSTRBOT-22 against the request ledger.
 
 In 1.17, R13-OC-185423 checks optional failover with one admitted user message, real request ledgers, and genuine conflict/unknown-outcome negative cases. Missing implementation remains a gap and is not executed.
+
+In 1.18, restore the last admitted model per conversation, require an explicit choice for missing or inaccessible models, and reject private models in shared conversations. Verify destination, restart, privacy and idempotency under RSTRBOT-24.
