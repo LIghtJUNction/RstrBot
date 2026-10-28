@@ -21,7 +21,7 @@ tmpdir="$(mktemp -d)"
 printf '临时输出目录: %s\n' "$tmpdir"
 recipkg check recipes/rstrbot
 recipkg pack recipes/rstrbot -o "$tmpdir/rstrbot.recipe.tar.gz"
-recipkg build "$tmpdir/rstrbot.recipe.tar.gz" --lang zh-CN --request '在 generated/rstrbot/ 中重建，遵守配方与验收要求' --output "$tmpdir/rstrbot-build.md"
+recipkg build "$tmpdir/rstrbot.recipe.tar.gz" --lang zh-CN --request '在 generated/rstrbot-implementation/ 中重建，遵守配方与验收要求' --output "$tmpdir/rstrbot-build.md"
 ```
 
 打包文件和build提示词写入系统临时目录，不在仓库中建立产物目录；需要继续使用时从命令输出中取该目录路径。build只生成提示词。把该Markdown交给Agent，才会开始实际实现与验收。源码语言保持Rust核心、TypeScript前端及Rust/Python/TypeScript/C# SDK，辅助工具可选。性能预算暂无数字，重建后按[性能计划](recipes/rstrbot/PERFORMANCE.md)测量。
