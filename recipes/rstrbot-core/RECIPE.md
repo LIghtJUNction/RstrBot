@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-core"
-version = "0.2.0-recipe.7"
+version = "0.2.0-recipe.8"
 kind = "software"
 description = "HTTP、CLI、执行引擎、计划、知识、身份和可靠投递核心"
 entry = "BUILD_PROMPT.md"
