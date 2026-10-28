@@ -35,4 +35,6 @@ mise exec -- cargo run --locked -- --web-dir web/dist
 
 每次改进先更新[构建提示词](recipes/rstrbot/BUILD_PROMPT.md)、相关组件合同/验收和[版本记录](recipes/rstrbot/CHANGELOG.md)，再生成实现。开发技能在[.agents/skills/](.agents/skills/)；产品内教程/SDK技能材料随根配方保留。
 
+Recipkg 的共享开发技能按一仓库一个技能固定为 Git 子模块。新克隆后运行 `git submodule update --init --recursive`。要更新技能时，先在对应上游仓库审阅并选定提交，再更新本仓库的子模块提交指针。现有 `rstrbot-development` 和 `rstrbot-plugin-development` 是本项目维护的普通技能文件，继续留在原位置；不为它们另建仓库。完整清单和更新方法见[技能目录说明](.agents/skills/README.md)。
+
 [依赖图](recipes/rstrbot/DEPENDENCIES.md) · [集成验收](recipes/rstrbot/ACCEPTANCE.md) · [设计](recipes/rstrbot/DESIGN.md) · [本次校验](docs/MIGRATION.md) · [许可](LICENSE)

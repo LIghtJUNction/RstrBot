@@ -16,3 +16,4 @@
 | RSTRBOT-10 | Linux/macOS/Windows桌面分别安装/启动/退出/升级/卸载 | 逐平台证明，无原生证据的平台不得称完成 |
 | RSTRBOT-11 | 按PERFORMANCE.md记录设备、数据量、并发、预热、重复次数、分位数和RSS | 未知预算保持未知；不能用包体积或diagnostic质量替代性能/模型质量 |
 | RSTRBOT-12 | 对照REQUIREMENTS.md和TRACEABILITY.md逐项盘点 | 52/215/287保持完整，未完成项及阻塞条件仍可定位，无丢需求 |
+| RSTRBOT-13 | 在全新克隆中运行`git submodule update --init --recursive`，核对.agents/skills/共享技能来源和固定提交，并检查两个RstrBot自有技能文件 | 所有Recipkg共享技能来自各自规范上游仓库且停在父仓库记录的提交；两个项目自有技能仍为普通文件，不要求额外技能仓库；配方归档不包含.git子模块元数据 |
