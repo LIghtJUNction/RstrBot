@@ -72,3 +72,9 @@
 | R13-CORE-040 / E01–E09 | 从本合同生成扩展OpenAPI/路由/四SDK DTO，遍历E05+E08所有operation_name、kind、ReadRef消费路由、未知字段/枚举/边界；运行全旧v1向量 | v1 66+2不改变；registry/DTO/handler/只读投影逐项闭合，未知动作拒绝；三态能力不从文档推true；HTTP/worker/schema版本可独立不匹配并清楚拒绝 |
 | R13-CORE-041 / E08 | 实例管理员从固定archive/git/index/local候选discover→download→prepare明确执行批准→权限decision→activate；第二版本失败/取消/扩权拒绝；workspace admin尝试全局安装、建立合法实例后卸载三种数据策略，重启 | 实际摘要/许可/进程/注册表读回；未批准prepare执行计数0；旧active保留；跨scope拒绝；实例停用撤销租约；export未确认交付不删；未知/已完成回执不被卸载清空 |
 | R13-CORE-042 / E08 | 用批准stdio命令与本地Streamable HTTP夹具分别保存MCP连接、启用、目录刷新/分页；初始化失败后修正同配置，版本错/撤权/新目录扩权、同代并发断线及unknown写调用，重启 | 目录在真实握手前不可用；profile准确；新工具不自动批准；一次合并重连有界；配置/目录可GET读回且secret不返回；非幂等unknown无重放，未批准命令不能执行 |
+
+## 1.14 验收
+
+| 编号 | 输入与操作 | 预期结果 |
+| --- | --- | --- |
+| RSTRBOT-CORE-20 | 对发现、模型测试与对话分别注入401/403/429、未知插件码和断网；重启后读run | 使用约定安全分类，HTTP v1保持502、持久失败终态和可选分类；旧记录/旧worker通用回退，不返回原始上游内容，不自动重放或猜测未知费用 |

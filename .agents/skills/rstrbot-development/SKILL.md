@@ -14,3 +14,5 @@ description: Use when updating RstrBot recipes, generating the implementation, o
 浏览器本地草稿/版本也属于用户私有状态：按实例来源和已认证用户隔离，旧匿名数据不自动认领；会话切换清理旧视图和迟到操作。计划预览使用真实只读API；网络未知结果仅核对，不自动重放。对应本地浏览器入口为generated/rstrbot/tests/browser/verify_feedback.mjs和verify_configuration.mjs；真实商业端点/原生设备仍单独验收。
 
 完整能力按根CAPABILITY_COVERAGE和ACCEPTANCE_HARNESS逐项实现，当前v1/1.0与未来v2/1.1-draft分开。竞品任务和OpenClaw反馈按COMPETITIVE_RUNBOOK/OPENCLAW_FEEDBACK保留版本、来源状态、下游证据与not_executed；不能把材料检查、已关闭issue或模拟用户当作软件通过/体验胜出。生成教程和内嵌技能须同步当前合同，来源文档缺失时读递归配方，不能把尚未生成的源码文档当作隐藏前提。
+
+1.14上游模型拒绝按协议补充PROVIDER_ERRORS分类：四SDK向量保持同一整数码、旧host和旧worker通用回退；中英文提示只使用安全分类，不能暴露响应体或把上游401当作用户登出。实际未运行的语言须单独标记。

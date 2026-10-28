@@ -29,3 +29,7 @@ platform.capabilities 明确只支持出站文本、HTTP 接受回执，不宣�
 继续阅读 [LIFECYCLE_AND_ISOLATION.md](LIFECYCLE_AND_ISOLATION.md) 与 [ADAPTERS_AND_COMPATIBILITY.md](ADAPTERS_AND_COMPATIBILITY.md)，补齐原子安装/代次、实例数据、凭据代理、钩子命令、真实沙箱、通用MCP、双向平台/媒体和兼容加载。新能力均为未实现目标，不改写三个现有worker的当前能力。线格式只经声明依赖`sdk → protocol`读取；不反向依赖产品根或复制HTTP定义。重建时使用显式1.1-draft特性并执行新增验收，不重放未知副作用。
 
 兼容验收先使用 [COMPATIBILITY_FIXTURES.md](COMPATIBILITY_FIXTURES.md) 已冻结的三个官方未修改候选；保留精确profile和未覆盖集，不能修改样本或将旧profile通过扩大为当前全部版本兼容。
+
+## 1.14 模型提供方拒绝
+
+OpenAI兼容worker在确实收到401、403、429时按协议给出认证、授权、限流分类；发现和生成路径一致。保留未知错误及原有状态语义，不读取、记录或返回上游原始响应与凭据。

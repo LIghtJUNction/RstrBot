@@ -45,3 +45,9 @@
 | R13-WEB-010 | CAPABILITY_WORKFLOWS.md 的同ID场景 | not_executed |
 | R13-WEB-011 | CAPABILITY_WORKFLOWS.md 的同ID场景 | not_executed |
 | R13-WEB-012 | CAPABILITY_WORKFLOWS.md 的同ID场景 | not_executed |
+
+## 1.14 验收
+
+| 编号 | 输入与操作 | 预期结果 |
+| --- | --- | --- |
+| RSTRBOT-WEB-23 | 中英分别以真实本地模型夹具返回401/403/429；发送、重开run和会话，再测未知错误及断网 | 认证、权限、限流分别显示当前语言的修复说明；前两者可进入模型配置；不泄露原始响应/密钥，不自动重发、不把上游401登出本机账号；旧记录仍可读 |

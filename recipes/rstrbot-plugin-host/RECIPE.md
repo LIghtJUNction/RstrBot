@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-plugin-host"
-version = "0.2.0-recipe.2"
+version = "0.2.0-recipe.3"
 kind = "software"
 description = "受控插件宿主与 OpenAI、diagnostic、Webhook 参考 worker"
 entry = "BUILD_PROMPT.md"

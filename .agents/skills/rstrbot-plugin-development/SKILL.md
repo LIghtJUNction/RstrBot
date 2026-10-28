@@ -12,3 +12,5 @@ description: Use when updating RstrBot plugin protocol/SDK recipes or generating
 取消须回收进程树，未知外部副作用不重放；可信独立进程不等于恶意代码沙箱。用真实四语言进程运行共同向量，缺运行时记not_executed。先更新配方/验收/根版本记录，再生成代码并按当前产物实际验证。
 
 当前1.0参考和向量保持原字节；EXTENSION_PROTOCOL的1.1-draft、SDK_CAPABILITY_CONTRACT、宿主生命周期/兼容合同及核心EXTENSION_API仅为未来协商合同，不能写成已有能力。受控host服务是逐方法/资源/调用代次授权的白名单，不是核心管理RPC。真实未修改兼容样本按COMPATIBILITY_FIXTURES核摘要，再分别验证导入、行为、恢复和清理；样本冻结不算兼容通过。生成文档和页内教程同步这些边界；命令仅在对应生成文件实际存在时运行。
+
+1.14上游模型拒绝按协议补充PROVIDER_ERRORS分类：四SDK向量保持同一整数码、旧host和旧worker通用回退；中英文提示只使用安全分类，不能暴露响应体或把上游401当作用户登出。实际未运行的语言须单独标记。

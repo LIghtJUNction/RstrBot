@@ -19,3 +19,7 @@ Python 的 rstrbot.plugins 入口点发现只读取元数据；--list 不导入�
 ## 1.13能力补全
 
 阅读 [SDK_CAPABILITY_CONTRACT.md](SDK_CAPABILITY_CONTRACT.md)，按依赖protocol的当前1.0和未来1.1-draft分别重建。四语言共同覆盖编码/取消/进度、受控资源与数据、钩子/命令、模型/平台/媒体/MCP和持久子任务的同义表面。扩展当前未实现，新增验收均未执行。不能以一个语言通过、仅转发JSON或历史基础向量代替完整能力；运行时仍按需安装。
+
+## 1.14 可选上游错误码
+
+四种语言SDK共同遵守协议补充 递归依赖 protocol 的 `PROVIDER_ERRORS.md` 的三种整数错误码与旧host/worker回退向量；消息安全、请求ID和失败终态一致，不能把新增配方当成四语言运行通过。
