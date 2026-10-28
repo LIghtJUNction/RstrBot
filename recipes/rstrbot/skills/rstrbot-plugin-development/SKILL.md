@@ -1,32 +1,12 @@
 ---
 name: rstrbot-plugin-development
-description: Use when building, reviewing, or documenting RstrBot executable plugins or language SDKs.
+description: Use when updating RstrBot plugin protocol/SDK recipes or generating and validating plugins.
 ---
 
-# RstrBot plugin development
+# rstrbot-plugin-development
 
-## Read the contract first
+先读recipes/rstrbot-plugin-protocol/、rstrbot-sdk/与rstrbot-plugin-host/的BUILD_PROMPT和验收，再读核心集成边界。修改协议时同时更新四语言SDK合同与共同向量，不能只改某一语言实现。
 
-- Read `docs/PLUGIN_PROTOCOL.md` and `sdk/README.md` before writing a worker.
-- Choose the existing Rust, Python, TypeScript, or C# SDK. Implement the public protocol; do not depend on private core objects.
-- Treat the package manifest, installed package, workspace instance, and one invocation as separate things.
+在generated/rstrbot/生成插件与SDK；不将原源码放入配方或依赖来源。区分包、实例、调用；声明能力不授予权限，worker不接受核心管理权限。凭据只传目标provider，普通工具不接收秘密。
 
-## Capability and trust rules
-
-- A capability declaration describes what a plugin requests; it does not grant permission. The core checks installed declarations and current user authority for each operation.
-- Workers are trusted native programs in this release. A separate process is not a malicious-code sandbox. Do not describe it as one.
-- Keep provider credentials scoped to the provider call. Ordinary tool invocations must not receive them.
-- Do not add worker-initiated core-admin methods, arbitrary executable installation through workspace settings, or network listeners for the local worker protocol.
-- Validate initialization context, nonce, protocol version, request IDs, frame limits, method parameters, and the single terminal response. Bound queues and event output.
-- Propagate cancellation and stop child processes. Cancellation cannot reverse a remote side effect; retain an unknown/in-flight outcome for reconciliation and never silently replay it.
-- Redact keys, authorization headers, private URL paths, and remote response bodies from diagnostics.
-
-## SDK conformance
-
-Build the selected example using the pinned toolchain and run:
-
-```sh
-python3 tests/plugin_conformance.py --sdk <rust|python|typescript|csharp>
-```
-
-For a full local check, use `mise exec -- ./scripts/check.sh`. An unavailable runtime is `not_executed`, not a pass. Update the protocol document, SDK README, and conformance vectors together when changing shared behavior.
+取消须回收进程树，未知外部副作用不重放；可信独立进程不等于恶意代码沙箱。用真实四语言进程运行共同向量，缺运行时记not_executed。先更新配方/验收/根版本记录，再生成代码并按当前产物实际验证。

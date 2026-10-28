@@ -1,5 +1,4 @@
 /generated/
-/artifacts/
 *.recipe.tar.gz
 .env
 *.db

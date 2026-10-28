@@ -1,0 +1,8 @@
+[submodule ".agents/skills/rstrbot-development"]
+	path = .agents/skills/rstrbot-development
+	url = https://github.com/LIghtJUNction/rstrbot-development.git
+	branch = main
+[submodule ".agents/skills/rstrbot-plugin-development"]
+	path = .agents/skills/rstrbot-plugin-development
+	url = https://github.com/LIghtJUNction/rstrbot-plugin-development.git
+	branch = main
