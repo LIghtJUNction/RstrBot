@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-web"
-version = "0.2.0-recipe.11"
+version = "0.2.0-recipe.12"
 kind = "software"
 description = "单语言双主题、双形态导航与完整业务状态的Web工作台"
 entry = "BUILD_PROMPT.md"
