@@ -6,9 +6,10 @@ use sha2::{Digest, Sha256};
 // Argon2 runs outside database transactions. This proof records exactly which
 // stored credential was verified; it is rechecked under the user row's write
 // lock before a session or replacement password can be committed.
-struct PasswordProof {
-    user_id: String,
-    hash: String,
+pub(crate) struct PasswordProof {
+    pub(crate) user_id: String,
+    pub(crate) hash: String,
+    login_identifier: Option<String>,
 }
 
 impl Store {
@@ -34,6 +35,8 @@ impl Store {
             .execute(&mut *tx)
             .await
             .map_err(unique_error)?;
+        crate::identity::lock_identity(&mut tx).await?;
+        crate::identity::ensure_username_available(&mut tx, &user.username).await?;
         insert_user(&mut tx, &user, &hash).await?;
         create_workspace_in(&mut tx, &workspace_id, &name, &user.id).await?;
         let session = create_session_in(&mut tx, user).await?;
@@ -51,6 +54,8 @@ impl Store {
             instance_admin: false,
         };
         let mut tx = self.pool.begin().await?;
+        crate::identity::lock_identity(&mut tx).await?;
+        crate::identity::ensure_username_available(&mut tx, &user.username).await?;
         insert_user(&mut tx, &user, &hash).await?;
         tx.commit().await?;
         Ok(user)
@@ -84,14 +89,16 @@ impl Store {
         if password.len() > 1024 {
             return Err(Error::Unauthorized);
         }
-        let username = normalize_username(username).map_err(|_| Error::Unauthorized)?;
-        let row =
-            sqlx::query("SELECT id, password_hash FROM users WHERE username = $1 AND disabled = 0")
-                .bind(username)
-                .fetch_optional(&self.pool)
-                .await?
-                .ok_or(Error::Unauthorized)?;
-        verify_password(&row, password).await
+        let username = crate::identity::normalize_login(username)?;
+        let mut rows = sqlx::query("SELECT id, password_hash FROM users WHERE disabled = 0 AND (username = $1 OR id IN (SELECT user_id FROM auth_emails WHERE email = $1)) LIMIT 2")
+            .bind(&username).fetch_all(&self.pool).await?;
+        if rows.len() != 1 {
+            return Err(Error::Unauthorized);
+        }
+        let row = rows.remove(0);
+        let mut proof = verify_password(&row, password).await?;
+        proof.login_identifier = Some(username);
+        Ok(proof)
     }
 
     async fn create_verified_session(&self, proof: PasswordProof) -> Result<TokenSession> {
@@ -103,6 +110,16 @@ impl Store {
             .bind(&proof.user_id).bind(&proof.hash).execute(&mut *tx).await?.rows_affected();
         if changed != 1 {
             return Err(Error::Unauthorized);
+        }
+        if let Some(login) = &proof.login_identifier {
+            // The password proof may have been obtained through a verified
+            // email that was subsequently changed/reassigned. The alias is
+            // checked under the same user lock as email replacement.
+            let still_bound: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM users WHERE id = $1 AND (username = $2 OR id IN (SELECT user_id FROM auth_emails WHERE email = $2))")
+                .bind(&proof.user_id).bind(login).fetch_one(&mut *tx).await?;
+            if still_bound != 1 {
+                return Err(Error::Unauthorized);
+            }
         }
         let row = sqlx::query("SELECT id, username, instance_admin FROM users WHERE id = $1")
             .bind(&proof.user_id)
@@ -129,10 +146,17 @@ impl Store {
     }
 
     pub async fn revoke(&self, token: &str) -> Result<()> {
+        let mut tx = self.pool.begin().await?;
+        // Identity mutations use this same row lock, then recheck the session.
+        // A logout completed before a delayed binding cannot be bypassed by a
+        // previously read session. Disabled accounts may still revoke tokens.
+        sqlx::query("UPDATE users SET password_hash = password_hash WHERE id = (SELECT user_id FROM sessions WHERE token_hash = $1)")
+            .bind(token_hash(token)).execute(&mut *tx).await?;
         sqlx::query("DELETE FROM sessions WHERE token_hash = $1")
             .bind(token_hash(token))
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
+        tx.commit().await?;
         Ok(())
     }
 
@@ -168,7 +192,12 @@ impl Store {
         if changed != 1 {
             return Err(Error::Unauthorized);
         }
+        crate::identity::lock_identity(&mut tx).await?;
         sqlx::query("DELETE FROM sessions WHERE user_id = $1")
+            .bind(&proof.user_id)
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("DELETE FROM auth_challenges WHERE user_id = $1")
             .bind(&proof.user_id)
             .execute(&mut *tx)
             .await?;
@@ -186,7 +215,12 @@ impl Store {
             .bind(&user.id)
             .execute(&mut *tx)
             .await?;
+        crate::identity::lock_identity(&mut tx).await?;
         sqlx::query("DELETE FROM sessions WHERE user_id = $1")
+            .bind(&user.id)
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("DELETE FROM auth_challenges WHERE user_id = $1")
             .bind(&user.id)
             .execute(&mut *tx)
             .await?;
@@ -197,10 +231,14 @@ impl Store {
     }
 }
 
-async fn verify_password(row: &sqlx::any::AnyRow, password: &str) -> Result<PasswordProof> {
+pub(crate) async fn verify_password(
+    row: &sqlx::any::AnyRow,
+    password: &str,
+) -> Result<PasswordProof> {
     let proof = PasswordProof {
         user_id: row.try_get("id")?,
         hash: row.try_get("password_hash")?,
+        login_identifier: None,
     };
     let hash = proof.hash.clone();
     let password = password.to_owned();
@@ -234,7 +272,7 @@ fn normalize_username(value: &str) -> Result<String> {
     Ok(value)
 }
 
-async fn hash_password(password: &str) -> Result<String> {
+pub(crate) async fn hash_password(password: &str) -> Result<String> {
     if !(12..=1024).contains(&password.len()) {
         return Err(Error::Invalid("password must contain 12–1024 bytes".into()));
     }
@@ -250,7 +288,7 @@ async fn hash_password(password: &str) -> Result<String> {
     .map_err(|_| Error::Invalid("password hashing worker stopped".into()))?
 }
 
-fn user_from_row(row: &sqlx::any::AnyRow) -> Result<User> {
+pub(crate) fn user_from_row(row: &sqlx::any::AnyRow) -> Result<User> {
     Ok(User {
         id: row.try_get("id")?,
         username: row.try_get("username")?,
@@ -287,13 +325,18 @@ pub(crate) async fn create_workspace_in(
     Ok(())
 }
 
-async fn create_session_in(tx: &mut Transaction<'_, Any>, user: User) -> Result<TokenSession> {
+pub(crate) async fn create_session_in(
+    tx: &mut Transaction<'_, Any>,
+    user: User,
+) -> Result<TokenSession> {
     let mut bytes = [0u8; 32];
     OsRng.fill_bytes(&mut bytes);
     let token = bytes.iter().map(|b| format!("{b:02x}")).collect::<String>();
     let expires_at = now() + 7 * 24 * 60 * 60;
     sqlx::query("INSERT INTO sessions (token_hash, user_id, expires_at, created_at) VALUES ($1, $2, $3, $4)")
         .bind(token_hash(&token)).bind(&user.id).bind(expires_at).bind(now()).execute(&mut **tx).await?;
+    sqlx::query("INSERT INTO auth_session_security (token_hash, reauthenticated_at, auth_method, credential_id) VALUES ($1, $2, 'password', '')")
+        .bind(token_hash(&token)).bind(now()).execute(&mut **tx).await?;
     Ok(TokenSession {
         token,
         user,
@@ -301,7 +344,7 @@ async fn create_session_in(tx: &mut Transaction<'_, Any>, user: User) -> Result<
     })
 }
 
-fn token_hash(token: &str) -> String {
+pub(crate) fn token_hash(token: &str) -> String {
     format!("{:x}", Sha256::digest(token.as_bytes()))
 }
 
@@ -330,6 +373,42 @@ mod tests {
             let url = Store::sqlite_file_url(&dir.path().join("auth.sqlite3")).unwrap();
             (Store::connect(&url).await.unwrap(), Some(dir))
         }
+    }
+
+    #[tokio::test]
+    async fn changed_email_rejects_an_already_verified_alias_login() {
+        let (store, _dir) = database().await;
+        let original = store.bootstrap("alice", PASSWORD, "Auth").await.unwrap();
+        let first = store
+            .begin_email_change(&original.token, "old@example.test")
+            .await
+            .unwrap();
+        store
+            .consume_email_change(&original.token, &first.token)
+            .await
+            .unwrap();
+        let pending = store
+            .verify_login_password("old@example.test", PASSWORD)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM auth_delivery_limits")
+            .execute(&store.pool)
+            .await
+            .unwrap();
+        let second = store
+            .begin_email_change(&original.token, "new@example.test")
+            .await
+            .unwrap();
+        store
+            .consume_email_change(&original.token, &second.token)
+            .await
+            .unwrap();
+        assert!(matches!(
+            store.create_verified_session(pending).await,
+            Err(Error::Unauthorized)
+        ));
+        store.login("new@example.test", PASSWORD).await.unwrap();
+        store.login("alice", PASSWORD).await.unwrap();
     }
 
     #[tokio::test]

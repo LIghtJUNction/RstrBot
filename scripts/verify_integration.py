@@ -107,6 +107,8 @@ def main():
         ("model-target-authority-postgres","tests/model_target_authority.py",True,None,[]),
         ("model-test-revocation-sqlite","tests/model_test_revocation.py",False,None,[]),
         ("model-test-revocation-postgres","tests/model_test_revocation.py",True,None,[]),
+        ("identity-sqlite","tests/identity_integration.py",False,None,[]),
+        ("identity-postgres","tests/identity_integration.py",True,None,[]),
     ]
     report["planned_cases"] = [case[0] for case in cases]
     previous = {}

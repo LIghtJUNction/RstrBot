@@ -1,6 +1,6 @@
 # RstrBot Web UI
 
-The 0.1.2 web client is a React and TypeScript application built by Vite. It uses
+The 0.2.0 web client is a React and TypeScript application built by Vite. It uses
 TanStack Query for keyed request caching, cancellation and revalidation. It is
 served from the same origin as the Rust HTTP API; model credentials are not
 persisted in browser storage. Authentication is an HttpOnly server cookie. Mutations include the
@@ -25,6 +25,11 @@ and report each assertion group with the Node test runner.
 
 ## Implemented workflows
 
+- A redesigned login and grouped workspace navigation, with independent account
+  security and instance authentication/email settings. Users can verify or replace
+  email, recover a password, explicitly link Google and add, rename, remove or
+  atomically replace multiple Passkeys. Account access does not require workspace
+  membership. See [authentication](AUTHENTICATION.md) for setup and protocol limits.
 - One-time initialization with a terminal-issued token and always-visible
   SQLite/PostgreSQL choices. Testing and applying a connection are separate
   operations; an unapplied engine change blocks setup completion. Local account
@@ -116,14 +121,11 @@ Implementation references: [UI permission rules](../web/src/permissions.ts),
 
 ## Visual design
 
-The original visual direction uses charcoal, warm paper and restrained champagne
-accents. The application uses ordinary document elements and lists. Only the
-welcome screen lazily loads a decorative folded-ribbon particle sculpture; it
-does not display fictional telemetry. The sculpture uses 850 deterministic
-points, caps device pixel ratio at 1.5, observes reduced motion/data saving,
-pauses offscreen and in a background tab, supports manual pause, and removes its
-animation callbacks and observers on unmount. Core controls do not depend on the
-canvas.
+The redesigned interface uses charcoal, warm paper and restrained champagne
+accents, a static brand mark, grouped navigation and consistent forms and status
+messages. The login no longer mounts the former decorative particle sculpture;
+that historical source file is retained but is not part of the current flow.
+Both themes, Chinese/English and the 320px mobile layout remain available.
 
 No remote font, image or script is needed at runtime. The initial JavaScript
 bundle in the historical 0.1.1 local production build measured approximately
@@ -132,7 +134,18 @@ These are bundle sizes, not an LCP, accessibility or device-performance result.
 
 ## Verification and current limits
 
-### Current 0.1.2 verification scope
+### Current 0.2.0 verification scope
+
+The current results are recorded in [v0.2.0 evidence](evidence/v0.2.0/) and the
+[implementation report](IMPROVEMENTS_0_2_0.md). The workspace harness is paired
+with a separate account-security harness using actual local SMTP and Chromium
+WebAuthn virtual authenticators. Regressions cover multiple credentials, atomic
+replacement, manual email confirmation, cross-tab identity-cache isolation,
+cancelled reauthentication responses and configuration draft conflicts. These
+receipts do not establish real Google authorization, physical hardware or cloud
+account synchronization acceptance.
+
+### Historical 0.1.2 verification scope
 
 The current frontend test suite contains **14 focused tests**: the previous ten
 history/event/draft/pagination checks plus three role/ownership checks for

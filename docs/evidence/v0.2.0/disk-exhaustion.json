@@ -1,0 +1,9 @@
+{
+  "captured_at_utc": "2026-10-28T00:50:22.270932+00:00",
+  "failure": "Temporary filesystem exhausted during PostgreSQL startup before any assertions in model-target-authority-postgres.",
+  "postgres_log_excerpt": [
+    "2026-10-27 17:49:27.967 PDT [315584] ERROR:  could not create file \"base/5/44954\": No space left on device"
+  ],
+  "remediation": "Removed reproducible Cargo target artifacts for this task. Immutable binaries were hard links outside that target and remain unchanged. Resume with the same binaries, harness fingerprints and service endpoints.",
+  "freed_build_cache_bytes_approx": 1900000000
+}

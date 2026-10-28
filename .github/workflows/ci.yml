@@ -102,6 +102,8 @@ jobs:
       - run: python3 tests/session_revocation.py --output test-results/session-revocation.json
       - run: python3 tests/model_target_authority.py --output test-results/model-target-authority.json
       - run: python3 tests/model_test_revocation.py --output test-results/model-test-revocation.json
+      - name: Account configuration, verified email and recovery via real local SMTP
+        run: python3 tests/identity_integration.py --output test-results/identity.json
       - name: SQLite streamed fragments survive concurrent writes and restart
         if: matrix.database == 'sqlite' && matrix.valkey == 'off'
         run: python3 tests/stream_persistence.py --output test-results/stream-persistence-sqlite.json
@@ -174,6 +176,57 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.99.1
+      - name: Locate the runner's Windows OpenSSL development files
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # runner-images installs the full x64 distribution in this directory.
+          # https://github.com/actions/runner-images/blob/main/images/windows/scripts/build/Install-OpenSSL.ps1
+          $rstrbotOpenSsl = Join-Path $env:ProgramFiles 'OpenSSL'
+          $rstrbotOpenSslInclude = Join-Path $rstrbotOpenSsl 'include'
+          $rstrbotOpenSslLib = Join-Path $rstrbotOpenSsl 'lib\VC\x64\MD'
+          $rstrbotOpenSslBin = Join-Path $rstrbotOpenSsl 'bin'
+          foreach ($required in @(
+            (Join-Path $rstrbotOpenSslInclude 'openssl\ssl.h'),
+            (Join-Path $rstrbotOpenSslLib 'libssl.lib'),
+            (Join-Path $rstrbotOpenSslLib 'libcrypto.lib'),
+            (Join-Path $rstrbotOpenSslBin 'openssl.exe')
+          )) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "The runner's OpenSSL development file is missing: $required"
+            }
+          }
+          "OPENSSL_INCLUDE_DIR=$rstrbotOpenSslInclude" >> $env:GITHUB_ENV
+          "OPENSSL_LIB_DIR=$rstrbotOpenSslLib" >> $env:GITHUB_ENV
+          "OPENSSL_STATIC=0" >> $env:GITHUB_ENV
+          $rstrbotOpenSslBin >> $env:GITHUB_PATH
+          # AWS-LC uses these only when NASM is unavailable on Windows x86-64.
+          # https://aws.github.io/aws-lc-rs/requirements/windows.html
+          "AWS_LC_SYS_PREBUILT_NASM=1" >> $env:GITHUB_ENV
+          & (Join-Path $rstrbotOpenSslBin 'openssl.exe') version
+      - name: Locate an installed Homebrew OpenSSL development package
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          rstrbot_openssl_prefix=""
+          for formula in openssl@3 openssl@4; do
+            candidate=$(brew --prefix "$formula" 2>/dev/null) || continue
+            if [ -f "$candidate/include/openssl/ssl.h" ] &&
+               [ -f "$candidate/lib/libssl.dylib" ] &&
+               [ -f "$candidate/lib/libcrypto.dylib" ]; then
+              rstrbot_openssl_prefix="$candidate"
+              break
+            fi
+          done
+          if [ -z "$rstrbot_openssl_prefix" ]; then
+            echo 'The runner has no supported Homebrew OpenSSL development package' >&2
+            exit 1
+          fi
+          echo "OPENSSL_INCLUDE_DIR=$rstrbot_openssl_prefix/include" >> "$GITHUB_ENV"
+          echo "OPENSSL_LIB_DIR=$rstrbot_openssl_prefix/lib" >> "$GITHUB_ENV"
+          echo "OPENSSL_STATIC=0" >> "$GITHUB_ENV"
+          echo "$rstrbot_openssl_prefix/bin" >> "$GITHUB_PATH"
+          "$rstrbot_openssl_prefix/bin/openssl" version
       - run: cargo check --workspace --all-targets --locked
       - run: cargo test -p rstrbot-store --locked
       # These jobs prove native core/storage behavior only. They do not claim

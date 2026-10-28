@@ -1,6 +1,24 @@
-# RstrBot HTTP contract 0.1
+# RstrBot HTTP contract — application 0.2.0, API v1
 
-Machine-readable OpenAPI 3.1: `GET /api/v1/openapi.json` and `docs/openapi.json`; covers all 44 API operations plus the two health operations.
+Machine-readable OpenAPI 3.1: `GET /api/v1/openapi.json` and `docs/openapi.json`; covers all 65 API operations plus the two health operations. Router coverage includes the identity, email and provider configuration modules.
+
+## Account and authentication additions
+
+`GET /auth/options` returns enabled methods without secrets. `GET /auth/security` returns only the caller's verified email, Google bindings, passkey summaries and `recent_auth_until`. Account settings do not require workspace membership. Login accepts a username or explicitly verified email plus password.
+
+`POST /auth/reauth {password}` and `/auth/passkeys/reauth/{options,finish}` refresh a five-minute window for the current session, without extending session expiry. Google sign-in is not a substitute for this confirmation. Proof failures have distinct codes and do not by themselves invalidate a still-valid browser session.
+
+Passkey routes include `/auth/passkeys/register/{options,finish}`, `/auth/passkeys/login/{options,finish}` and PATCH/DELETE `/auth/passkeys/{id}`. Finish bodies contain `{challenge_id,credential}`; only public options are returned, while verifier state stays in a one-use, expiring database row. Registration may include `replace_id`; the new verified credential and old removal commit atomically. Default ceremonies require UV and leave physical/platform choice to the browser. Origin must be HTTPS or localhost and RP ID must exactly match the hostname. A change in configuration revision or credential version invalidates stale completion.
+
+`POST /auth/google/start {mode:"login"|"link"}` returns the fixed Google authorization URL and sets a short-lived HttpOnly Lax browser-binding cookie. The ordinary login cookie remains Strict. `GET /auth/google/callback` consumes the one-use intent, checks binding and PKCE/nonce/verified ID token, then redirects to a fixed same-origin success/failure location; credentials never enter the return URL. Existing account linking uses current recent authentication and stable Google `sub`, never an email match. `POST /auth/google/unlink {id}` removes an owned binding and its issued sessions.
+
+`POST /auth/email/start {email}` sends a same-session, single-use 15-minute verification link; `/auth/email/verify {token}` confirms it. Public `/auth/password/reset/request {email}` uses a generic response, and `/auth/password/reset/finish {token,new_password}` checks the original email/password version before revoking all prior sessions. SMTP delivery does not establish an email binding by itself.
+
+`GET/PUT /admin/auth-settings` is instance-administrator only. PUT requires recent authentication and matching `revision`; secret inputs are write-only, encrypted at rest, and retained only when their destination is unchanged. `POST /admin/auth-settings/test-email {email}` sends through the saved SMTP configuration. The complete DTOs, errors and flags are in OpenAPI; operational setup and limitations are in [AUTHENTICATION.md](AUTHENTICATION.md).
+
+New backups use `rstrbot-db-v2` with database schema 2. They include durable identity bindings and encrypted settings but exclude active sessions, authentication challenges and email tokens. Import remains a local maintenance operation and accepts legacy v1 backups.
+
+## Shared API behavior
 
 Base `/api/v1`. Errors `{error:{code,message}}`. Browser uses HttpOnly SameSite=Strict cookie, other clients Bearer. Mutation requests from browser have `X-RstrBot-Request: 1` (CSRF defense). No CORS credentials allowed. Resource paths always include workspace: `/workspaces/:wid/resources/:kind` (GET/POST) and `/workspaces/:wid/resource/:id` (GET/PATCH/DELETE). PATCH `{version,data}`; DELETE `?version=N`. Responses resource directly, lists `{items}`. Optional visibility `private` (default) or `workspace` on creation; changing visibility requires a separate explicit sharing flow and is not implicit on edit.
 

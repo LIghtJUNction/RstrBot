@@ -5,7 +5,8 @@ use std::collections::BTreeMap;
 
 /// A consistent database snapshot. This deliberately does not claim to include
 /// external plugin state, media files or the separately protected encryption key.
-/// It contains password hashes and must be handled as sensitive backup material.
+/// It contains password hashes, identity bindings and encrypted configuration;
+/// it must be handled as sensitive backup material.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Backup {
     pub format: String,
@@ -18,7 +19,8 @@ pub struct Backup {
 }
 
 impl Store {
-    /// Export one database snapshot, excluding session bearer-token hashes.
+    /// Export one database snapshot, excluding session bearer-token hashes and
+    /// pending authentication/email ceremonies, which must never survive restore.
     pub async fn export_backup(&self, actor: &User) -> Result<Backup> {
         self.require_instance_admin(&actor.id).await?;
         self.export_backup_local().await
@@ -59,6 +61,10 @@ impl Store {
                 for column in table.columns {
                     let value = match column.kind {
                         Kind::Text => Value::String(row.try_get(column.name)?),
+                        Kind::NullableText => row
+                            .try_get::<Option<String>, _>(column.name)?
+                            .map(Value::String)
+                            .unwrap_or(Value::Null),
                         Kind::Int => Value::from(row.try_get::<i64, _>(column.name)?),
                         Kind::NullableInt => row
                             .try_get::<Option<i64>, _>(column.name)?
@@ -81,8 +87,8 @@ impl Store {
         tx.commit().await?;
         let sha256 = checksum(&tables)?;
         Ok(Backup {
-            format: "rstrbot-db-v1".into(),
-            schema_version: 1,
+            format: "rstrbot-db-v2".into(),
+            schema_version: 2,
             created_at: now(),
             source_backend: self.backend.into(),
             includes_external_state: false,
@@ -94,17 +100,19 @@ impl Store {
     /// Restore atomically into an uninitialized destination. Source remains
     /// untouched. The restored database starts in recovery/quarantine mode.
     pub async fn import_backup(&self, backup: &Backup) -> Result<()> {
-        if backup.format != "rstrbot-db-v1"
-            || backup.schema_version != 1
-            || checksum(&backup.tables)? != backup.sha256
-        {
+        let tables = match (backup.format.as_str(), backup.schema_version) {
+            ("rstrbot-db-v1", 1) => &TABLES[..LEGACY_TABLE_COUNT],
+            ("rstrbot-db-v2", 2) => TABLES,
+            _ => return Err(Error::Invalid("unsupported backup version".into())),
+        };
+        if checksum(&backup.tables)? != backup.sha256 {
             return Err(Error::Invalid("backup version or checksum mismatch".into()));
         }
         if serde_json::to_vec(&backup.tables)?.len() > 256 * 1024 * 1024 {
             return Err(Error::Invalid("backup exceeds 256 MiB".into()));
         }
-        if backup.tables.len() != TABLES.len()
-            || TABLES.iter().any(|t| !backup.tables.contains_key(t.name))
+        if backup.tables.len() != tables.len()
+            || tables.iter().any(|t| !backup.tables.contains_key(t.name))
         {
             return Err(Error::Invalid(
                 "backup table manifest is incomplete or unknown".into(),
@@ -125,7 +133,7 @@ impl Store {
         sqlx::query("DELETE FROM instance_state")
             .execute(&mut *tx)
             .await?;
-        for table in TABLES {
+        for table in tables {
             let rows = backup
                 .tables
                 .get(table.name)
@@ -162,6 +170,13 @@ impl Store {
                             Kind::Text => query.bind(value.as_str().ok_or_else(|| {
                                 Error::Invalid("expected backup text field".into())
                             })?),
+                            Kind::NullableText => query.bind(if value.is_null() {
+                                None
+                            } else {
+                                Some(value.as_str().ok_or_else(|| {
+                                    Error::Invalid("invalid nullable text".into())
+                                })?)
+                            }),
                             Kind::Int => query.bind(value.as_i64().ok_or_else(|| {
                                 Error::Invalid("expected backup integer field".into())
                             })?),
@@ -186,6 +201,21 @@ impl Store {
                 "backup ownership or reservation ledger is inconsistent".into(),
             ));
         }
+        if backup.schema_version == 1 {
+            sqlx::query("INSERT INTO counters (name, value) VALUES ('identity', 0) ON CONFLICT (name) DO NOTHING")
+                .execute(&mut *tx).await?;
+        }
+        crate::identity::validate_restored_identities(&mut tx).await?;
+        sqlx::query("INSERT INTO instance_state (key, value) VALUES ('schema_version', '2') ON CONFLICT (key) DO UPDATE SET value = excluded.value")
+            .execute(&mut *tx).await?;
+        // Even a still-uninitialized target can have anonymous login challenges.
+        // Discard all transient identity state when replacing its database state.
+        sqlx::query("DELETE FROM auth_challenges")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("DELETE FROM auth_delivery_limits")
+            .execute(&mut *tx)
+            .await?;
         sqlx::query("INSERT INTO instance_state (key, value) VALUES ('recovery_mode', 'true') ON CONFLICT (key) DO UPDATE SET value = excluded.value")
             .execute(&mut *tx).await?;
         // Existing reservations are not released or changed into new operations.
@@ -202,6 +232,7 @@ fn checksum(tables: &BTreeMap<String, Vec<Value>>) -> Result<String> {
 #[derive(Clone, Copy)]
 enum Kind {
     Text,
+    NullableText,
     Int,
     NullableInt,
 }
@@ -225,12 +256,21 @@ const fn int(name: &'static str) -> Column {
         kind: Kind::Int,
     }
 }
+const fn nullable_text(name: &'static str) -> Column {
+    Column {
+        name,
+        kind: Kind::NullableText,
+    }
+}
 const fn nullable_int(name: &'static str) -> Column {
     Column {
         name,
         kind: Kind::NullableInt,
     }
 }
+// Preserve the exact v1 manifest; identity tables are appended in v2. Importing
+// v1 intentionally creates no external identity or verified-email bindings.
+const LEGACY_TABLE_COUNT: usize = 10;
 const TABLES: &[Table] = &[
     Table {
         name: "users",
@@ -320,5 +360,38 @@ const TABLES: &[Table] = &[
     Table {
         name: "instance_state",
         columns: &[text("key"), text("value")],
+    },
+    Table {
+        name: "auth_emails",
+        columns: &[
+            text("user_id"),
+            text("email"),
+            int("verified_at"),
+            int("version"),
+        ],
+    },
+    Table {
+        name: "auth_google",
+        columns: &[
+            text("id"),
+            text("user_id"),
+            text("subject"),
+            nullable_text("email"),
+            int("created_at"),
+            nullable_int("last_used_at"),
+        ],
+    },
+    Table {
+        name: "auth_passkeys",
+        columns: &[
+            text("id"),
+            text("user_id"),
+            text("credential_id"),
+            text("name"),
+            text("credential"),
+            int("version"),
+            int("created_at"),
+            nullable_int("last_used_at"),
+        ],
     },
 ];

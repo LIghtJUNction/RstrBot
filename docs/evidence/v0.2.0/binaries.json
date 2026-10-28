@@ -1,0 +1,18 @@
+{
+  "rstrbot": {
+    "bytes": 60162808,
+    "sha256": "d3eaf2170e4681f096022510d4173072e18b3beecb74f33096b85cd48c84e47c"
+  },
+  "rstrbot-openai": {
+    "bytes": 13681864,
+    "sha256": "1bcc96cbe0c92ed0aa9ab9b65366ab93918664727907cc87f4e3fc5ee5cc1bae"
+  },
+  "rstrbot-diagnostic": {
+    "bytes": 3797552,
+    "sha256": "05a6750a66a18131de03b5b615fd43db9eb190604ed131435bb3fd27965c3244"
+  },
+  "rstrbot-webhook": {
+    "bytes": 14420704,
+    "sha256": "4267d1a62221c9bfc3fbcd474a942d9dea54ef8e3e72b7bc7156a8d370529db2"
+  }
+}

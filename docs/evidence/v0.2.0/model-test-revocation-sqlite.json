@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "checks": [
+    "a logged-out queued model test never reaches the provider; eight independent owner tests complete",
+    "in-flight logout revocation terminates the model test; an already sent request retains unknown cost and is not retried",
+    "in-flight password revocation terminates the model test; an already sent request retains unknown cost and is not retried",
+    "in-flight expiry revocation terminates the model test; an already sent request retains unknown cost and is not retried",
+    "in-flight demotion revocation terminates the model test; an already sent request retains unknown cost and is not retried",
+    "an independent valid administrator still receives and settles a model-test result"
+  ],
+  "database": "sqlite",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "started_at": "2026-10-28T00:50:39.893600+00:00",
+  "binary_sha256": "d3eaf2170e4681f096022510d4173072e18b3beecb74f33096b85cd48c84e47c",
+  "harness_sha256": "861ef163245fbbff40f95d0ee50155993cbf405243dfcfb66e1f17cce1279881",
+  "scope": "real local HTTP and provider workers with a barrier-controlled mock upstream; no commercial account",
+  "upstream_requests": [
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "keeper",
+    "inflight-logout",
+    "inflight-password",
+    "inflight-expiry",
+    "inflight-demotion",
+    "healthy-after-revocation"
+  ],
+  "exit_code": 0
+}

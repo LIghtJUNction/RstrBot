@@ -11,7 +11,8 @@ export type Message = { id?: string; role: string; content: string; tool_call_id
 export type Event = { id: number; resource_id?: string; kind?: string; event_type?: string; data: Json; created_at?: string | number };
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) { super(message); }
+  status: number; code: string;
+  constructor(status: number, code: string, message: string) { super(message); this.status = status; this.code = code; }
 }
 
 // A network failure may leave a readable cached view. An explicit access or
@@ -28,11 +29,13 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   if (response.status === 204) return undefined as T;
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== 'undefined') {
+    const detail = payload.error;
+    const code = detail?.code ?? payload.code ?? `HTTP_${response.status}`;
+    // Credential proof failures do not revoke an otherwise valid session.
+    if (response.status === 401 && code === 'unauthorized' && typeof window !== 'undefined') {
       window.dispatchEvent(new Event('rstrbot:session-expired'));
     }
-    const detail = payload.error;
-    throw new ApiError(response.status, detail?.code ?? payload.code ?? `HTTP_${response.status}`,
+    throw new ApiError(response.status, code,
       typeof detail === 'string' ? detail : detail?.message ?? payload.message ?? response.statusText);
   }
   return payload as T;

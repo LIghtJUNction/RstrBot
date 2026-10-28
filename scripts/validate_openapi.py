@@ -170,11 +170,14 @@ def balanced_end(source, start, opening="(", closing=")"):
     raise ValueError("Unbalanced Rust router expression")
 
 
-def actual_routes(source):
-    start = source.index("pub fn router(")
+def actual_routes(source, source_path="src/api.rs"):
+    declaration = re.search(r'pub(?:\(crate\))?\s+fn\s+router\(', source)
+    if not declaration:
+        raise ValueError(f"Router function missing in {source_path}")
+    start = declaration.start()
     brace = source.index("{", start)
     router = source[start:balanced_end(source, brace, "{", "}") + 1]
-    if '.nest("/api/v1", api)' not in router:
+    if source_path == "src/api.rs" and '.nest("/api/v1", api)' not in router:
         raise ValueError("Router API prefix changed; update the contract/validator deliberately")
     output = {}
     for match in re.finditer(r'\.route\(\s*"([^"]+)"\s*,', router):
@@ -182,14 +185,22 @@ def actual_routes(source):
         end = balanced_end(router, router.index("(", match.start()))
         expression = router[match.end():end]
         full = path if path.startswith("/health/") else "/api/v1" + path
-        declarations = re.findall(r'\b(get|post|patch|delete|put|head|options|trace)\(\s*(\w+)\s*\)', expression)
+        declarations = re.findall(r'\b(get|post|patch|delete|put|head|options|trace)\(\s*([\w:]+)\s*\)', expression)
         if not declarations:
             raise ValueError(f"Cannot parse registered handler: {path}")
         for method, handler in declarations:
             key = (full, method)
             if key in output:
                 raise ValueError(f"Duplicate registered route: {key}")
-            output[key] = handler
+            parts = handler.split("::")
+            handler_path = source_path if len(parts) == 1 else (Path(source_path).with_suffix("") / Path(*parts[:-1])).as_posix() + ".rs"
+            output[key] = handler_path + "::" + parts[-1]
+    for module in re.findall(r'\.merge\(crate::([\w:]+)::router\(\)\)', router):
+        module_path = "src/" + module.replace("::", "/") + ".rs"
+        child_routes = actual_routes((ROOT / module_path).read_text(), module_path)
+        if set(output) & set(child_routes):
+            raise ValueError(f"Merged router duplicates paths: {module_path}")
+        output.update(child_routes)
     return output
 
 
@@ -202,11 +213,17 @@ def dto_checks(document):
             "UpdateResource": ["UpdateResource"], "BranchInput": ["BranchInput"], "BudgetInput": ["BudgetInput"]},
         "src/engine.rs": {"ChatRequest": ["ChatRequest"]},
         "src/delivery.rs": {"SendRequest": ["SendRequest"]},
+        "src/email_auth.rs": {"EmailInput": ["EmailInput"], "VerifyInput": ["EmailVerifyInput"], "ResetInput": ["EmailResetInput"]},
+        "src/identity_config.rs": {"GoogleInput": ["GoogleSettingsInput"], "SmtpInput": ["SmtpSettingsInput"], "SettingsInput": ["AuthSettingsInput"]},
+        "src/identity.rs": {"PasswordReauth": ["PasswordReauth"], "RegistrationInput": ["PasskeyRegistrationInput"],
+            "RegistrationFinish": ["PasskeyFinishInput"], "AuthenticationFinish": ["PasskeyFinishInput"],
+            "LoginInput": ["PasskeyLoginInput"], "RenameInput": ["PasskeyRenameInput"]},
+        "src/identity/google.rs": {"StartInput": ["GoogleStartInput"], "UnlinkInput": ["GoogleUnlinkInput"]},
     }
     for source_path, names in groups.items():
         source = (ROOT / source_path).read_text()
         for rust_name, schema_names in names.items():
-            pattern = r'(?:pub\s+)?struct\s+' + re.escape(rust_name) + r'\s*\{(.*?)\n\}'
+            pattern = r'(?:pub(?:\(\w+\))?\s+)?struct\s+' + re.escape(rust_name) + r'\s*\{(.*?)\n\}'
             match = re.search(pattern, source, re.S)
             if not match:
                 raise ValueError(f"Request struct disappeared: {rust_name}")
@@ -260,8 +277,8 @@ def validate(document, source):
             if method not in METHODS:
                 continue
             key = (path, method)
-            handler = operation["x-handler"].removeprefix("src/api.rs::")
-            registered[key] = handler
+            handler_source_path, handler = operation["x-handler"].rsplit("::", 1)
+            registered[key] = operation["x-handler"]
             identifier = operation["operationId"]
             if identifier in operation_ids:
                 raise ValueError("Duplicate operationId: " + identifier)
@@ -280,7 +297,7 @@ def validate(document, source):
                 assert ("header", "X-RstrBot-Request") in param_keys
                 assert "x-csrf" in operation
             responses = operation["responses"]
-            assert any(re.match(r"2\d\d$", status) for status in responses)
+            assert any(re.match(r"[23]\d\d$", status) for status in responses)
             if "204" in responses:
                 assert "content" not in resolve(document, responses["204"])
             for status, response in responses.items():
@@ -298,10 +315,11 @@ def validate(document, source):
                         validate_value(document, example, payload["schema"], f"{method.upper()} {path}/{location}/example/{index}")
                         examples += 1
             # Function return type independently checks the real 204 convention.
-            match = re.search(r'async fn\s+' + re.escape(handler) + r'\s*\(', source)
+            handler_source = (ROOT / handler_source_path).read_text()
+            match = re.search(r'async fn\s+' + re.escape(handler) + r'\s*\(', handler_source)
             assert match, (key, "handler missing")
-            end = balanced_end(source, source.index("(", match.start()))
-            signature = source[end + 1:source.index("{", end + 1)]
+            end = balanced_end(handler_source, handler_source.index("(", match.start()))
+            signature = handler_source[end + 1:handler_source.index("{", end + 1)]
             if "ApiResult<StatusCode>" in signature:
                 assert "204" in responses, (key, "actual no-content handler")
     if registered != expected:
@@ -332,6 +350,8 @@ def main():
               "scope": "Static OpenAPI/router/DTO/reference/example checks; not native execution or a full external OpenAPI meta-schema validator.",
               "spec_sha256": hashlib.sha256(options.spec.read_bytes()).hexdigest(),
               "router_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest()}
+    report["router_module_sha256"] = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+        for name in ["src/api.rs", "src/identity.rs", "src/identity/google.rs", "src/identity_config.rs", "src/email_auth.rs"]}
     try:
         report.update(validate(read_json(options.spec), source_path.read_text()))
         report["status"] = "passed"

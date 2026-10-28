@@ -34,3 +34,55 @@ The diagnostic worker is a process fixture, not an AI model. This is a bounded
 Chromium acceptance check, not complete browser, screen-reader, native-desktop,
 visual-design or production-provider certification. Resource list search is over
 loaded pages; the harness exercises the visible pagination controls.
+
+## Identity and account security
+
+Run the additional authentication harness against the same built binaries and
+WebUI:
+
+```sh
+node verify_security.mjs --binary ../../target/debug/rstrbot
+```
+
+It accepts the same `--binary`, `--chromium` and `--evidence-dir` arguments.
+Reports use `security-browser.json` and `security-browser-server.log`; screenshots
+are under `artifacts/screenshots/security/`. Python 3 is used solely to advance a
+recent-authentication timestamp inside the disposable SQLite fixture.
+
+The server listens on loopback and the browser uses `http://localhost:<port>`
+with RP ID `localhost`. Chromium's CDP WebAuthn domain creates two kinds of
+virtual CTAP2 authenticators: a USB security key and an internal authenticator
+reporting backup eligibility and backup state. Both generate actual public-key
+credentials and signatures, and the application verifies them with its normal
+WebAuthn implementation and required user verification.
+
+The checks cover:
+
+- Administrator origin, Google and SMTP configuration, write-only secrets and
+  delivery to an in-process loopback SMTP receiver.
+- Multiple passkeys, accurate authenticator-reported backup labels, rename,
+  cancellation before replacement submission, atomic replacement, removal of
+  one key while another remains usable, and sign-in with the retained key.
+- Rejection of a consumed registration challenge, a removed credential signing
+  a fresh challenge, a proof missing user verification, and tampered signed
+  origin data. Failed secondary proofs preserve the main authenticated session.
+- Explicit same-session email verification, delivered recovery links, password
+  confirmation and sign-in with the verified email after recovery.
+- An account page that remains accessible without workspace membership,
+  responsive navigation and both supported languages/themes.
+- Shared-cookie identity changes across two tabs: the old view is blocked and
+  private cached history/drafts never appear under the incoming account.
+- A delayed password reauthentication response after its dialog is closed:
+  it cannot run a different action queued by a new dialog.
+- Background configuration changes while a local draft contains typed secrets:
+  inputs and their original revision remain intact, a stale save conflicts, and
+  an explicit discard/reload updates the form. Fields are locked while saving.
+
+The harness respects the production authentication rate limit and may pause
+between batches. It does not lower or disable that limit. Every request stays on
+the temporary local instance; SMTP recipients and Google credentials are
+synthetic. A virtual authenticator's backup flags exercise the protocol and UI
+labels, not real cloud synchronization or a particular password-manager vendor.
+Real Google account login, real hardware, platform-native prompts and delivery
+through an external SMTP provider still require a deployment configured with
+those services.

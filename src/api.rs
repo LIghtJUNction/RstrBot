@@ -42,11 +42,14 @@ const RESOURCE_KINDS: &[&str] = &[
     "deliveries",
 ];
 const BODY_LIMIT: usize = 1024 * 1024;
-type ApiResult<T> = Result<T, AppError>;
+pub(crate) type ApiResult<T> = Result<T, AppError>;
 
 /// Build the authenticated API and the bundled, same-origin web application.
 pub fn router(state: AppState, web_dir: PathBuf) -> Router {
     let api = Router::new()
+        .merge(crate::identity::router())
+        .merge(crate::identity_config::router())
+        .merge(crate::email_auth::router())
         .route("/setup", get(setup_status).post(setup))
         .route("/setup/test-database", post(test_database))
         .route("/setup/database", post(select_database))
@@ -122,7 +125,7 @@ pub fn router(state: AppState, web_dir: PathBuf) -> Router {
 }
 
 /// Convert JSON extraction errors into the same stable envelope as domain errors.
-struct Payload<T>(T);
+pub(crate) struct Payload<T>(pub(crate) T);
 impl<T: DeserializeOwned + Send> FromRequest<AppState> for Payload<T> {
     type Rejection = AppError;
     async fn from_request(request: Request, state: &AppState) -> Result<Self, Self::Rejection> {
@@ -221,7 +224,7 @@ async fn request_boundary(request: Request, next: Next) -> Response {
     response
 }
 
-fn token(headers: &HeaderMap) -> ApiResult<String> {
+pub(crate) fn token(headers: &HeaderMap) -> ApiResult<String> {
     if let Some(value) = headers.get(header::AUTHORIZATION) {
         return value
             .to_str()
@@ -241,16 +244,16 @@ fn token(headers: &HeaderMap) -> ApiResult<String> {
         .ok_or_else(|| rstrbot_store::Error::Unauthorized.into())
 }
 
-async fn actor(state: &AppState, headers: &HeaderMap) -> ApiResult<User> {
+pub(crate) async fn actor(state: &AppState, headers: &HeaderMap) -> ApiResult<User> {
     Ok(state.store().await.authenticate(&token(headers)?).await?)
 }
 
-async fn session_response(
+pub(crate) async fn session_response(
     state: &AppState,
     headers: &HeaderMap,
     session: TokenSession,
 ) -> ApiResult<Response> {
-    let secure = if state.config.read().await.secure_cookie {
+    let secure = if crate::identity_config::cookie_is_secure(state).await? {
         "; Secure"
     } else {
         ""
@@ -273,7 +276,7 @@ async fn session_response(
     Ok(response)
 }
 
-struct LoginGate {
+pub(crate) struct LoginGate {
     attempts: Mutex<HashMap<String, VecDeque<Instant>>>,
     concurrent: Arc<Semaphore>,
 }
@@ -284,9 +287,9 @@ impl LoginGate {
             concurrent: Arc::new(Semaphore::new(4)),
         }
     }
-    fn enter(&self, username: &str) -> ApiResult<OwnedSemaphorePermit> {
-        if username.len() > 64 {
-            return Err(AppError::bad_request("Username is too long"));
+    pub(crate) fn enter(&self, username: &str) -> ApiResult<OwnedSemaphorePermit> {
+        if username.len() > 254 {
+            return Err(AppError::bad_request("Sign-in identifier is too long"));
         }
         let now = Instant::now();
         let mut attempts = self
@@ -332,7 +335,7 @@ async fn login(
     headers: HeaderMap,
     Payload(body): Payload<LoginInput>,
 ) -> ApiResult<Response> {
-    if body.username.len() > 64 || body.password.len() > 1024 {
+    if body.username.len() > 254 || body.password.len() > 1024 {
         return Err(rstrbot_store::Error::Unauthorized.into());
     }
     let _permit = gate.enter(&body.username)?;
@@ -348,7 +351,7 @@ async fn me(State(state): State<AppState>, headers: HeaderMap) -> ApiResult<Json
 }
 async fn logout(State(state): State<AppState>, headers: HeaderMap) -> ApiResult<Response> {
     state.store().await.revoke(&token(&headers)?).await?;
-    let secure = if state.config.read().await.secure_cookie {
+    let secure = if crate::identity_config::cookie_is_secure(&state).await? {
         "; Secure"
     } else {
         ""

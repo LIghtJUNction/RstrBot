@@ -40,7 +40,7 @@ def main():
         if not path.is_file():
             parser.error(f"Required release document is missing: {name}")
         files.append((path, name))
-    for name in ("API_CONTRACT.md", "PLUGIN_PROTOCOL.md", "UI.md", "DESKTOP.md", "openapi.json"):
+    for name in ("API_CONTRACT.md", "PLUGIN_PROTOCOL.md", "UI.md", "DESKTOP.md", "AUTHENTICATION.md", "IMPROVEMENTS_0_2_0.md", "openapi.json"):
         path = ROOT / "docs" / name
         if path.is_file():
             files.append((path, "docs/" + name))

@@ -7,6 +7,7 @@
 mod auth;
 mod backup;
 mod budget;
+mod identity;
 mod probe;
 mod resources;
 mod workspaces;
@@ -18,6 +19,9 @@ use std::time::Duration;
 use thiserror::Error;
 
 pub use backup::Backup;
+pub use identity::{
+    AuthAccount, AuthChallenge, GoogleIdentity, IdentitySetting, PasskeyCredential, VerifiedEmail,
+};
 pub use probe::Probe;
 pub use resources::{ResourceCursor, ResourcePage};
 
@@ -29,6 +33,10 @@ pub enum Error {
     Unauthorized,
     #[error("operation is not permitted")]
     Forbidden,
+    #[error("verify a sign-in method again before changing account security")]
+    RecentAuthRequired,
+    #[error("too many authentication requests; try again later")]
+    RateLimited,
     #[error("resource not found")]
     NotFound,
     #[error("the record changed; reload before retrying")]
@@ -295,7 +303,9 @@ impl Store {
         )
         .execute(&mut *tx)
         .await?;
-        sqlx::query("INSERT INTO instance_state (key, value) VALUES ('schema_version', '1') ON CONFLICT (key) DO NOTHING")
+        sqlx::query("INSERT INTO counters (name, value) VALUES ('identity', 0) ON CONFLICT (name) DO NOTHING")
+            .execute(&mut *tx).await?;
+        sqlx::query("INSERT INTO instance_state (key, value) VALUES ('schema_version', '2') ON CONFLICT (key) DO UPDATE SET value = excluded.value")
             .execute(&mut *tx).await?;
         tx.commit().await?;
         Ok(())
@@ -398,4 +408,14 @@ const SCHEMA: &[&str] = &[
     "CREATE TABLE IF NOT EXISTS budgets (workspace_id TEXT PRIMARY KEY REFERENCES workspaces(id), limit_microusd BIGINT NOT NULL DEFAULT -1, spent_microusd BIGINT NOT NULL DEFAULT 0 CHECK (spent_microusd >= 0), reserved_microusd BIGINT NOT NULL DEFAULT 0 CHECK (reserved_microusd >= 0))",
     "CREATE TABLE IF NOT EXISTS reservations (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspaces(id), user_id TEXT NOT NULL REFERENCES users(id), operation_id TEXT NOT NULL, amount_microusd BIGINT NOT NULL CHECK (amount_microusd >= 0), actual_microusd BIGINT, state TEXT NOT NULL, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL, UNIQUE(workspace_id, operation_id))",
     "CREATE TABLE IF NOT EXISTS operations (workspace_id TEXT NOT NULL REFERENCES workspaces(id), user_id TEXT NOT NULL REFERENCES users(id), operation_key TEXT NOT NULL, fingerprint TEXT NOT NULL, state TEXT NOT NULL, result TEXT NOT NULL, created_at BIGINT NOT NULL, PRIMARY KEY(workspace_id, user_id, operation_key))",
+    "CREATE TABLE IF NOT EXISTS auth_emails (user_id TEXT PRIMARY KEY REFERENCES users(id), email TEXT UNIQUE NOT NULL, verified_at BIGINT NOT NULL, version BIGINT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS auth_google (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), subject TEXT UNIQUE NOT NULL, email TEXT, created_at BIGINT NOT NULL, last_used_at BIGINT)",
+    "CREATE INDEX IF NOT EXISTS auth_google_user ON auth_google(user_id)",
+    "CREATE TABLE IF NOT EXISTS auth_passkeys (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), credential_id TEXT UNIQUE NOT NULL, name TEXT NOT NULL, credential TEXT NOT NULL, version BIGINT NOT NULL, created_at BIGINT NOT NULL, last_used_at BIGINT)",
+    "CREATE INDEX IF NOT EXISTS auth_passkeys_user ON auth_passkeys(user_id)",
+    "CREATE TABLE IF NOT EXISTS auth_session_security (token_hash TEXT PRIMARY KEY REFERENCES sessions(token_hash) ON DELETE CASCADE, reauthenticated_at BIGINT NOT NULL, auth_method TEXT NOT NULL, credential_id TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS auth_challenges (token_hash TEXT PRIMARY KEY, purpose TEXT NOT NULL, user_id TEXT NOT NULL, session_hash TEXT NOT NULL, payload TEXT NOT NULL, expires_at BIGINT NOT NULL, created_at BIGINT NOT NULL)",
+    "CREATE INDEX IF NOT EXISTS auth_challenges_expiry ON auth_challenges(expires_at)",
+    "CREATE INDEX IF NOT EXISTS auth_challenges_user ON auth_challenges(user_id, purpose)",
+    "CREATE TABLE IF NOT EXISTS auth_delivery_limits (scope TEXT PRIMARY KEY, last_issued_at BIGINT NOT NULL, hour_started_at BIGINT NOT NULL, hour_count BIGINT NOT NULL, day_started_at BIGINT NOT NULL, day_count BIGINT NOT NULL)",
 ];

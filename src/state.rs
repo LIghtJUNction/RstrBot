@@ -82,6 +82,16 @@ impl From<rstrbot_store::Error> for AppError {
                 "Please sign in again",
             ),
             Error::Forbidden => Self::forbidden(),
+            Error::RecentAuthRequired => Self::new(
+                StatusCode::FORBIDDEN,
+                "reauth_required",
+                "Confirm your identity before changing account security settings",
+            ),
+            Error::RateLimited => Self::new(
+                StatusCode::TOO_MANY_REQUESTS,
+                "rate_limited",
+                "Wait at least one minute before requesting another email; the hourly or daily limit may also apply",
+            ),
             Error::NotFound => Self::new(StatusCode::NOT_FOUND, "not_found", "Resource not found"),
             Error::Conflict => Self::conflict(
                 "The record changed or this operation is already in progress; reload before retrying",

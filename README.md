@@ -2,23 +2,25 @@
 
 面向个人与小团队的私有 AI 工作区：在自己的服务器上管理对话、模型、工具、知识、记忆和计划任务。Rust 核心提供统一业务 API；React / TypeScript WebUI 与模型、工具、平台插件通过明确协议协作。
 
-**当前版本 0.1.3 是开发预览。第二阶段蓝图包含的完整产品范围尚未全部实现或通过验收。** 本仓库保留原始设计、52 项需求以及 215 个需求族 / 287 条原验收映射；已实现范围与缺口见 [验收追踪](docs/ACCEPTANCE.md)。本版修复认证撤销竞态、模型与工具派发时的授权检查，以及跨页面迟到响应与拒绝后缓存恢复问题。改动、对照复现和实际验证见 [0.1.3 改进报告](docs/IMPROVEMENTS_0_1_3.md) 与 [版本变更](CHANGELOG.md)；旧回执仍只代表各自记录的版本。
+**当前版本 0.2.0 是开发预览。第二阶段蓝图包含的完整产品范围尚未全部实现或通过验收。** 本仓库保留原始设计、52 项需求以及 215 个需求族 / 287 条原验收映射；已实现范围与缺口见 [验收追踪](docs/ACCEPTANCE.md)。本版重做 WebUI，并加入邮箱、Google 登录和多 Passkey 管理。配置步骤见 [账户与登录指南](docs/AUTHENTICATION.md)，改动与验证见 [0.2.0 报告](docs/IMPROVEMENTS_0_2_0.md)；旧回执只代表各自记录的版本。
 
-## 0.1.3 改进
+## 0.2.0 界面与账号体系
 
-- **改密码不会被较早请求反悔。** 登录签发与改密提交都原子复核实际验证过的密码版本；改密、恢复密码或禁用账户后，已通过旧密码校验但尚未提交的请求不能再签发会话或覆盖新密码。昂贵的密码计算仍在事务外执行。
-- **排队的模型和工具调用继续受当前权限约束。** 获得 worker 槽位后、握手完成并发送业务 RPC 前都重查授权。模型页面的真实连接测试也绑定原登录凭据；注销、改密、过期或管理员降权会阻止后续派发并取消相应在途测试。已发生的调用保留已知费用或未知状态，不自动重发。
-- **离开聊天页后，迟到响应不再影响新视图。** 页面或工作区切换使旧异步操作失效；只创建了空会话且尚未发送消息时，不会在离开后继续触发模型请求。已经提交的聊天仍可在原会话完成，其回执不能清掉新视图的草稿。
-- **被拒绝的缓存内容不会因网络错误重新出现。** 明确的未认证、无权限或不存在响应会撤下旧资源；后续网络错误不能恢复这些旧内容，必须再次成功取得授权数据。普通断网不自动删除草稿。
+- **统一工作台。** 深炭色、暖白与低饱和金色；工作、知识、连接、工作区与账号分组导航。重做登录、聊天与表单视觉层次，保留浅色主题、中英文和移动端。
+- **独立账户与安全页。** 不依赖工作区成员身份，可以管理邮箱、密码、Google 绑定和多枚 Passkey；实例认证配置与普通用户设置分开。
+- **邮箱验证与恢复。** 管理员配置 SMTP，用户验证或更换邮箱；验证后可用邮箱和密码登录。旧邮箱在新地址确认前保持有效，单次重置链接不能覆盖后来的密码变更。
+- **Google 登录。** 管理员配置 OAuth Web 客户端，用户在已有账户中显式绑定后使用 Google 登录。不依据相同邮箱自动关联账户；安全设置使用密码或 Passkey 再次确认。
+- **多 Passkey 与换绑。** 支持具备用户验证能力的实体 FIDO2 密钥和浏览器/系统提供的同步凭据。可添加、重命名、删除和原子换绑；新凭据验证成功前保留旧凭据。
+- **保留原有撤权与缓存保护。** 模型、工具与投递仍使用实时授权检查；新认证方式产生相同类型的可撤销会话，不绕过工作区与私有资源权限。
 
-新增旧密码竞态和真实模型测试撤权回归，并扩展真实浏览器流程；双数据库与可选缓存继续使用共同集成矩阵。测试数量及通过状态以 [0.1.3 回执](docs/evidence/v0.1.3/) 为准，不代表完整设计包已经完成。
+验证使用本地 SMTP、真实 HTTP、SQLite/PostgreSQL、浏览器虚拟认证器和实际签名的 OIDC 测试令牌。真实 Google 项目、真实邮件投递和实体硬件/手机云同步需要部署环境实机验收。准确数量与执行边界见 [0.2.0 回执](docs/evidence/v0.2.0/)，不代表整个设计包已经完成。
 
 ## 交付内容
 
 | 内容 | 用途与当前边界 |
 | --- | --- |
 | Rust 服务与三个独立 worker | Linux 上可运行的核心、OpenAI 兼容模型插件、diagnostic 测试插件和 Webhook 出站插件 |
-| WebUI | 初始化、登录、多工作区、聊天及模型/插件/知识/记忆/计划任务/成员/预算/备份页面 |
+| WebUI | 初始化、多方式登录、账户安全、认证与邮件配置、多工作区、聊天及模型/插件/知识/记忆/计划任务/成员/预算/备份页面 |
 | SQLite / PostgreSQL 存储 | 使用共同的权限、资源、事件、预算与恢复逻辑；Valkey 为可选缓存 |
 | 四种语言 SDK | Rust、Python、TypeScript、C# 源码，沿用相同协议向量，0.1.1 有四语言 Linux 通过记录；历史构建的执行结果以对应回执为准；新版本 CI 重新执行共同协议向量 |
 | Tauri 2 桌面工程 | 本机 sidecar 与远程 HTTPS 工作区源码；本次没有已验证的桌面安装器，Windows 本机插件路径尚未支持 |
@@ -41,7 +43,7 @@ chmod u+x rstrbot rstrbot-openai rstrbot-diagnostic rstrbot-webhook
 ./rstrbot --data-dir "$HOME/.local/share/rstrbot"
 ```
 
-打开 <http://127.0.0.1:8787>。首次启动需要本机初始化凭据；在另一个终端读取：
+打开 <http://localhost:8787>（本机 Passkey 使用 `localhost`，不要用 IP 作为 RP）。首次启动需要本机初始化凭据；在另一个终端读取：
 
 ```sh
 cat "$HOME/.local/share/rstrbot/bootstrap.token"
@@ -76,7 +78,7 @@ cat "$HOME/.local/share/rstrbot/bootstrap.token"
 
 仓库提供 `rust-toolchain.toml`、`mise.toml`、`Cargo.lock`、WebUI 和 TypeScript SDK 的 npm 锁文件。Rust 工具链固定为 1.99.1，Node.js 固定为 24.22.1；开发配置中的 Python 版本与各次测试实际使用版本分别记录，不把工具配置文件当作执行证明。
 
-已经安装相应 Rust 工具链、Node.js 24 与本机 C 编译/链接工具时：
+已经安装相应 Rust 工具链、Node.js 24、本机 C 编译/链接工具以及 OpenSSL 库和头文件时：
 
 ```sh
 npm --prefix web ci
@@ -84,6 +86,8 @@ npm --prefix web run build
 cargo build --workspace --bins --locked
 ./target/debug/rstrbot --web-dir web/dist
 ```
+
+0.2.0 的 WebAuthn 使用 OpenSSL，JWT 校验使用 AWS-LC。源码构建依赖说明见 [rust-openssl](https://docs.rs/openssl/latest/openssl/) 与 [AWS-LC 平台要求](https://aws.github.io/aws-lc-rs/requirements/index.html)。例如 Debian/Ubuntu 需要 `pkg-config` 与 `libssl-dev`；Linux 动态链接的运行包也需要与构建匹配的 OpenSSL 运行库，准确依赖以二进制的 `ldd` 输出为准。
 
 构建优化版本与可执行归档：
 
@@ -134,13 +138,14 @@ python3 tests/schedule_authority.py --output test-results/schedule-authority.jso
 python3 tests/session_revocation.py --output test-results/session-revocation.json
 python3 tests/model_target_authority.py --output test-results/model-target-authority.json
 python3 tests/model_test_revocation.py --output test-results/model-test-revocation.json
+python3 tests/identity_integration.py --output test-results/identity.json
 ```
 
 运行测试前先构建程序和 WebUI。PostgreSQL 行为测试使用一次性的测试 schema；参数与环境变量见测试脚本和 CI 配置，勿指向生产数据库。四 SDK 缺少运行时会被记录为 `not_executed`，使用 `--require-all` 才会把缺失项作为失败。核心测试不会自动验证独立的 Tauri 工程。
 
-当前回执保存到 [docs/evidence/v0.1.3](docs/evidence/v0.1.3/)，记录环境、二进制摘要和检查结果；[docs/evidence](docs/evidence/) 中其余记录保留为历史。旧回执只适用于它记录的二进制；CI 工作流存在不代表 GitHub Actions 已运行成功。本地 HTTP 测试使用 diagnostic 和模拟上游，不能替代真实收费供应商或聊天平台账号测试。
+当前回执保存到 [docs/evidence/v0.2.0](docs/evidence/v0.2.0/)，记录环境、二进制摘要和检查结果；[docs/evidence](docs/evidence/) 中其余记录保留为历史。旧回执只适用于它记录的二进制；CI 工作流存在不代表 GitHub Actions 已运行成功。本地 HTTP 测试使用 diagnostic 和模拟上游，不能替代真实收费供应商或聊天平台账号测试。
 
-浏览器验收入口见 [tests/browser](tests/browser/README.md)，包含真实服务下的初始化、聊天、工具轨迹、分页、身份切换与桌面/320px 页面，以及新加入的数据库选择、共享会话只读和管理员降权回归。新增迟到响应、工作区切换与拒绝后缓存恢复回归，实际结果以 0.1.3 最终浏览器回执为准。当前没有桌面安装/升级/签名回执，没有 Windows 插件 named pipe / 进程树验收，也没有读屏和全部浏览器兼容性验收。已执行与未执行的区别、全部功能缺口见 [52 项验收追踪](docs/ACCEPTANCE.md)。
+浏览器验收入口见 [tests/browser](tests/browser/README.md)，包含原有真实聊天、工具、分页、撤权、迟到响应和缓存保护回归；另有账户安全与 WebAuthn 虚拟认证器验证，覆盖邮箱、多个凭据及换绑。准确数量见 0.2.0 的两份浏览器回执。当前没有桌面安装/升级/签名回执，没有 Windows 插件 named pipe / 进程树验收，也没有读屏和全部浏览器兼容性验收。已执行与未执行的区别、全部功能缺口见 [52 项验收追踪](docs/ACCEPTANCE.md)。
 
 ## 项目导航
 

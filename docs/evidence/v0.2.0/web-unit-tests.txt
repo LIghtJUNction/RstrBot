@@ -1,0 +1,35 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @rstrbot/web@0.2.0 test
+> node --test --test-isolation=none tests/*.test.mjs
+
+✔ credential proof failures preserve a session while unauthorized expires it (27.538263ms)
+✔ resource access barriers still recognize forbidden and missing responses (0.237247ms)
+✔ malformed records cannot prevent valid history from rendering (0.307022ms)
+✔ duplicate stable message IDs are rendered only once (0.137918ms)
+✔ raw model text remains text, including HTML payloads (0.149044ms)
+✔ a delayed or invalid cursor never rolls event replay backwards (0.124578ms)
+✔ reconnect overlap and terminal receipts do not repeat or retain generated text (0.789166ms)
+✔ historical replay releases terminal streams and bounds missing-terminal buffers (21.841936ms)
+✔ unordered duplicate delivery is consumed in ID order and cannot revive terminal text (0.296205ms)
+✔ a delayed send acknowledgement preserves text entered while the request was pending (0.380942ms)
+✔ pagination reaches resources beyond the old 200-item window despite page overlap (0.357016ms)
+✔ an overlapping resource page keeps the newest resource revision (0.182735ms)
+✔ base64url preserves leading zeros and non-ASCII bytes without padding (0.463206ms)
+✔ malformed byte strings are rejected before calling the authenticator (0.188383ms)
+✔ registration decodes all credential identifiers and preserves server verification policy (0.262194ms)
+✔ authentication preserves RP and verification while converting allowed credential IDs (0.220631ms)
+✔ registration and login JSON contain the actual signed binary fields (0.257127ms)
+✔ passkey names honor the shared UTF-8 limit for multilingual names (0.428474ms)
+✔ instance administration does not imply workspace write permission (0.121743ms)
+✔ shared resources are writable by their member owner or an operator (0.166961ms)
+✔ private ownership and unknown roles fail closed (0.074822ms)
+✔ workspace administrators can moderate approved routes without approving new destinations (0.092259ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 112.203376

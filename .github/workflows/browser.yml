@@ -41,6 +41,8 @@ jobs:
         run: npx --no-install playwright install --with-deps --only-shell chromium
       - name: Exercise a disposable local instance
         run: node tests/browser/verify_ui.mjs --binary target/debug/rstrbot --evidence-dir test-results/browser
+      - name: Exercise real WebAuthn ceremonies and account security controls
+        run: node tests/browser/verify_security.mjs --binary target/debug/rstrbot --evidence-dir test-results/security
       - name: Verify the extracted Linux preview outside the source checkout
         shell: bash
         run: |
@@ -54,6 +56,7 @@ jobs:
           name: chromium-browser-acceptance
           path: |
             test-results/browser/
+            test-results/security/
             test-results/package-verification.json
             artifacts/screenshots/
       - uses: actions/upload-artifact@v4

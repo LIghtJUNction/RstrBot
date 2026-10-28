@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useId, useRef } from 'react';
+import { cloneElement, isValidElement, createContext, useContext, useEffect, useId, useRef } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { AlertCircle, ArrowRight, LoaderCircle, X } from 'lucide-react';
 import { friendlyError } from './api';
@@ -41,18 +41,22 @@ export function LoadMore({ query, label }: { query: { hasNextPage: boolean; isFe
   return <div className="load-more"><Button type="button" busy={query.isFetchingNextPage} onClick={() => void query.fetchNextPage()}>{label ?? t('加载更多', 'Load more')}</Button></div>;
 }
 
-export function Modal({ title, children, close, wide = false }: { title: string; children: ReactNode; close: () => void; wide?: boolean }) {
+export function Modal({ title, children, close, wide = false, closeDisabled = false }: { title: string; children: ReactNode; close: () => void; wide?: boolean; closeDisabled?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const { t } = useText();
   useEffect(() => { const node = ref.current; node?.showModal(); return () => node?.close(); }, []);
-  return <dialog ref={ref} className={`dialog ${wide ? 'wide' : ''}`} onCancel={e => { e.preventDefault(); close(); }} onClick={e => { if (e.target === ref.current) close(); }} aria-labelledby={titleId}>
-    <div className="dialog-inner"><header><h2 id={titleId}>{title}</h2><Button variant="ghost icon" onClick={close} aria-label={t('关闭', 'Close')}><X size={20} /></Button></header>{children}</div>
+  return <dialog ref={ref} className={`dialog ${wide ? 'wide' : ''}`} onCancel={e => { e.preventDefault(); if (!closeDisabled) close(); }} onClick={e => { if (e.target === ref.current && !closeDisabled) close(); }} aria-labelledby={titleId}>
+    <div className="dialog-inner"><header><h2 id={titleId}>{title}</h2><Button variant="ghost icon" disabled={closeDisabled} onClick={close} aria-label={t('关闭', 'Close')}><X size={20} /></Button></header>{children}</div>
   </dialog>;
 }
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return <label className="field"><span>{label}</span>{children}{hint && <small>{hint}</small>}</label>;
+  const generated = useId();
+  const control = isValidElement<{ id?: string; 'aria-describedby'?: string }>(children) ? children : null;
+  const id = control?.props.id ?? generated;
+  const description = [control?.props['aria-describedby'], hint ? `${generated}-hint` : null].filter(Boolean).join(' ') || undefined;
+  return <div className="field"><label htmlFor={id}>{label}</label>{control ? cloneElement(control, { id, 'aria-describedby': description }) : children}{hint && <small id={`${generated}-hint`}>{hint}</small>}</div>;
 }
 
 export function PageHeader({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {

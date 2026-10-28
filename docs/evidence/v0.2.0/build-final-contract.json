@@ -1,0 +1,33 @@
+{
+  "captured_at_utc": "2026-10-28T00:46:49.773228+00:00",
+  "status": "passed",
+  "reason": "Rebuild the embedded OpenAPI after removing an inaccurate declared 401 response from the public password-reset finish operation. Rust source and dependencies remain identical to the passed workspace/store tests.",
+  "spec_sha256": "3e8da482e31640ae4c1fc3b3bd07e57a7114f55b7b2030fe29cdc2e10c63e1b7",
+  "command": [
+    "cargo",
+    "build",
+    "--workspace",
+    "--bins",
+    "--locked"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 9.607,
+  "binaries": {
+    "rstrbot": {
+      "bytes": 60162808,
+      "sha256": "d3eaf2170e4681f096022510d4173072e18b3beecb74f33096b85cd48c84e47c"
+    },
+    "rstrbot-openai": {
+      "bytes": 13681864,
+      "sha256": "1bcc96cbe0c92ed0aa9ab9b65366ab93918664727907cc87f4e3fc5ee5cc1bae"
+    },
+    "rstrbot-diagnostic": {
+      "bytes": 3797552,
+      "sha256": "05a6750a66a18131de03b5b615fd43db9eb190604ed131435bb3fd27965c3244"
+    },
+    "rstrbot-webhook": {
+      "bytes": 14420704,
+      "sha256": "4267d1a62221c9bfc3fbcd474a942d9dea54ef8e3e72b7bc7156a8d370529db2"
+    }
+  }
+}

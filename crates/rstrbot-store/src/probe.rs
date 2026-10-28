@@ -89,7 +89,7 @@ impl Store {
         };
         // Table names alone are not proof that this installation understands
         // the schema. Refuse unknown future versions without migrating them.
-        let schema = schema && version.as_deref() == Some("1");
+        let schema = schema && matches!(version.as_deref(), Some("1" | "2"));
         let initialized = if schema {
             sqlx::query_scalar::<_, String>(
                 "SELECT value FROM instance_state WHERE key='initialized'",

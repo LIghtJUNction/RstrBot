@@ -10,7 +10,7 @@ export const collectionPath = (workspace: string, kind: string) => `${workspaceP
 type ResourcePage = { items: Resource[] };
 type MessagePage = { items: Message[]; next_before: number | null; total: number };
 
-async function authorizedRead<T>(client: QueryClient, key: QueryKey, signal: AbortSignal, read: () => Promise<T>): Promise<T> {
+export async function authorizedRead<T>(client: QueryClient, key: QueryKey, signal: AbortSignal, read: () => Promise<T>): Promise<T> {
   try { return await read(); }
   catch (error) {
     // Failed refetches retain data. Clear the exact cache on a definite denial,

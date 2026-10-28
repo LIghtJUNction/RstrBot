@@ -288,7 +288,7 @@ async fn populated_database_probe_and_reconnect_preserve_records() {
     // A recognizable set of table names must not authorize a migration of a
     // future or unversioned database. Inspecting/refusing it stays read-only.
     let pool = sqlx::AnyPool::connect(&url).await.unwrap();
-    sqlx::query("UPDATE instance_state SET value = '2' WHERE key = 'schema_version'")
+    sqlx::query("UPDATE instance_state SET value = '3' WHERE key = 'schema_version'")
         .execute(&pool)
         .await
         .unwrap();
@@ -300,7 +300,7 @@ async fn populated_database_probe_and_reconnect_preserve_records() {
             .fetch_one(&pool)
             .await
             .unwrap();
-    assert_eq!(version, "2");
+    assert_eq!(version, "3");
 
     sqlx::query("DELETE FROM instance_state WHERE key = 'schema_version'")
         .execute(&pool)

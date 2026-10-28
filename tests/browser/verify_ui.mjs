@@ -47,7 +47,7 @@ async function inputHashes() {
 }
 const report = {
   status: 'running', started_at: new Date().toISOString(),
-  environment: { os: os.platform(), architecture: os.arch(), node: process.version, playwright: playwrightVersion, browser: '', database: 'SQLite', valkey: 'off', locale: 'en-US', reduced_motion: true },
+  environment: { os: os.platform(), architecture: os.arch(), node: process.version, playwright: playwrightVersion, browser: '', database: 'SQLite', valkey: 'off', locale: 'en-US', timezone: 'Asia/Taipei', reduced_motion: true },
   input_sha256: await inputHashes(), harness_sha256: sha256(await fs.readFile(fileURLToPath(import.meta.url))),
   checks: [], screenshots: [], console_errors: [], network_errors: [],
   limitations: ['Diagnostic worker only; no commercial model or external account.', 'Chromium only. No screen-reader, native desktop, production load or full browser-matrix acceptance.', 'List search covers loaded pages; resource pagination uses the existing offset API.'],
@@ -125,7 +125,7 @@ try {
   token = (await fs.readFile(path.join(directory, 'bootstrap.token'), 'utf8')).trim();
   browser = await chromium.launch({ headless: true, ...(executable ? { executablePath: executable } : {}), args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   report.environment.browser = browser.version();
-  context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'en-US', reducedMotion: 'reduce' });
+  context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'en-US', timezoneId: 'Asia/Taipei', reducedMotion: 'reduce' });
   await context.route('**/*', route => {
     if (new URL(route.request().url()).origin !== base) {
       report.network_errors.push(`Blocked unexpected origin: ${new URL(route.request().url()).origin}`);
@@ -165,7 +165,7 @@ try {
   await check('actual first-run form creates an authenticated administrator and workspace', async () => {
     await page.goto(base);
     await page.getByLabel('Setup token').waitFor();
-    await page.locator('.sculpture canvas').waitFor();
+    await page.locator('.auth-features').waitFor();
     await screenshot('01-setup-dark-desktop');
     await page.getByLabel('Setup token').fill(token);
     await page.getByLabel('Username', { exact: true }).fill('browser_alice');
@@ -491,7 +491,7 @@ try {
     await api('POST', '/auth/logout', {}, [200, 204]);
     await page.getByRole('button', { name: 'Refresh', exact: true }).click();
     await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor({ timeout: 20000 });
-    await page.getByLabel('Username', { exact: true }).fill('browser_bob');
+    await page.getByLabel('Username or verified email', { exact: true }).fill('browser_bob');
     await page.getByLabel('Password', { exact: false }).fill(password);
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     await page.locator('.app-shell').waitFor();

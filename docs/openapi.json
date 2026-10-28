@@ -3,8 +3,8 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "RstrBot HTTP API",
-    "version": "0.1.3",
-    "description": "Contract for actually registered release routes. All paths are absolute from the server origin. Current JSON success bodies use HTTP 200; documented no-content operations use 204. Browser authentication uses an HttpOnly SameSite=Strict cookie; non-browser callers may use the same opaque session token as Bearer (not a separately scoped API key). Authorization headers override cookies. Every API mutation without a Bearer-prefixed Authorization requires X-RstrBot-Request: 1, including setup/login. Cross-site Sec-Fetch-Site and mismatched Origin are rejected even with Bearer. No credentialed CORS or automatic redirect-based authorization is provided. JSON bodies are limited to 1 MiB; UTF-8 byte limits are described with x-max-utf8-bytes. Unknown top-level fields are rejected only where the Rust request type declares deny_unknown_fields; generic data and ChatRequest are intentionally described separately. Examples are illustrative test data, not execution evidence. Unsupported capabilities have no invented endpoints.",
+    "version": "0.2.0",
+    "description": "Contract for actually registered release routes. All paths are absolute from the server origin. Current JSON success bodies use HTTP 200; documented no-content operations use 204. Browser authentication uses an HttpOnly SameSite=Strict cookie; non-browser callers may use the same opaque session token as Bearer (not a separately scoped API key). Authorization headers override cookies. Every API mutation without a Bearer-prefixed Authorization requires X-RstrBot-Request: 1, including setup/login. Cross-site Sec-Fetch-Site and mismatched Origin are rejected even with Bearer. No credentialed CORS is provided. The Google callback has its own single-use state/browser binding validation before exchanging a code. JSON bodies are limited to 1 MiB; UTF-8 byte limits are described with x-max-utf8-bytes. Unknown top-level fields are rejected only where the Rust request type declares deny_unknown_fields; generic data and ChatRequest are intentionally described separately. Examples are illustrative test data, not execution evidence. Unsupported capabilities have no invented endpoints.",
     "license": {
       "name": "MIT",
       "identifier": "MIT"
@@ -91,7 +91,7 @@
                   "database": "sqlite",
                   "valkey": false,
                   "valkey_status": "disabled",
-                  "version": "0.1.3",
+                  "version": "0.2.0",
                   "database_selection": true
                 }
               }
@@ -652,6 +652,1451 @@
                     "new_password": "new-example-not-a-secret"
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/options": {
+      "get": {
+        "operationId": "options",
+        "summary": "Read available sign-in methods",
+        "description": "Returns public capability flags and the configured origin/RP only. IP origins cannot enable WebAuthn; use localhost or an HTTPS domain. Does not expose OAuth or mail credentials.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthOptions"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity_config.rs::options"
+      }
+    },
+    "/api/v1/auth/security": {
+      "get": {
+        "operationId": "security",
+        "summary": "Read this account's sign-in methods",
+        "description": "Returns verified email, Google bindings and redacted passkey metadata. Backup flags come from verified authenticator data and do not identify a cloud provider. No private keys or WebAuthn verifier state are returned.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountSecurity"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::security"
+      }
+    },
+    "/api/v1/auth/reauth": {
+      "post": {
+        "operationId": "reauthenticate",
+        "summary": "Confirm the current password",
+        "description": "Refreshes the five-minute recent-authentication window for this specific active session. Does not create another session or extend the absolute session lifetime. Failed proof does not revoke the current session.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentAuthentication"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::reauthenticate",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordReauth"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/passkeys/register/options": {
+      "post": {
+        "operationId": "register_options",
+        "summary": "Start passkey registration or replacement",
+        "description": "Requires a current recently authenticated session. Server stores expiring one-use verifier state bound to this session, account and configuration revision. Replacement preserves the old credential until the new registration commits. No authenticator attachment is forced; physical FIDO2 UV-capable keys and synced credentials are accepted.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyOptions"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::register_options",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyRegistrationInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/passkeys/register/finish": {
+      "post": {
+        "operationId": "register_finish",
+        "summary": "Complete passkey registration",
+        "description": "Verifies the browser ceremony, then atomically adds the credential and optionally removes the replaced one. Requires the original active recently authenticated session. A failed or cancelled ceremony cannot remove the old credential.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::register_finish",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyFinishInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/passkeys/login/options": {
+      "post": {
+        "operationId": "login_options",
+        "summary": "Start account-first passkey sign-in",
+        "description": "Accepts a username or explicitly verified email. Existing credential allow-list is scoped to that account. One-use verifier state expires after five minutes. Credential IDs and browser prompts are not themselves proof of authentication.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyOptions"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::login_options",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyLoginInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/passkeys/login/finish": {
+      "post": {
+        "operationId": "login_finish",
+        "summary": "Sign in using a verified passkey assertion",
+        "description": "Verifies RP/origin/challenge/signature/user verification, then rechecks the enabled account, credential version and configuration under database locks before issuing a session. A removed or replaced credential cannot revive a stale assertion.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "description": "rstrbot_session; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800 for a new session or 0 for logout. Secure is conditional on server configuration.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::login_finish",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyFinishInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/passkeys/reauth/options": {
+      "post": {
+        "operationId": "reauth_options",
+        "summary": "Start passkey confirmation for this session",
+        "description": "Uses only passkeys bound to the current account, with single-use state bound to the original session.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyOptions"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::reauth_options",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/passkeys/reauth/finish": {
+      "post": {
+        "operationId": "reauth_finish",
+        "summary": "Confirm this session using a passkey",
+        "description": "Fresh verified assertion updates only this session's recent-authentication window. Revoked sessions and stale credential versions remain invalid.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentAuthentication"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::reauth_finish",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyFinishInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/passkeys/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ResourceId"
+        }
+      ],
+      "patch": {
+        "operationId": "rename_passkey",
+        "summary": "Rename a bound passkey",
+        "description": "Requires current recently authenticated account ownership. The name is a user label, not an attested authenticator vendor.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::rename",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyRenameInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "remove_passkey",
+        "summary": "Remove one bound passkey",
+        "description": "Requires current recently authenticated account ownership and preserves at least one usable sign-in method. Sessions issued using the removed credential are revoked.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Operation accepted/completed with no response body."
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity.rs::remove",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/google/start": {
+      "post": {
+        "operationId": "google_start",
+        "summary": "Start Google sign-in or binding",
+        "description": "Authorization-code OIDC with state, nonce, PKCE S256 and an independent HttpOnly SameSite=Lax browser-binding cookie. Link requires recent password/passkey confirmation. Google sign-in only accepts previously explicitly linked identities; no registration or account merge by email. A Google login session must confirm a local password or passkey before sensitive account changes.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleStartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity/google.rs::start",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleStartInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/google/callback": {
+      "get": {
+        "operationId": "google_callback",
+        "summary": "Finish the Google authorization-code callback",
+        "description": "Consumes the one-use intent and validates its browser binding before any token exchange. Uses fixed Google endpoints and verifies JWT signature, issuer, audience, authorized presenter, lifetime and nonce. Rechecks the original session for account changes; errors redirect to /?auth=failed without provider details or credentials.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "303": {
+            "description": "Redirect to the same-origin application with a success/failure indicator. Clears the short-lived OAuth cookie.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Fixed same-origin return path."
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Clears the OAuth binding and may set the normal HttpOnly Strict session cookie."
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity/google.rs::callback",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provider callback value; never log."
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provider callback value; never log."
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provider callback value; never log."
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/google/unlink": {
+      "post": {
+        "operationId": "google_unlink",
+        "summary": "Remove a Google identity binding",
+        "description": "Requires a current recently authenticated owner session, revokes sessions issued by that identity and preserves another usable sign-in method.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Operation accepted/completed with no response body."
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity/google.rs::unlink",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleUnlinkInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/email/start": {
+      "post": {
+        "operationId": "start_email",
+        "summary": "Send an email verification link",
+        "description": "Current recent authentication required. Delivers through saved SMTP settings; response never contains the verification token. Pending replacement leaves the prior verified email active. Rate limited per account, including hourly/daily caps.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailPending"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/email_auth.rs::start_email",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/email/verify": {
+      "post": {
+        "operationId": "verify_email",
+        "summary": "Confirm a pending email binding",
+        "description": "Requires the original active session and one-use 15-minute token from the mail fragment. Atomically confirms the new address and invalidates stale recovery requests. Merely opening a GET link never binds an email.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifiedEmail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/email_auth.rs::verify_email",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailVerifyInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/password/reset/request": {
+      "post": {
+        "operationId": "request_reset",
+        "summary": "Request email password recovery",
+        "description": "Uses only an explicitly verified address. Existing, unknown and delivery-throttled addresses receive the same accepted response. Mail delivery is asynchronous; acceptance does not promise delivery. Public/global request limiting can still return 429.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/email_auth.rs::request_reset",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/password/reset/finish": {
+      "post": {
+        "operationId": "finish_reset",
+        "summary": "Reset a password using verified email",
+        "description": "Consumes a valid single-use 15-minute token, checks the exact password/email version captured at issuance, changes the password and revokes all account sessions/challenges. Stale recovery cannot overwrite a newer password or email change.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "Operation accepted/completed with no response body."
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/email_auth.rs::finish_reset",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailResetInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/auth-settings": {
+      "get": {
+        "operationId": "read_auth_settings",
+        "summary": "Read redacted authentication configuration",
+        "description": "Instance administrator only. Shows secret-presence flags instead of secret values or ciphertext; includes the exact Google redirect URI and passkey count.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity_config.rs::settings"
+      },
+      "put": {
+        "operationId": "save_settings",
+        "summary": "Save authentication and email configuration",
+        "description": "Requires current recently authenticated instance administrator and matching revision. Entire configuration saves atomically. Secrets are encrypted with the installation vault; changing their destination requires replacement or explicit clearing. Origin/RP cannot change while passkeys exist. SMTP requires TLS or STARTTLS, except explicitly selected literal loopback local relay.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/identity_config.rs::save_settings",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthSettingsInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/auth-settings/test-email": {
+      "post": {
+        "operationId": "test_email",
+        "summary": "Send a test using saved SMTP settings",
+        "description": "Requires current recently authenticated instance administrator. Sends one real message to the supplied address through the already saved transport. No credentials or message bodies are logged. A successful result means the SMTP server accepted the message.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/email_auth.rs::test_email",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailInput"
               }
             }
           }
@@ -3318,7 +4763,7 @@
                 },
                 "example": {
                   "status": "ok",
-                  "version": "0.1.3"
+                  "version": "0.2.0"
                 }
               }
             }
@@ -4264,9 +5709,9 @@
         "properties": {
           "username": {
             "type": "string",
-            "maxLength": 64,
-            "x-max-utf8-bytes": 64,
-            "description": "Local username; trimmed and lowercased by the server."
+            "maxLength": 254,
+            "x-max-utf8-bytes": 254,
+            "description": "Local username or explicitly verified email; trimmed and lowercased by the server."
           },
           "password": {
             "type": "string",
@@ -4374,6 +5819,804 @@
         "required": [
           "current_password",
           "new_password"
+        ]
+      },
+      "AuthOptions": {
+        "type": "object",
+        "properties": {
+          "google_enabled": {
+            "type": "boolean"
+          },
+          "passkey_enabled": {
+            "type": "boolean"
+          },
+          "email_enabled": {
+            "type": "boolean"
+          },
+          "public_origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rp_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "username_required": {
+            "const": true
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "google_enabled",
+          "passkey_enabled",
+          "email_enabled",
+          "public_origin",
+          "rp_id",
+          "username_required"
+        ]
+      },
+      "VerifiedEmail": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "verified_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "email",
+          "verified_at",
+          "version"
+        ]
+      },
+      "GoogleBinding": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64",
+                "description": "UTC Unix timestamp in seconds."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "email",
+          "created_at",
+          "last_used_at"
+        ]
+      },
+      "PasskeySummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          },
+          "name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64",
+                "description": "UTC Unix timestamp in seconds."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "backup_eligible": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "backed_up": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "name",
+          "created_at",
+          "last_used_at",
+          "backup_eligible",
+          "backed_up"
+        ]
+      },
+      "PasskeyResponse": {
+        "type": "object",
+        "properties": {
+          "passkey": {
+            "$ref": "#/components/schemas/PasskeySummary"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "passkey"
+        ]
+      },
+      "AccountSecurity": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedEmail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "google": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoogleBinding"
+            }
+          },
+          "passkeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PasskeySummary"
+            }
+          },
+          "has_password": {
+            "type": "boolean"
+          },
+          "recent_auth_until": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "email",
+          "google",
+          "passkeys",
+          "has_password",
+          "recent_auth_until"
+        ]
+      },
+      "RecentAuthentication": {
+        "type": "object",
+        "properties": {
+          "recent_auth_until": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "recent_auth_until"
+        ]
+      },
+      "PasswordReauth": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "maxLength": 1024,
+            "x-max-utf8-bytes": 1024,
+            "description": "At most 1024 UTF-8 bytes.",
+            "format": "password",
+            "writeOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "password"
+        ]
+      },
+      "EmailInput": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "x-max-utf8-bytes": 254,
+            "description": "At most 254 UTF-8 bytes.",
+            "format": "email"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "email"
+        ]
+      },
+      "EmailPending": {
+        "type": "object",
+        "properties": {
+          "pending": {
+            "const": true
+          },
+          "expires_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "pending",
+          "expires_at"
+        ]
+      },
+      "EmailAccepted": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "const": true
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "accepted"
+        ]
+      },
+      "EmailVerifyInput": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 256,
+            "x-max-utf8-bytes": 256,
+            "description": "Single-use random token from the email link fragment; never log or place in a query parameter.",
+            "writeOnly": true,
+            "x-sensitive": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "token"
+        ]
+      },
+      "EmailResetInput": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 256,
+            "x-max-utf8-bytes": 256,
+            "description": "Single-use random token from the email link fragment; never log or place in a query parameter.",
+            "writeOnly": true,
+            "x-sensitive": true
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 1024,
+            "x-max-utf8-bytes": 1024,
+            "description": "12–1024 UTF-8 bytes. This byte minimum is not a Unicode character count.",
+            "format": "password",
+            "writeOnly": true,
+            "x-min-utf8-bytes": 12
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "new_password"
+        ]
+      },
+      "PasskeyRegistrationInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "x-max-utf8-bytes": 100,
+            "description": "At most 100 UTF-8 bytes."
+          },
+          "replace_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authenticator": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "any",
+                  "security-key",
+                  "platform",
+                  "google-password-manager"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ]
+      },
+      "PasskeyLoginInput": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 254,
+            "x-max-utf8-bytes": 254,
+            "description": "Username or verified email; this release uses an account-first passkey flow."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "username"
+        ]
+      },
+      "PasskeyOptions": {
+        "type": "object",
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "description": "Opaque single-use ceremony ID, not verifier state."
+          },
+          "expires_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          },
+          "publicKey": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "description": "WebAuthn request/creation options. Binary values are unpadded base64url strings; decode before calling navigator.credentials."
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "challenge_id",
+          "expires_at",
+          "publicKey"
+        ]
+      },
+      "PasskeyFinishInput": {
+        "type": "object",
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "maxLength": 256,
+            "x-max-utf8-bytes": 256,
+            "description": "At most 256 UTF-8 bytes."
+          },
+          "credential": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "description": "Native WebAuthn credential with id/rawId/type/response and clientExtensionResults. Binary fields use base64url. The WebAuthn verifier checks signature, origin, RP, challenge and user verification."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "challenge_id",
+          "credential"
+        ]
+      },
+      "PasskeyRenameInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "x-max-utf8-bytes": 100,
+            "description": "At most 100 UTF-8 bytes."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ]
+      },
+      "GoogleStartInput": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "login",
+              "link"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "mode"
+        ]
+      },
+      "GoogleStartResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "url"
+        ]
+      },
+      "GoogleUnlinkInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ]
+      },
+      "GoogleSettingsInput": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "client_id": {
+            "type": "string",
+            "maxLength": 254,
+            "x-max-utf8-bytes": 254,
+            "description": "At most 254 UTF-8 bytes."
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8192,
+                "x-max-utf8-bytes": 8192,
+                "description": "Write-only secret. Omit or send empty to retain; clear explicitly. Destination changes require replacement or clearing.",
+                "writeOnly": true,
+                "x-sensitive": true
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clear_client_secret": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "enabled",
+          "client_id"
+        ]
+      },
+      "SmtpSettingsInput": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "host": {
+            "type": "string",
+            "maxLength": 253,
+            "x-max-utf8-bytes": 253,
+            "description": "At most 253 UTF-8 bytes."
+          },
+          "port": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "security": {
+            "type": "string",
+            "enum": [
+              "tls",
+              "starttls",
+              "local"
+            ]
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 254,
+            "x-max-utf8-bytes": 254,
+            "description": "At most 254 UTF-8 bytes."
+          },
+          "from_email": {
+            "type": "string",
+            "maxLength": 254,
+            "x-max-utf8-bytes": 254,
+            "description": "At most 254 UTF-8 bytes."
+          },
+          "from_name": {
+            "type": "string",
+            "maxLength": 120,
+            "x-max-utf8-bytes": 120,
+            "description": "At most 120 UTF-8 bytes."
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8192,
+                "x-max-utf8-bytes": 8192,
+                "description": "Write-only secret. Omit or send empty to retain; clear explicitly. Destination changes require replacement or clearing.",
+                "writeOnly": true,
+                "x-sensitive": true
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clear_password": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "enabled",
+          "host",
+          "port",
+          "security",
+          "username",
+          "from_email",
+          "from_name"
+        ]
+      },
+      "AuthSettingsInput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "public_origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rp_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "google": {
+            "$ref": "#/components/schemas/GoogleSettingsInput"
+          },
+          "smtp": {
+            "$ref": "#/components/schemas/SmtpSettingsInput"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "google",
+          "smtp"
+        ]
+      },
+      "AuthSettings": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "public_origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rp_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "passkey_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "google": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "client_id": {
+                "type": "string"
+              },
+              "has_client_secret": {
+                "type": "boolean"
+              },
+              "redirect_uri": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": true,
+            "required": [
+              "enabled",
+              "client_id",
+              "has_client_secret",
+              "redirect_uri"
+            ]
+          },
+          "smtp": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "host": {
+                "type": "string",
+                "maxLength": 253,
+                "x-max-utf8-bytes": 253,
+                "description": "At most 253 UTF-8 bytes."
+              },
+              "port": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "security": {
+                "type": "string",
+                "enum": [
+                  "tls",
+                  "starttls",
+                  "local"
+                ]
+              },
+              "username": {
+                "type": "string",
+                "maxLength": 254,
+                "x-max-utf8-bytes": 254,
+                "description": "At most 254 UTF-8 bytes."
+              },
+              "from_email": {
+                "type": "string",
+                "maxLength": 254,
+                "x-max-utf8-bytes": 254,
+                "description": "At most 254 UTF-8 bytes."
+              },
+              "from_name": {
+                "type": "string",
+                "maxLength": 120,
+                "x-max-utf8-bytes": 120,
+                "description": "At most 120 UTF-8 bytes."
+              },
+              "has_password": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true,
+            "required": [
+              "enabled",
+              "host",
+              "port",
+              "security",
+              "username",
+              "from_email",
+              "from_name",
+              "has_password"
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "revision",
+          "public_origin",
+          "rp_id",
+          "passkey_count",
+          "google",
+          "smtp"
         ]
       },
       "DatabaseInput": {
@@ -7097,14 +9340,138 @@
           "value"
         ]
       },
+      "BackupAuthEmailsRow": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "verified_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "user_id",
+          "email",
+          "verified_at",
+          "version"
+        ]
+      },
+      "BackupAuthGoogleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_id",
+          "subject",
+          "email",
+          "created_at",
+          "last_used_at"
+        ]
+      },
+      "BackupAuthPasskeysRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "credential_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "credential": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_id",
+          "credential_id",
+          "name",
+          "credential",
+          "version",
+          "created_at",
+          "last_used_at"
+        ]
+      },
       "Backup": {
         "type": "object",
         "properties": {
           "format": {
-            "const": "rstrbot-db-v1"
+            "const": "rstrbot-db-v2"
           },
           "schema_version": {
-            "const": 1
+            "const": 2
           },
           "created_at": {
             "type": "integer",
@@ -7189,6 +9556,27 @@
                   "$ref": "#/components/schemas/BackupInstanceStateRow"
                 },
                 "maxItems": 250000
+              },
+              "auth_emails": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BackupAuthEmailsRow"
+                },
+                "maxItems": 250000
+              },
+              "auth_google": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BackupAuthGoogleRow"
+                },
+                "maxItems": 250000
+              },
+              "auth_passkeys": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BackupAuthPasskeysRow"
+                },
+                "maxItems": 250000
               }
             },
             "additionalProperties": false,
@@ -7202,7 +9590,10 @@
               "operations",
               "events",
               "counters",
-              "instance_state"
+              "instance_state",
+              "auth_emails",
+              "auth_google",
+              "auth_passkeys"
             ]
           },
           "sha256": {
@@ -7211,7 +9602,7 @@
           }
         },
         "additionalProperties": true,
-        "description": "Sensitive consistent database snapshot, excluding sessions, secrets.key and external files/state. Protect separately from the encryption key. Restore is CLI-only into an empty target.",
+        "description": "Sensitive consistent database snapshot including verified emails, Google/passkey bindings and encrypted identity configuration. Excludes sessions, pending authentication/email challenges, secrets.key and external files/state. Protect separately from the encryption key. Restore is CLI-only into an empty target; legacy v1 imports remain supported.",
         "x-sensitive": true,
         "required": [
           "format",
@@ -7311,6 +9702,10 @@
   },
   "x-reviewed-sources": [
     "src/api.rs",
+    "src/identity.rs",
+    "src/identity/google.rs",
+    "src/identity_config.rs",
+    "src/email_auth.rs",
     "src/state.rs",
     "src/engine.rs",
     "src/schedule.rs",
@@ -7319,6 +9714,7 @@
     "crates/rstrbot-store/src/lib.rs",
     "crates/rstrbot-store/src/resources.rs",
     "crates/rstrbot-store/src/auth.rs",
+    "crates/rstrbot-store/src/identity.rs",
     "crates/rstrbot-store/src/workspaces.rs",
     "crates/rstrbot-store/src/backup.rs",
     "crates/rstrbot-store/src/budget.rs"

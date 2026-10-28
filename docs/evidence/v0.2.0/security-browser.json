@@ -1,0 +1,238 @@
+{
+  "status": "passed",
+  "started_at": "2026-10-28T00:48:36.977Z",
+  "environment": {
+    "os": "linux",
+    "architecture": "x64",
+    "node": "v24.22.1",
+    "playwright": "1.62.1",
+    "browser": "156.0.8078.47",
+    "database": "SQLite",
+    "valkey": "off",
+    "locale": "en-US",
+    "timezone": "Asia/Taipei",
+    "reduced_motion": true
+  },
+  "input_sha256": {
+    "rstrbot": "d3eaf2170e4681f096022510d4173072e18b3beecb74f33096b85cd48c84e47c",
+    "rstrbot-diagnostic": "05a6750a66a18131de03b5b615fd43db9eb190604ed131435bb3fd27965c3244",
+    "rstrbot-openai": "1bcc96cbe0c92ed0aa9ab9b65366ab93918664727907cc87f4e3fc5ee5cc1bae",
+    "rstrbot-webhook": "4267d1a62221c9bfc3fbcd474a942d9dea54ef8e3e72b7bc7156a8d370529db2",
+    "web/dist/assets/index-Bi84OJkC.css": "6e751ffd9e3f297a4df065a3b37a191cefe0e86ac6a87188ea283a3db17b48e4",
+    "web/dist/assets/index-CBwZrEKJ.css": "0843ae7e30879d5dfcfa798ef15364866ddec069871f97a936555bd5a3fb09d6",
+    "web/dist/assets/index-Dny7bw-S.js": "aeba7d6c3736b811733afc9788655ab97f4c1cdb7800289878a6c3e0c45d17fa",
+    "web/dist/assets/index-Dny7bw-S.js.map": "e174ce14b2621207c9247ad43e231f45bb881b7ab64549acbb4d56e80dc59eef",
+    "web/dist/assets/index-OFUNqZM1.js": "5c0811d86edb468eeb3807e5ec0158cdb3aca837f5ba4cc3fa59e825e389eb59",
+    "web/dist/assets/index-OFUNqZM1.js.map": "fbd2ea974e84f25aef6cd52019d4cc2c59a873e4b6b3cf95984aee38912d099d",
+    "web/dist/favicon.svg": "4d5f6708df31528b64652d0ce0224ebba0ad6d108279fb12fd90f4461ccf9c48",
+    "web/dist/index.html": "fc7a034e8cfa1a52cf33d574576670a0b9644d5862b1882fc03bbcb08e7858ce"
+  },
+  "harness_sha256": "065b4497bf0e89093aa250a67c5e00dd253a55e036e9147fd037a6008e374818",
+  "checks": [
+    {
+      "name": "administrator configures a real origin, Google and loopback SMTP without secret echo",
+      "status": "passed",
+      "duration_ms": 828
+    },
+    {
+      "name": "configuration refetch preserves local drafts and saving locks the submitted fields",
+      "status": "passed",
+      "duration_ms": 5199
+    },
+    {
+      "name": "incorrect reauthentication preserves the current account and a password proof succeeds",
+      "status": "passed",
+      "duration_ms": 1910
+    },
+    {
+      "name": "closing a pending password proof cannot authorize a different newly opened action",
+      "status": "passed",
+      "duration_ms": 1836
+    },
+    {
+      "name": "a USB authenticator registers a UV passkey and its consumed challenge cannot be replayed",
+      "status": "passed",
+      "duration_ms": 207
+    },
+    {
+      "name": "a backup-capable platform authenticator adds a second credential and names can be changed",
+      "status": "passed",
+      "duration_ms": 309
+    },
+    {
+      "name": "email verification is delivered locally and requires a deliberate same-session confirmation",
+      "status": "passed",
+      "duration_ms": 852
+    },
+    {
+      "name": "a passkey can reauthenticate and cancelling replacement leaves both existing keys usable",
+      "status": "passed",
+      "duration_ms": 58074
+    },
+    {
+      "name": "replacement is atomic and the old authenticator cannot sign in with a fresh signed challenge",
+      "status": "passed",
+      "duration_ms": 2366
+    },
+    {
+      "name": "removing one credential preserves the other and a removed key stays absent",
+      "status": "passed",
+      "duration_ms": 58242
+    },
+    {
+      "name": "missing user verification and tampered signed origin are rejected without losing the main session",
+      "status": "passed",
+      "duration_ms": 2582
+    },
+    {
+      "name": "320px account and navigation remain usable in Chinese and login exposes configured methods",
+      "status": "passed",
+      "duration_ms": 57494
+    },
+    {
+      "name": "a shared-cookie account change blocks cached private history and reloads the identity boundary",
+      "status": "passed",
+      "duration_ms": 14640
+    },
+    {
+      "name": "account settings remain accessible to a user with no workspace membership",
+      "status": "passed",
+      "duration_ms": 1213
+    },
+    {
+      "name": "password recovery uses delivered email, rejects mismatched inputs, and returns to sign-in",
+      "status": "passed",
+      "duration_ms": 2570
+    },
+    {
+      "name": "runtime, local-only requests and immutable acceptance inputs remain clean",
+      "status": "passed",
+      "duration_ms": 160
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "artifacts/screenshots/security/01-auth-settings-desktop.png",
+      "sha256": "a0a9682ec0e8fd5cb59f076d11d3dcbc23c5a2485d89a9f37b6526688d4fa78a",
+      "bytes": 136936,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/02-account-desktop.png",
+      "sha256": "3055c25e19a386048ce91cbcbfe825d7aa9af3305799363b08d893d2bea6a683",
+      "bytes": 140148,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/02b-account-full-desktop-zh.png",
+      "sha256": "1f10783c4b7604e807ec950dec1ee0ef435a7a387429aeb366a0b1b8b39717b4",
+      "bytes": 169677,
+      "viewport": {
+        "width": 1440,
+        "height": 1700
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/03-account-light-desktop.png",
+      "sha256": "85846a909fcd53f4d959a7fc028b446f820ed655c4ba3b1fbf7ce44f764be677",
+      "bytes": 142088,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/04-account-dark-320-zh.png",
+      "sha256": "09aa6f534f4c596ba72a690f3474bb2fe21c2d426bb0e7cf4762625155188fbf",
+      "bytes": 57562,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/05-navigation-dark-320-zh.png",
+      "sha256": "60d81dee3930065c448424b9080414682519dc16a809a3d9354f60c7ffcb28d3",
+      "bytes": 37054,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/06-login-dark-desktop.png",
+      "sha256": "a0d533b1bc91e96cb9919ba2e99f48d5130aa5186283eddce4b719b59c7bf223",
+      "bytes": 94354,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/07-login-dark-320.png",
+      "sha256": "0427aec144f0c7d02890222850132983877f93a0195d78a21fa888f8342eed92",
+      "bytes": 45429,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/08-login-light-320.png",
+      "sha256": "386a95f336219b2b690acbfb8570ea0d595b1d561beb55abac7b3dea578b05b8",
+      "bytes": 44253,
+      "viewport": {
+        "width": 320,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/09-account-without-workspace.png",
+      "sha256": "2c76a453c0acbe4f6d6fedff1ba333ce258dd68138f267f59700ec24a81c0890",
+      "bytes": 109620,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "file": "artifacts/screenshots/security/10-workspace-desktop.png",
+      "sha256": "48d03f41c26dabe44154b29b19302e890cd92b6a57c54e1da2c952fd4794e194",
+      "bytes": 103173,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    }
+  ],
+  "console_errors": [],
+  "network_errors": [],
+  "limitations": [
+    "Virtual CTAP2 authenticators sign real WebAuthn challenges with UV; physical hardware and real cloud synchronization are not exercised.",
+    "Chromium only. No screen-reader, native desktop, production load or full browser-matrix acceptance.",
+    "SMTP is a local fixture. Google buttons and state boundaries are covered without contacting Google or claiming a real Google account login."
+  ],
+  "virtual_authenticators": [
+    {
+      "transport": "usb",
+      "backup_eligible": false,
+      "backed_up": false,
+      "registered": true
+    },
+    {
+      "transport": "internal",
+      "backup_eligible": true,
+      "backed_up": true,
+      "registered": true,
+      "simulated_cloud_flags": true
+    }
+  ],
+  "finished_at": "2026-10-28T00:52:06.791Z",
+  "inputs_unchanged": true
+}

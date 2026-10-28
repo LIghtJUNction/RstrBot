@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-28T00:43:50.530613+00:00",
+  "scope": "Static OpenAPI/router/DTO/reference/example checks; not native execution or a full external OpenAPI meta-schema validator.",
+  "spec_sha256": "3e8da482e31640ae4c1fc3b3bd07e57a7114f55b7b2030fe29cdc2e10c63e1b7",
+  "router_sha256": "40ef857b90410fa9a5f442e41ad06908842ab722ec259e406b1eef57d3d88c7c",
+  "router_module_sha256": {
+    "src/api.rs": "40ef857b90410fa9a5f442e41ad06908842ab722ec259e406b1eef57d3d88c7c",
+    "src/identity.rs": "b0ef905424737e9e28a8ab5dfba06147a6838b827e102f059ce73c4a6b7318ad",
+    "src/identity/google.rs": "5c32cc38c4dac84246ad80ce70b178d96afa8f04fd728b6965d75e39bd9dc088",
+    "src/identity_config.rs": "6044358ac7be5fd3eeec2f73d07dc00b508b12fb21f367605e7c16124069fc49",
+    "src/email_auth.rs": "9c1a7ec1e2a7ea5f19bfc1f0ba045bbcaa3b3259322c187a4b35fe30f010ddbf"
+  },
+  "registered_paths": 56,
+  "registered_operations": 67,
+  "api_v1_operations": 65,
+  "health_operations": 2,
+  "schema_count": 124,
+  "resolved_references": 826,
+  "validated_examples": 121,
+  "request_schema_type_checks": 28,
+  "operation_ids_unique": true,
+  "all_declared_router_methods_covered": true,
+  "status": "passed"
+}

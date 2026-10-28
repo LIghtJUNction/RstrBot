@@ -115,7 +115,7 @@ schema("Reservation", obj({"id": ID, "workspace_id": ID, "operation_id": string(
     ["id", "workspace_id", "operation_id", "amount_microusd", "actual_microusd", "state"]))
 collection("ReservationList", ref("Reservation"), maxItems=500)
 
-schema("LoginInput", obj({"username": text(64, "Local username; trimmed and lowercased by the server."),
+schema("LoginInput", obj({"username": text(254, "Local username or explicitly verified email; trimmed and lowercased by the server."),
     "password": text(1024, "Existing account password.") | {"format": "password", "writeOnly": True}}, ["username", "password"], True))
 password = text(1024, "12–1024 UTF-8 bytes. This byte minimum is not a Unicode character count.") | {"format": "password", "writeOnly": True, "x-min-utf8-bytes": 12}
 username = text(64, "After trim/lowercase: 3–64 ASCII letters, digits, underscore, dash, @ or dot.")
@@ -125,6 +125,48 @@ schema("SetupInput", obj({"token": proof, "username": username, "password": pass
     "workspace": text(200, nonblank=True)}, ["token", "username", "password", "workspace"], True))
 schema("PasswordInput", obj({"current_password": text(1024) | {"format": "password", "writeOnly": True},
     "new_password": password}, ["current_password", "new_password"], True))
+schema("AuthOptions", obj({"google_enabled": BOOL, "passkey_enabled": BOOL, "email_enabled": BOOL,
+    "public_origin": nullable(string()), "rp_id": nullable(string()), "username_required": {"const": True}},
+    ["google_enabled", "passkey_enabled", "email_enabled", "public_origin", "rp_id", "username_required"]))
+schema("VerifiedEmail", obj({"email": string(format="email"), "verified_at": TIME, "version": integer(minimum=1)}, ["email", "verified_at", "version"]))
+schema("GoogleBinding", obj({"id": ID, "email": nullable(string()), "created_at": TIME, "last_used_at": nullable(TIME)}, ["id", "email", "created_at", "last_used_at"]))
+schema("PasskeySummary", obj({"id": ID, "name": string(), "created_at": TIME, "last_used_at": nullable(TIME),
+    "backup_eligible": nullable(BOOL), "backed_up": nullable(BOOL)}, ["id", "name", "created_at", "last_used_at", "backup_eligible", "backed_up"]))
+schema("PasskeyResponse", obj({"passkey": ref("PasskeySummary")}, ["passkey"]))
+schema("AccountSecurity", obj({"email": nullable(ref("VerifiedEmail")), "google": array(ref("GoogleBinding")),
+    "passkeys": array(ref("PasskeySummary")), "has_password": BOOL, "recent_auth_until": TIME},
+    ["email", "google", "passkeys", "has_password", "recent_auth_until"]))
+schema("RecentAuthentication", obj({"recent_auth_until": TIME}, ["recent_auth_until"]))
+schema("PasswordReauth", obj({"password": text(1024) | {"format": "password", "writeOnly": True}}, ["password"], True))
+schema("EmailInput", obj({"email": text(254) | {"format": "email"}}, ["email"], True))
+schema("EmailPending", obj({"pending": {"const": True}, "expires_at": TIME}, ["pending", "expires_at"]))
+schema("EmailAccepted", obj({"accepted": {"const": True}}, ["accepted"]))
+verification_token = text(256, "Single-use random token from the email link fragment; never log or place in a query parameter.") | {"writeOnly": True, "x-sensitive": True}
+schema("EmailVerifyInput", obj({"token": verification_token}, ["token"], True))
+schema("EmailResetInput", obj({"token": verification_token, "new_password": password}, ["token", "new_password"], True))
+schema("PasskeyRegistrationInput", obj({"name": text(100), "replace_id": nullable(ID),
+    "authenticator": nullable(string(enum=["any", "security-key", "platform", "google-password-manager"]))}, ["name"], True))
+schema("PasskeyLoginInput", obj({"username": text(254, "Username or verified email; this release uses an account-first passkey flow.")}, ["username"], True))
+schema("PasskeyOptions", obj({"challenge_id": string("Opaque single-use ceremony ID, not verifier state."), "expires_at": TIME,
+    "publicKey": obj({}, description="WebAuthn request/creation options. Binary values are unpadded base64url strings; decode before calling navigator.credentials.")}, ["challenge_id", "expires_at", "publicKey"]))
+schema("PasskeyFinishInput", obj({"challenge_id": text(256), "credential": obj({},
+    description="Native WebAuthn credential with id/rawId/type/response and clientExtensionResults. Binary fields use base64url. The WebAuthn verifier checks signature, origin, RP, challenge and user verification.")}, ["challenge_id", "credential"], True))
+schema("PasskeyRenameInput", obj({"name": text(100)}, ["name"], True))
+schema("GoogleStartInput", obj({"mode": string(enum=["login", "link"])}, ["mode"], True))
+schema("GoogleStartResponse", obj({"url": string(format="uri")}, ["url"]))
+schema("GoogleUnlinkInput", obj({"id": ID}, ["id"], True))
+secret_input = text(8192, "Write-only secret. Omit or send empty to retain; clear explicitly. Destination changes require replacement or clearing.") | {"writeOnly": True, "x-sensitive": True}
+schema("GoogleSettingsInput", obj({"enabled": BOOL, "client_id": text(254), "client_secret": nullable(secret_input),
+    "clear_client_secret": BOOL}, ["enabled", "client_id"], True))
+smtp_properties = {"enabled": BOOL, "host": text(253), "port": integer(minimum=1, maximum=65535),
+    "security": string(enum=["tls", "starttls", "local"]), "username": text(254), "from_email": text(254), "from_name": text(120)}
+schema("SmtpSettingsInput", obj(smtp_properties | {"password": nullable(secret_input), "clear_password": BOOL}, list(smtp_properties), True))
+schema("AuthSettingsInput", obj({"revision": integer(minimum=0), "public_origin": nullable(string()), "rp_id": nullable(string()),
+    "google": ref("GoogleSettingsInput"), "smtp": ref("SmtpSettingsInput")}, ["revision", "google", "smtp"], True))
+schema("AuthSettings", obj({"revision": integer(minimum=0), "public_origin": nullable(string()), "rp_id": nullable(string()),
+    "passkey_count": integer(minimum=0),
+    "google": obj({"enabled": BOOL, "client_id": string(), "has_client_secret": BOOL, "redirect_uri": nullable(string())}, ["enabled", "client_id", "has_client_secret", "redirect_uri"]),
+    "smtp": obj(smtp_properties | {"has_password": BOOL}, list(smtp_properties) + ["has_password"])}, ["revision", "public_origin", "rp_id", "passkey_count", "google", "smtp"]))
 schema("DatabaseInput", obj({"token": proof,
     "database_url": text(4096, "sqlite:, postgres:// or postgresql:// URL. Credentials are sensitive. SQLite probes require an existing file; select a new SQLite path at CLI startup.") | {"writeOnly": True}}, ["token", "database_url"], True))
 schema("DatabaseProbe", obj({"connected": {"const": True}, "database": DB, "initialized": BOOL,
@@ -289,19 +331,20 @@ backup_source = (ROOT / "crates/rstrbot-store/src/backup.rs").read_text().split(
 table_properties = {}
 for match in re.finditer(r'Table\s*\{\s*name:\s*"([^"]+)",\s*columns:\s*&\[(.*?)\]', backup_source, re.S):
     table, definitions = match.groups()
-    columns = {name: string() if kind == "text" else nullable(integer()) if kind == "nullable_int" else integer()
-               for kind, name in re.findall(r'(text|int|nullable_int)\("([^"]+)"\)', definitions)}
+    column_types = {"text": string, "nullable_text": lambda: nullable(string()), "int": integer, "nullable_int": lambda: nullable(integer())}
+    columns = {name: column_types[kind]()
+               for kind, name in re.findall(r'(text|nullable_text|int|nullable_int)\("([^"]+)"\)', definitions)}
     row_name = "Backup" + "".join(part.title() for part in table.split("_")) + "Row"
     if table == "users":
         columns["password_hash"]["x-sensitive"] = True
     schema(row_name, obj(columns, columns.keys(), True))
     table_properties[table] = array(ref(row_name), maxItems=250000)
-assert len(table_properties) == 10
-schema("Backup", obj({"format": {"const": "rstrbot-db-v1"}, "schema_version": {"const": 1}, "created_at": TIME,
+assert len(table_properties) == 13
+schema("Backup", obj({"format": {"const": "rstrbot-db-v2"}, "schema_version": {"const": 2}, "created_at": TIME,
     "source_backend": DB, "includes_external_state": {"const": False}, "tables": obj(table_properties, table_properties.keys(), True),
     "sha256": string(pattern="^[0-9a-f]{64}$")},
     ["format", "schema_version", "created_at", "source_backend", "includes_external_state", "tables", "sha256"],
-    description="Sensitive consistent database snapshot, excluding sessions, secrets.key and external files/state. Protect separately from the encryption key. Restore is CLI-only into an empty target.", **{"x-sensitive": True}))
+    description="Sensitive consistent database snapshot including verified emails, Google/passkey bindings and encrypted identity configuration. Excludes sessions, pending authentication/email challenges, secrets.key and external files/state. Protect separately from the encryption key. Restore is CLI-only into an empty target; legacy v1 imports remain supported.", **{"x-sensitive": True}))
 schema("Liveness", obj({"status": {"const": "ok"}, "version": string()}, ["status", "version"]))
 schema("Readiness", obj({"status": {"const": "ok"}, "database": DB, "initialized": BOOL, "recovery_mode": BOOL,
     "valkey_status": CACHE, "checks": array(string()), "upstream_models": {"const": "not_checked"}},
@@ -356,7 +399,7 @@ def parameter(name):
 
 def operation(path, method, handler, summary, description, response=None, body=None,
               public=False, tag="Resources", query=(), errors=(), example=None, request_examples=None,
-              status="200", cookie=False):
+              status="200", cookie=False, source="src/api.rs", operation_id=None):
     full = path if path.startswith("/health/") else "/api/v1" + path
     item = PATHS.setdefault(full, {})
     if "parameters" not in item:
@@ -365,9 +408,9 @@ def operation(path, method, handler, summary, description, response=None, body=N
         if parameters:
             item["parameters"] = parameters
     mutation = method not in ["get", "head", "options"]
-    op = {"operationId": handler, "summary": summary, "description": description, "tags": [tag],
+    op = {"operationId": operation_id or handler, "summary": summary, "description": description, "tags": [tag],
           "security": [] if public else ([{"bearerAuth": []}, {"sessionCookie": [], "csrfHeader": []}] if mutation else [{"bearerAuth": []}, {"sessionCookie": []}]),
-          "responses": {}, "x-handler": "src/api.rs::" + handler}
+          "responses": {}, "x-handler": source + "::" + handler}
     params = [parameter(name) for name in query]
     if mutation:
         params += [parameter("CsrfHeader"), parameter("Origin")]
@@ -434,6 +477,30 @@ operation("/auth/login", "post", "login", "Sign in to a local account", "Rate li
 operation("/auth/logout", "post", "logout", "Revoke the presented session", "Uses the presented bearer token or exact session cookie, revokes it, and expires the browser cookie. This is session logout, not account deletion.", tag="Authentication", status="204", cookie=True)
 operation("/auth/me", "get", "me", "Read current account", "Authenticates the presented session against current account state.", "UserResponse", tag="Authentication", example={"user": user_example})
 operation("/auth/password", "post", "change_password", "Change the local account password", "Requires the current password and a valid session; revokes all sessions for this account. Sign in again after success. Password hashing is rate/capacity limited.", body="PasswordInput", tag="Authentication", status="204", errors=["429"], request_examples={"change": {"current_password": "old-example-not-a-secret", "new_password": "new-example-not-a-secret"}})
+operation("/auth/options", "get", "options", "Read available sign-in methods", "Returns public capability flags and the configured origin/RP only. IP origins cannot enable WebAuthn; use localhost or an HTTPS domain. Does not expose OAuth or mail credentials.", "AuthOptions", public=True, tag="Authentication", source="src/identity_config.rs")
+operation("/auth/security", "get", "security", "Read this account's sign-in methods", "Returns verified email, Google bindings and redacted passkey metadata. Backup flags come from verified authenticator data and do not identify a cloud provider. No private keys or WebAuthn verifier state are returned.", "AccountSecurity", tag="Authentication", source="src/identity.rs")
+operation("/auth/reauth", "post", "reauthenticate", "Confirm the current password", "Refreshes the five-minute recent-authentication window for this specific active session. Does not create another session or extend the absolute session lifetime. Failed proof does not revoke the current session.", "RecentAuthentication", "PasswordReauth", tag="Authentication", errors=["429"], source="src/identity.rs")
+operation("/auth/passkeys/register/options", "post", "register_options", "Start passkey registration or replacement", "Requires a current recently authenticated session. Server stores expiring one-use verifier state bound to this session, account and configuration revision. Replacement preserves the old credential until the new registration commits. No authenticator attachment is forced; physical FIDO2 UV-capable keys and synced credentials are accepted.", "PasskeyOptions", "PasskeyRegistrationInput", tag="Authentication", errors=["409", "429"], source="src/identity.rs")
+operation("/auth/passkeys/register/finish", "post", "register_finish", "Complete passkey registration", "Verifies the browser ceremony, then atomically adds the credential and optionally removes the replaced one. Requires the original active recently authenticated session. A failed or cancelled ceremony cannot remove the old credential.", "PasskeyResponse", "PasskeyFinishInput", tag="Authentication", errors=["409", "429"], source="src/identity.rs")
+operation("/auth/passkeys/login/options", "post", "login_options", "Start account-first passkey sign-in", "Accepts a username or explicitly verified email. Existing credential allow-list is scoped to that account. One-use verifier state expires after five minutes. Credential IDs and browser prompts are not themselves proof of authentication.", "PasskeyOptions", "PasskeyLoginInput", public=True, tag="Authentication", errors=["401", "429", "503"], source="src/identity.rs")
+operation("/auth/passkeys/login/finish", "post", "login_finish", "Sign in using a verified passkey assertion", "Verifies RP/origin/challenge/signature/user verification, then rechecks the enabled account, credential version and configuration under database locks before issuing a session. A removed or replaced credential cannot revive a stale assertion.", "SessionResponse", "PasskeyFinishInput", public=True, cookie=True, tag="Authentication", errors=["401", "409", "429", "503"], source="src/identity.rs")
+operation("/auth/passkeys/reauth/options", "post", "reauth_options", "Start passkey confirmation for this session", "Uses only passkeys bound to the current account, with single-use state bound to the original session.", "PasskeyOptions", tag="Authentication", errors=["429"], source="src/identity.rs")
+operation("/auth/passkeys/reauth/finish", "post", "reauth_finish", "Confirm this session using a passkey", "Fresh verified assertion updates only this session's recent-authentication window. Revoked sessions and stale credential versions remain invalid.", "RecentAuthentication", "PasskeyFinishInput", tag="Authentication", errors=["409", "429"], source="src/identity.rs")
+operation("/auth/passkeys/{id}", "patch", "rename", "Rename a bound passkey", "Requires current recently authenticated account ownership. The name is a user label, not an attested authenticator vendor.", "PasskeyResponse", "PasskeyRenameInput", tag="Authentication", errors=["404"], source="src/identity.rs", operation_id="rename_passkey")
+operation("/auth/passkeys/{id}", "delete", "remove", "Remove one bound passkey", "Requires current recently authenticated account ownership and preserves at least one usable sign-in method. Sessions issued using the removed credential are revoked.", tag="Authentication", status="204", errors=["400", "404"], source="src/identity.rs", operation_id="remove_passkey")
+operation("/auth/google/start", "post", "start", "Start Google sign-in or binding", "Authorization-code OIDC with state, nonce, PKCE S256 and an independent HttpOnly SameSite=Lax browser-binding cookie. Link requires recent password/passkey confirmation. Google sign-in only accepts previously explicitly linked identities; no registration or account merge by email. A Google login session must confirm a local password or passkey before sensitive account changes.", "GoogleStartResponse", "GoogleStartInput", public=True, tag="Authentication", errors=["401", "429", "503"], source="src/identity/google.rs", operation_id="google_start")
+operation("/auth/google/callback", "get", "callback", "Finish the Google authorization-code callback", "Consumes the one-use intent and validates its browser binding before any token exchange. Uses fixed Google endpoints and verifies JWT signature, issuer, audience, authorized presenter, lifetime and nonce. Rechecks the original session for account changes; errors redirect to /?auth=failed without provider details or credentials.", public=True, tag="Authentication", status="303", source="src/identity/google.rs", operation_id="google_callback")
+google_callback = PATHS["/api/v1/auth/google/callback"]["get"]
+google_callback["parameters"] = [{"name": name, "in": "query", "required": False, "schema": string(), "description": "Provider callback value; never log."} for name in ["state", "code", "error"]]
+google_callback["responses"]["303"] = {"description": "Redirect to the same-origin application with a success/failure indicator. Clears the short-lived OAuth cookie.", "headers": {"Location": {"schema": string(), "description": "Fixed same-origin return path."}, "Set-Cookie": {"schema": string(), "description": "Clears the OAuth binding and may set the normal HttpOnly Strict session cookie."}}}
+operation("/auth/google/unlink", "post", "unlink", "Remove a Google identity binding", "Requires a current recently authenticated owner session, revokes sessions issued by that identity and preserves another usable sign-in method.", body="GoogleUnlinkInput", tag="Authentication", status="204", errors=["400", "404"], source="src/identity/google.rs", operation_id="google_unlink")
+operation("/auth/email/start", "post", "start_email", "Send an email verification link", "Current recent authentication required. Delivers through saved SMTP settings; response never contains the verification token. Pending replacement leaves the prior verified email active. Rate limited per account, including hourly/daily caps.", "EmailPending", "EmailInput", tag="Authentication", errors=["409", "429", "502"], source="src/email_auth.rs")
+operation("/auth/email/verify", "post", "verify_email", "Confirm a pending email binding", "Requires the original active session and one-use 15-minute token from the mail fragment. Atomically confirms the new address and invalidates stale recovery requests. Merely opening a GET link never binds an email.", "VerifiedEmail", "EmailVerifyInput", tag="Authentication", errors=["409", "429"], source="src/email_auth.rs")
+operation("/auth/password/reset/request", "post", "request_reset", "Request email password recovery", "Uses only an explicitly verified address. Existing, unknown and delivery-throttled addresses receive the same accepted response. Mail delivery is asynchronous; acceptance does not promise delivery. Public/global request limiting can still return 429.", "EmailAccepted", "EmailInput", public=True, tag="Authentication", errors=["429", "503"], source="src/email_auth.rs")
+operation("/auth/password/reset/finish", "post", "finish_reset", "Reset a password using verified email", "Consumes a valid single-use 15-minute token, checks the exact password/email version captured at issuance, changes the password and revokes all account sessions/challenges. Stale recovery cannot overwrite a newer password or email change.", body="EmailResetInput", public=True, tag="Authentication", status="204", errors=["429", "503"], source="src/email_auth.rs")
+operation("/admin/auth-settings", "get", "settings", "Read redacted authentication configuration", "Instance administrator only. Shows secret-presence flags instead of secret values or ciphertext; includes the exact Google redirect URI and passkey count.", "AuthSettings", tag="Administration", source="src/identity_config.rs", operation_id="read_auth_settings")
+operation("/admin/auth-settings", "put", "save_settings", "Save authentication and email configuration", "Requires current recently authenticated instance administrator and matching revision. Entire configuration saves atomically. Secrets are encrypted with the installation vault; changing their destination requires replacement or explicit clearing. Origin/RP cannot change while passkeys exist. SMTP requires TLS or STARTTLS, except explicitly selected literal loopback local relay.", "AuthSettings", "AuthSettingsInput", tag="Administration", errors=["409", "429"], source="src/identity_config.rs")
+operation("/admin/auth-settings/test-email", "post", "test_email", "Send a test using saved SMTP settings", "Requires current recently authenticated instance administrator. Sends one real message to the supplied address through the already saved transport. No credentials or message bodies are logged. A successful result means the SMTP server accepted the message.", "EmailAccepted", "EmailInput", tag="Administration", errors=["429", "502"], source="src/email_auth.rs")
 operation("/admin/users", "get", "users", "List active local accounts", "Instance administrator only; returns up to 1000 active users ordered by username, without password hashes.", "UserList", tag="Administration", example={"items": [user_example]})
 operation("/admin/users", "post", "create_user", "Create a local login account", "Instance administrator only. Creates a non-instance-admin account without workspace membership; membership is a separate action.", "UserResponse", "CreateUserInput", tag="Administration", errors=["409", "429"], example={"user": user_example}, request_examples={"account": {"username": "example_user", "password": "example-only-not-a-secret"}})
 operation("/admin/backup", "get", "backup", "Export a sensitive consistent database snapshot", "Instance administrator only. Includes password hashes and encrypted secrets but excludes sessions, secrets.key and external state. Bounded to 256 MiB of row data and 250,000 rows per table. Restore is CLI-only.", "Backup", tag="Administration", errors=["400", "500"])
@@ -479,7 +546,7 @@ operation("/health/ready", "get", "ready", "Check durable storage readiness", "P
 def build():
     return {"openapi": "3.1.0", "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
         "info": {"title": "RstrBot HTTP API", "version": VERSION,
-            "description": "Contract for actually registered release routes. All paths are absolute from the server origin. Current JSON success bodies use HTTP 200; documented no-content operations use 204. Browser authentication uses an HttpOnly SameSite=Strict cookie; non-browser callers may use the same opaque session token as Bearer (not a separately scoped API key). Authorization headers override cookies. Every API mutation without a Bearer-prefixed Authorization requires X-RstrBot-Request: 1, including setup/login. Cross-site Sec-Fetch-Site and mismatched Origin are rejected even with Bearer. No credentialed CORS or automatic redirect-based authorization is provided. JSON bodies are limited to 1 MiB; UTF-8 byte limits are described with x-max-utf8-bytes. Unknown top-level fields are rejected only where the Rust request type declares deny_unknown_fields; generic data and ChatRequest are intentionally described separately. Examples are illustrative test data, not execution evidence. Unsupported capabilities have no invented endpoints.",
+            "description": "Contract for actually registered release routes. All paths are absolute from the server origin. Current JSON success bodies use HTTP 200; documented no-content operations use 204. Browser authentication uses an HttpOnly SameSite=Strict cookie; non-browser callers may use the same opaque session token as Bearer (not a separately scoped API key). Authorization headers override cookies. Every API mutation without a Bearer-prefixed Authorization requires X-RstrBot-Request: 1, including setup/login. Cross-site Sec-Fetch-Site and mismatched Origin are rejected even with Bearer. No credentialed CORS is provided. The Google callback has its own single-use state/browser binding validation before exchanging a code. JSON bodies are limited to 1 MiB; UTF-8 byte limits are described with x-max-utf8-bytes. Unknown top-level fields are rejected only where the Rust request type declares deny_unknown_fields; generic data and ChatRequest are intentionally described separately. Examples are illustrative test data, not execution evidence. Unsupported capabilities have no invented endpoints.",
             "license": {"name": "MIT", "identifier": "MIT"}},
         "servers": [{"url": "/", "description": "Same-origin deployment; all API paths include /api/v1 explicitly."}],
         "tags": [{"name": name} for name in ["Setup", "Authentication", "Administration", "Workspaces", "Resources", "Execution", "Plugins", "Delivery", "Knowledge", "Scheduling", "Events", "Budget", "Discovery", "Health"]],
@@ -491,7 +558,7 @@ def build():
             "sessionCookie": {"type": "apiKey", "in": "cookie", "name": "rstrbot_session", "description": "HttpOnly SameSite=Strict browser session; Secure if deployment config enables it. Do not read it with frontend JavaScript."},
             "csrfHeader": {"type": "apiKey", "in": "header", "name": "X-RstrBot-Request", "description": "Literal value 1. Anti-CSRF signal, not identity; required with cookie-based API mutations."}},
             "parameters": PARAMETERS, "responses": RESPONSES, "schemas": SCHEMAS},
-        "x-reviewed-sources": ["src/api.rs", "src/state.rs", "src/engine.rs", "src/schedule.rs", "src/delivery.rs", "src/knowledge.rs", "crates/rstrbot-store/src/lib.rs", "crates/rstrbot-store/src/resources.rs", "crates/rstrbot-store/src/auth.rs", "crates/rstrbot-store/src/workspaces.rs", "crates/rstrbot-store/src/backup.rs", "crates/rstrbot-store/src/budget.rs"],
+        "x-reviewed-sources": ["src/api.rs", "src/identity.rs", "src/identity/google.rs", "src/identity_config.rs", "src/email_auth.rs", "src/state.rs", "src/engine.rs", "src/schedule.rs", "src/delivery.rs", "src/knowledge.rs", "crates/rstrbot-store/src/lib.rs", "crates/rstrbot-store/src/resources.rs", "crates/rstrbot-store/src/auth.rs", "crates/rstrbot-store/src/identity.rs", "crates/rstrbot-store/src/workspaces.rs", "crates/rstrbot-store/src/backup.rs", "crates/rstrbot-store/src/budget.rs"],
         "x-contract-notes": ["Resource data schemas describe supported client configuration. Some serde_json::Value fields are intentionally permissive and may retain extra JSON; they are not claimed to be globally rejected.", "All permission checks occur on the server against current membership/visibility; examples and schemas do not confer authority.", "The path/method inventory covers explicitly registered handlers. Axum's implicit HEAD handling for GET routes does not create a separate business operation; OPTIONS/CORS support is not declared.", "No API endpoint performs restore, executable installation, attachment upload, arbitrary sandbox execution, legacy compatibility or autonomous agent delegation in this release."]}
 
 

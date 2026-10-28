@@ -1,12 +1,33 @@
 # RstrBot operations
 
-## Upgrading the development preview to 0.1.2
+## Upgrading the development preview to 0.2.0
+
+Stop the core and preserve a consistent pre-upgrade database snapshot and a
+separately protected copy of `secrets.key`. Replace the four executables and
+`web/` together. Startup upgrades schema 1 to schema 2 transactionally; this is
+not a reversible binary-only update. To return to a schema-1 release, restore
+the pre-upgrade database and matching key into a separate data root. Do not run
+an old binary against the upgraded database or run both versions on one data root.
+
+The new account features require an administrator to configure a fixed HTTPS
+public origin and exact Passkey RP hostname, Google OAuth client and/or SMTP
+service. Local Passkey development uses `http://localhost`, not an IP RP. Once a
+Passkey exists, origin and RP changes are rejected; plan domain changes before
+registering credentials. See the [authentication guide](AUTHENTICATION.md) for
+Google linking, email recovery, multiple Passkeys and replacement behavior.
+
+Native WebAuthn dependencies require OpenSSL development files when building
+and compatible OpenSSL shared libraries when running a dynamically linked
+distribution. See [README](../README.md) for the build requirements. Exact test
+scope and fixed-build receipts are in [v0.2.0 evidence](evidence/v0.2.0/).
+
+### Retained 0.1.2 runtime behavior
 
 Stop the core, retain the protected data root and a separate protected copy of
 `secrets.key`, and replace the four executables plus `web/` together. Keep the old
 distribution for an explicit rollback. The Linux runtime ZIP is an executable
 service distribution, not a signed native desktop installer. See the current
-[acceptance record](ACCEPTANCE.md) and [versioned evidence](evidence/v0.1.2/) for
+[acceptance record](ACCEPTANCE.md) and [versioned evidence](evidence/v0.2.0/) for
 what was actually executed against the candidate being installed.
 
 In 0.1.2, runs, outbound deliveries and schedule claims are reconciled before the
@@ -189,7 +210,11 @@ Stop the core before local maintenance so the process lock can be acquired:
 
 The output must be a new file. It contains a consistent database snapshot,
 ownership, run/operation records and budget reservations. Password hashes and
-encrypted credential records make it sensitive. Sessions are excluded. Copy
+encrypted credential records make it sensitive. Version 2 snapshots include
+verified email, Google identity and Passkey public-key records, plus encrypted
+authentication settings. Sessions, security challenges, email tokens and mail
+rate-limit records are excluded. Version 1 snapshots remain importable and are
+upgraded to schema 2; new v2 snapshots are not a downgrade format. Copy
 `secrets.key` through a separately protected channel, and separately preserve
 external plugin state and attachments. The snapshot explicitly declares that it
 does not include that external state; it is not a complete application disaster
@@ -252,11 +277,13 @@ The CI workflow distinguishes Linux runtime tests, SQLite/PG with Valkey on/off,
 SDK process tests, and native Windows/macOS core checks. A workflow definition is
 not an executed CI receipt; only report success after a real run completes.
 
-The unified `scripts/verify_integration.py` runner defines 22 real-service
+The unified `scripts/verify_integration.py` runner defines 26 real-service
 HTTP/recovery groups, including both database backends for delivery-session
-revocation. `scripts/check.sh --full-matrix` requires disposable PostgreSQL and
-Valkey services. The browser harness defines 14 real-service UI flows. Current
-release receipts belong in `docs/evidence/v0.1.2/`; earlier evidence is historical.
+revocation and SMTP/identity behavior. `scripts/check.sh --full-matrix` requires
+disposable PostgreSQL and Valkey services. The two browser harnesses cover the
+workspace and account-security flows, including Chromium WebAuthn virtual
+authenticators. Current receipts belong in `docs/evidence/v0.2.0/`; earlier
+evidence is historical. See the receipts for actual executed counts and limits.
 The plan and CI wiring are not passing results. Reused passing matrix rows must
 match the candidate binaries, runner, harness files and service endpoints; a
 changed candidate requires new evidence.
@@ -265,10 +292,10 @@ changed candidate requires new evidence.
 
 Take a consistent database backup and protected key copy first. Stop the old core,
 preserve its binaries and all user data, replace the binaries/WebUI, then start the
-new version and inspect its health and interrupted-run records. This version has
-only the initial schema; later schema migrations must publish their reversibility
-limits before promising rollback. Do not run two release versions against one
-data directory.
+new version and inspect its health and interrupted-run records. Version 0.2.0
+uses schema 2 and upgrades schema 1 on startup. A rollback requires a protected
+pre-upgrade snapshot and its key; replacing only the executable does not undo
+the migration. Do not run two release versions against one data directory.
 
 Ctrl-C and Unix SIGTERM request shutdown, cancel owned active runs, and wait for
 bounded cleanup. Already-sent external operations retain their actual receipt or

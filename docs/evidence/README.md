@@ -1,6 +1,23 @@
 # RstrBot 验证证据
 
-## 当前交付：0.1.2
+## 当前交付：0.2.0
+
+本轮界面重设计与邮箱、Google、多 Passkey 功能的固定构建回执位于
+[v0.2.0/](v0.2.0/)。完整数量、输入摘要与执行边界见
+[verification.json](v0.2.0/verification.json) 和
+[0.2.0 改进报告](../IMPROVEMENTS_0_2_0.md)。配置步骤见
+[账户与登录指南](../AUTHENTICATION.md)。
+
+测试使用合成账户、真实本地 HTTP/SMTP、SQLite/PostgreSQL、Valkey 和
+Chromium 虚拟认证器。真实 Google 项目、真实收件箱、实体安全密钥和手机
+云同步没有由这些本机回执证明。远端 CI 应查看对应提交的实际 Actions 状态。
+
+## 历史交付：0.1.3
+
+[v0.1.3/](v0.1.3/) 保存上一轮撤权与迟到响应修复的证据，详细说明见
+[0.1.3 报告](../IMPROVEMENTS_0_1_3.md)。
+
+## 历史交付：0.1.2
 
 本轮固定 Linux x86_64 release 的证据位于 [v0.1.2/](v0.1.2/)。详细范围与限制见 [实现报告](../IMPLEMENTATION_REPORT.md) 和 [52 项追踪](../ACCEPTANCE.md)。
 

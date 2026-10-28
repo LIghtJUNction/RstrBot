@@ -37,6 +37,8 @@ python3 tests/shared_context_privacy.py --binary "$binary" --output test-results
 python3 tests/schedule_authority.py --binary "$binary" --output test-results/schedule-authority.json
 python3 tests/session_revocation.py --binary "$binary" --output test-results/session-revocation.json
 python3 tests/model_target_authority.py --binary "$binary" --output test-results/model-target-authority.json
+python3 tests/model_test_revocation.py --binary "$binary" --output test-results/model-test-revocation.json
+python3 tests/identity_integration.py --binary "$binary" --output test-results/identity.json
 python3 tests/stream_persistence.py --binary "$binary" --output test-results/stream-persistence-sqlite.json
 python3 tests/history_recovery.py --binary "$binary" --output test-results/history-recovery-sqlite.json
 
