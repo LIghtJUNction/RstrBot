@@ -2,7 +2,11 @@
 
 日期：2026-10-28，Asia/Taipei。项目与远端保持RstrBot，https://github.com/LIghtJUNction/RstrBot.git 。源码观察基线main提交 `ead5bf2cea735078e1a37655dcc136485f781b7f`，原工作区包含用户已确认纳入的未提交UI、SDK与文档改动。
 
-## 用户最终确定的布局
+## 2026-10-29 后续调整
+
+用户要求按迁移技能在远程提供 generated 子模块；本文件下方“最终确定的布局”记录的是此前时点，现由独立源码仓库与 `generated/rstrbot-implementation/` gitlink 取代。源码仍不属于配方依赖或配方归档。独立源码仓库：[https://github.com/LIghtJUNction/rstrbot-implementation](https://github.com/LIghtJUNction/rstrbot-implementation)，固定提交 `4fe18fdb2dbd5ae1892c11e503811801bd463287`，父提交为原源码基线 `ead5bf2cea735078e1a37655dcc136485f781b7f`；包含此前保留的本地 UI/SDK/文档与后续修复。完整迁移记录见项目 docs/MIGRATION.md。
+
+## 当时确定的布局（历史）
 
 RstrBot原仓库以recipes/为主要输入。既有实现、开发缓存及未提交改动完整移动到generated/rstrbot/，按用户指示作为可重新生成的本机产物由Git忽略。未建立观察源码子模块或新迁移仓库。早期额外创建的工作区已按用户要求移入系统回收站；本说明覆盖早期布局选择。
 

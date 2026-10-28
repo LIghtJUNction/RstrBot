@@ -10,9 +10,9 @@
 | --- | --- |
 | recipes/rstrbot/ | 产品入口、52项需求、215需求族/287原验收、设计、环境、性能计划和开发技能 |
 | recipes/rstrbot-*/ | 插件协议、四语言SDK、宿主/worker、存储、核心、Web与桌面的递归配方 |
-| generated/rstrbot/ | 既有源码及本地未提交改动、未来重建输出；临时生成物，Git忽略 |
+| generated/rstrbot-implementation/ | 独立源码仓库的 Git 子模块，固定可重新生成的实现；不属于配方依赖 |
 
-项目与仓库保持RstrBot原名。配方是主要输入，生成源码不作为配方依赖。历史源码提交仍在Git历史；当前本机源码完整移入generated/rstrbot/，555个来源文件内容已核对，详见[来源记录](recipes/rstrbot/SOURCE_EVIDENCE.md)。
+项目与仓库保持RstrBot原名。配方是主要输入，生成源码不作为配方依赖。既有源码及本地改动保留在独立子模块中；原始来源和后续迁移见[来源记录](recipes/rstrbot/SOURCE_EVIDENCE.md)。
 
 安装Recipkg工具后，在仓库根执行：
 
@@ -26,14 +26,16 @@ recipkg build "$tmpdir/rstrbot.recipe.tar.gz" --lang zh-CN --request '在 genera
 
 打包文件和build提示词写入系统临时目录，不在仓库中建立产物目录；需要继续使用时从命令输出中取该目录路径。build只生成提示词。把该Markdown交给Agent，才会开始实际实现与验收。源码语言保持Rust核心、TypeScript前端及Rust/Python/TypeScript/C# SDK，辅助工具可选。性能预算暂无数字，重建后按[性能计划](recipes/rstrbot/PERFORMANCE.md)测量。
 
-本机已有生成实现可从该目录运行：
+首次克隆后先执行 `git submodule update --init --recursive`。生成实现可从该目录运行：
 
 ```sh
-cd generated/rstrbot
+cd generated/rstrbot-implementation
+npm --prefix web ci
+npm --prefix web run build
 mise exec -- cargo run --locked -- --web-dir web/dist
 ```
 
-默认打开http://localhost:8787，完整首次初始化与使用说明见本机generated/rstrbot/README.md。打包后的Rust服务和worker无需Node/Python/.NET运行时；原生桌面、外部账号与目标平台需要分别验证。
+默认打开http://localhost:8787，完整首次初始化与使用说明见generated/rstrbot-implementation/README.md。打包后的Rust服务和worker无需Node/Python/.NET运行时；原生桌面、外部账号与目标平台需要分别验证。
 
 每次改进先更新[构建提示词](recipes/rstrbot/BUILD_PROMPT.md)、相关组件合同/验收和[版本记录](recipes/rstrbot/CHANGELOG.md)，再生成实现。开发技能在[.agents/skills/](.agents/skills/)；产品内教程/SDK技能材料随根配方保留。
 

@@ -93,3 +93,9 @@
 | R13-INT-008 | CONTRACT_INTEGRATION.md的同ID一致性场景；材料/运行分别报告 | not_executed |
 
 竞品追加：R13-CMP-01至R13-CMP-12、R13-CMP-GATE 的完整执行卡见 [COMPETITIVE_RUNBOOK.md](COMPETITIVE_RUNBOOK.md)；R13-OC-42640/59301/69160/91420/84544/177909/186700 的自足场景见 [OPENCLAW_FEEDBACK.md](OPENCLAW_FEEDBACK.md)。所有跨产品和新增上游回归软件结果初始not_executed。叶子及组件新验收随各包ACCEPTANCE继续执行，不由根表替代。
+
+## 1.15 生成实现布局验收
+
+| 编号 | 输入与操作 | 预期结果 |
+| --- | --- | --- |
+| RSTRBOT-21 | 全新克隆主仓库并递归初始化子模块；核对generated下gitlink、URL、精确提交和源码内容；无generated目录时独立检查配方归档 | 远程真实记录模式160000和可读的独立源码仓库，保留已确认本地改动；源码/构建缓存/数据库/密钥不进入纯Markdown配方归档；保留正在运行实例的本机兼容路径，禁止把别名提交为第二份实现 |

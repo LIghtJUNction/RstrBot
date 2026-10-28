@@ -1,4 +1,3 @@
-/generated/
 *.recipe.tar.gz
 .env
 *.db

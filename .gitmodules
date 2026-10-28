@@ -31,3 +31,6 @@
 [submodule ".agents/skills/update-recipkg-in-project"]
 	path = .agents/skills/update-recipkg-in-project
 	url = https://github.com/recipkg/update-recipkg-in-project.git
+[submodule "generated/rstrbot-implementation"]
+	path = generated/rstrbot-implementation
+	url = https://github.com/LIghtJUNction/rstrbot-implementation.git

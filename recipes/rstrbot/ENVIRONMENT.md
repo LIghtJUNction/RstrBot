@@ -18,4 +18,4 @@
 
 真实业务数据根、备份、secrets.key、登录cookie、bootstrap凭据不属于迁移输入。所有未来验收使用一次性数据根、临时数据库/schema、明确测试账号和受控本地服务；不得自动指向现有用户数据库。
 
-现有RstrBot仓库保持原名，recipes/是主要输入，generated/rstrbot/保存既有源码及未提交改动并作为未来生成位置。用户将其视为临时生成物，本次使用Git忽略目录，不新建子仓库或迁移仓库。历史源码及Recipkg工具源码都没有被声明成配方依赖，也不进入配方归档。Recipkg是生成/校验材料的工具，不是RstrBot运行时依赖。
+现有RstrBot仓库保持原名，recipes/是主要输入，generated/rstrbot-implementation/保存既有源码及未提交改动并作为未来生成位置。用户将其视为临时生成物，本次使用Git忽略目录，不新建子仓库或迁移仓库。历史源码及Recipkg工具源码都没有被声明成配方依赖，也不进入配方归档。Recipkg是生成/校验材料的工具，不是RstrBot运行时依赖。

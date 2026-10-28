@@ -2,6 +2,10 @@
 
 项目与远端保持 **RstrBot / LIghtJUNction/RstrBot**。现有仓库以 recipes/ 为主要输入，既有实现及未提交改动完整移到受Git忽略的 generated/rstrbot/。用户撤销的额外迁移工作区已移入系统回收站，不存在同名后缀项目路径。没有创建新的远端仓库。
 
+## 2026-10-29 后续布局
+
+用户要求远程包含 generated 源码子模块；旧版“Git忽略”的描述仅为本记录创建时的历史事实，现已由独立源码仓库和 `generated/rstrbot-implementation/` gitlink 取代。配方仍不依赖源码或把它打入归档。源码仓库为 [rstrbot-implementation](https://github.com/LIghtJUNction/rstrbot-implementation)，固定提交 `4fe18fdb2dbd5ae1892c11e503811801bd463287`，父提交为原基线 `ead5bf2cea735078e1a37655dcc136485f781b7f`。运行中的旧路径由本机未跟踪的兼容链接维持，递归克隆不包含该链接。
+
 ## 实际完成的检查
 
 | 检查 | 本次结果 | 范围 |

@@ -31,3 +31,5 @@ Browser-local drafts and versions are private user state: scope them by instance
 Keep current v1/1.0 behavior separate from future v2/1.1-draft contracts. Use the competitive runbook and OpenClaw feedback records for fixed versions, issue status, actual downstream evidence, and unexecuted cases. Static material validation, closed historical issues, and simulated users do not prove runtime success or comparative usability. Sync generated tutorials and embedded skills whenever these contracts change.
 
 For 1.14 provider rejections, use the supplemental PROVIDER_ERRORS contract and four-SDK vectors. Preserve generic fallback for older hosts/workers, never expose response bodies, and do not treat an upstream 401 as local sign-out. Report SDK runtimes not actually tested.
+
+The 1.15 generated implementation is the `generated/rstrbot-implementation/` source submodule. Verify its URL and pinned commit; recipe archives must not include implementation source or Git metadata.

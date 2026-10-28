@@ -35,3 +35,5 @@ python3 tests/plugin_conformance.py --sdk <rust|python|typescript|csharp>
 For a full local check, use `mise exec -- ./scripts/check.sh` when that script actually exists. Otherwise generate the required harness and record its real command. An unavailable runtime is `not_executed`, not a pass. Update the protocol document, SDK README, and conformance vectors together when changing shared behavior.
 
 For 1.14 provider rejections, use the supplemental PROVIDER_ERRORS contract and four-SDK vectors. Preserve generic fallback for older hosts/workers, never expose response bodies, and do not treat an upstream 401 as local sign-out. Report SDK runtimes not actually tested.
+
+The 1.15 generated implementation is the `generated/rstrbot-implementation/` source submodule. Verify its URL and pinned commit; recipe archives must not include implementation source or Git metadata.
