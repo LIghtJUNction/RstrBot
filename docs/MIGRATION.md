@@ -30,14 +30,6 @@
 
 早期检查引用的Recipkg源码路径在该项目并行调整布局后失效，返回No module named recipkg；最终定位到它的generated/src/，重新执行全部八包及归档检查通过。第一次需求计数只识别R前缀漏算26个B前缀；最终改为与原始215个ID集合及顺序逐一比对，通过。GitHub GraphQL标签回读曾EOF，后通过REST确认，没有重复修改标签。
 
-## 开发技能独立仓库
-
-核对[Recipkg当前上游迁移指南](https://github.com/recipkg/recipkg/blob/main/recipes/recipkg/skills/migrate-to-recipkg/SKILL.md)后，没有发现“开发技能必须作为子模块”的要求；指南说明的是源码工作区可采用子模块布局。本项目按用户要求为两个技能各建一个公开仓库：[`rstrbot-development`](https://github.com/LIghtJUNction/rstrbot-development)和[`rstrbot-plugin-development`](https://github.com/LIghtJUNction/rstrbot-plugin-development)，并固定为主仓库`.agents/skills/`下的Git子模块。
-
-主仓库`./scripts/sync-skills.sh`把两个子模块的`SKILL.md`同步到`recipes/rstrbot/skills/`，并更新[SOURCES.md](../recipes/rstrbot/skills/SOURCES.md)中的完整提交号。这样技能能独立迭代，Recipkg配方仍以普通Markdown快照完整交付，不依赖打包器解析Git子模块。脚本要求子模块工作区干净，避免把未提交修改误记为固定提交内容。Recipkg CLI的`skills sync`是将已安装配方里的技能安装到Agent目录的分发功能，不负责推进这些Git版本。
-
-拆分后的本地校验：同步脚本语法检查与执行通过，两个快照逐字匹配子模块；根配方`check`、递归`pack`、归档`check`及中文`build`提示词生成全部通过。临时归档和提示词位于系统临时目录，校验后自动清理。
-
 ## 未执行与边界
 
 本次未独立重建RstrBot，未重新运行原软件测试、未测性能、未验证原生安装/签名/升级、读屏/实体设备或商业模型/真实邮件/聊天平台。未触发CI。当前源版本是 `ead5bf2cea735078e1a37655dcc136485f781b7f` 加迁移前本地增量；旧已提交源码留在Git历史，本地增量连同全部原实现保存在generated/rstrbot/。性能数字保持未知，未来实现按配方验收。

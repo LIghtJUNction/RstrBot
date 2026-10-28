@@ -6,8 +6,6 @@ recipes/只含UTF-8 Markdown；根包声明的依赖必须指向有效配方，�
 
 每次收到产品改进，先更新主BUILD_PROMPT、相应组件/ACCEPTANCE和CHANGELOG，保留历史要求，再生成或修改实现。服务端仍独立执行授权/验证；UI隐藏不授予权限。未知费用、未知发送和未执行验收须如实记录。
 
-两个开发技能各自维护在独立Git仓库，并以`.agents/skills/`下的固定提交子模块接入。首次克隆后运行`git submodule update --init --recursive`；更新技能子模块后运行`./scripts/sync-skills.sh`，将SKILL.md和来源提交号同步到配方副本。提交主仓库时同时包含子模块指针与配方快照；不要直接编辑配方快照。
-
 使用Recipkg当前CLI运行check、pack、归档check和build --lang zh-CN；临时输出放在仓库外的系统临时目录，不要在仓库中创建固定的artifacts目录。核对归档只有普通UTF-8 .md、完整依赖/LOCK，生成提示词包含全部材料。模板生成/打包通过不表示软件已独立重建；保留验证结论于docs/MIGRATION.md。
 
 核心与四SDK语言保持用户选择，辅助工具可选。完整需求、视觉/交互、国际化、平台和性能未知见根配方。源实现检查在generated/rstrbot/运行，结果按对应源码/产物摘要记录；保持本地验证，不主动触发CI。正式发行构建/签名/部署要求在配方和生成实现中继续保留。

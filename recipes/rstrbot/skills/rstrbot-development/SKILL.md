@@ -1,12 +1,27 @@
 ---
 name: rstrbot-development
-description: Use when updating RstrBot recipes, generating the implementation, or changing product behavior.
+description: Use when changing RstrBot core, web UI, API, persistence, deployment, or repository documentation.
 ---
 
-# rstrbot-development
+# RstrBot development
 
-先阅读recipes/rstrbot/BUILD_PROMPT.md、SOURCE_EVIDENCE.md及受影响组件合同。配方是主要输入，生成实现位于generated/rstrbot/且不作为配方依赖。
+## Start here
 
-用户每次改进要求先更新相应配方、验收和根CHANGELOG，保留历史，再修改/生成代码。核心Rust、前端TypeScript、四SDK语言保持；UI选项依据真实API，权限、密钥和副作用规则由服务端执行。
+1. Read the root `AGENTS.md` and preserve unrelated work in the checkout.
+2. Read `README.md`, `docs/API_CONTRACT.md`, and the relevant module docs before changing behavior.
+3. Use the versions in `mise.toml`. Do not silently raise or lower the supported toolchain.
+4. Check `git status` and the current API contract before editing. The contract and OpenAPI schema are the source of truth for UI choices and backend behavior.
 
-运行recipkg check recipes/rstrbot、pack、归档check及完整build提示词验证；临时输出放在仓库外的系统临时目录，不要创建固定产物目录。业务实现检查在generated/rstrbot/执行，来源版本/环境/通过和未执行明确记录。代码可生成，未知用户改动仍须先提炼或完整保留。项目名保持RstrBot，不新建带迁移后缀的仓库。
+## Product and implementation boundaries
+
+- Keep authorization, validation, and durable state enforcement on the server. A hidden or disabled UI control is not an access check.
+- Do not invent resource fields, enum values, provider types, capability support, success states, or retry safety. Derive finite choices from the contract or server response; keep genuinely open text fields editable.
+- Treat secrets as write-only. Never put credentials in logs, rendered summaries, links, or errors.
+- Preserve the distinction between rejected, failed, unknown, and completed external operations. Do not replay a mutation after an uncertain response unless its contract provides idempotency.
+- Keep English and Chinese copy in separate language branches. Use short, plain wording and light original humor only where it does not obscure risk or status.
+- Prefer spacing and grouping over decorative rules. Keep keyboard focus, screen-reader names, touch targets, reduced-motion behavior, and narrow-screen layouts usable.
+- Keep docs and `docs/blueprint/BUILD_PROMPT.md` current when a user requests a product improvement. Record the requirement and its observable acceptance conditions without claiming it is already implemented.
+
+## Verification
+
+Use the smallest relevant local checks first. The repository-wide local check is `mise exec -- ./scripts/check.sh`. Report which checks ran and their result; a successful build does not prove browser, production, or device acceptance.

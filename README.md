@@ -9,29 +9,8 @@
 | recipes/rstrbot/ | 产品入口、52项需求、215需求族/287原验收、设计、环境、性能计划和开发技能 |
 | recipes/rstrbot-*/ | 插件协议、四语言SDK、宿主/worker、存储、核心、Web与桌面的递归配方 |
 | generated/rstrbot/ | 既有源码及本地未提交改动、未来重建输出；临时生成物，Git忽略 |
-| .agents/skills/ | 两个独立技能仓库的固定提交子模块；配方内另有可独立打包的Markdown快照 |
 
 项目与仓库保持RstrBot原名。配方是主要输入，生成源码不作为配方依赖。历史源码提交仍在Git历史；当前本机源码完整移入generated/rstrbot/，555个来源文件内容已核对，详见[来源记录](recipes/rstrbot/SOURCE_EVIDENCE.md)。
-
-两个技能各有独立仓库：[rstrbot-development](https://github.com/LIghtJUNction/rstrbot-development)和[rstrbot-plugin-development](https://github.com/LIghtJUNction/rstrbot-plugin-development)。克隆或更新后同步技能快照：
-
-```sh
-git submodule update --init --recursive
-./scripts/sync-skills.sh
-```
-
-迭代时先在技能仓库修改、提交并推送。回到主仓库确认对应子模块无未提交改动，再快进并同步配方快照：
-
-```sh
-skill=.agents/skills/rstrbot-development # 插件技能则改为 rstrbot-plugin-development
-git -C "$skill" status --short
-test -z "$(git -C "$skill" status --porcelain)"
-git -C "$skill" fetch origin main
-git -C "$skill" merge --ff-only FETCH_HEAD
-./scripts/sync-skills.sh
-```
-
-最后在主仓库提交新的子模块指针与`recipes/rstrbot/skills/`快照。子模块提交号记录在[技能来源清单](recipes/rstrbot/skills/SOURCES.md)。
 
 安装Recipkg工具后，在仓库根执行：
 
