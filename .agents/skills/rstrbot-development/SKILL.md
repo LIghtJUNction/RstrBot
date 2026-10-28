@@ -20,3 +20,5 @@ description: Use when updating RstrBot recipes, generating the implementation, o
 1.15生成实现位于 `generated/rstrbot-implementation/` 源码子模块；核对子模块URL和固定提交，配方归档不包含源码或Git元数据。
 
 1.16 用户确认 MaiBot 为对比对象。首次对话默认不为标题另发模型请求；可选模型标题需用户主动启用并说明请求、费用和数据范围。按RSTRBOT-22核对账本，模拟结果不代表整体领先。
+
+1.17 按 R13-OC-185423 验证可选供应商回退：复用已接纳消息，真冲突和 unknown 禁止回退；没有实现或实际账本时保持 gap/not_executed。
