@@ -23,3 +23,9 @@ Rust 实现 SQLite 与 PostgreSQL 下相同的业务语义。采用维护中的�
 启动监听前恢复全部runs、deliveries、schedule claims。稳定(created_at,id)游标，页128条、存储JSON批次16MiB（至少一条保证推进）、首批确定上界。不是公开分页token也不是事务快照。unfinished run变interrupted，prepared delivery变not_sent，sending delivery变unknown，在途schedule禁用并needs_reconciliation。恢复不新建替代操作，不重放外部副作用。
 
 探测数据库只读不迁移；拒绝无关schema。单数据根实例锁、Unix目录0700与凭据0600由宿主层配合。SQLite单核心；PG并不自动证明多副本支持。数据库URL必须保留Unicode、空格和特殊字符路径的真实含义。
+
+## 1.13 扩展持久化完成合同
+
+读取 [DURABILITY_CONTRACT.md](DURABILITY_CONTRACT.md) 的 S01–S07：它补全主体/授权归属、准入/幂等/事件/预算事务、双数据库故障、媒体与索引代次、schema 3 和完整外部状态备份、连续重启与未来多节点 fencing。当前 schema 2、rstrbot-db-v2 和原恢复规则继续兼容，新增格式和多节点均未实现/未执行；不能把设计迁移表当作数据库已升级。
+
+新增 `R13-STORE-001`–`R13-STORE-013` 必须在真实临时 SQLite/PG 分别执行，核对下游调用次数与恢复对象，保留 not_executed/blocked 范围。数据库不能提交准入时不得派发，已知实际费用不因撤权归零，unknown 副作用不因租约转移或导入恢复自动重放。

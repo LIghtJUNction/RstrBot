@@ -11,3 +11,18 @@
 | RSTRBOT-DESKTOP-05 | 正常退出/强制崩溃/升级后重启并检查进程树 | 正常退出回收；恢复保持未知副作用，不自动重发 |
 | RSTRBOT-DESKTOP-06 | 在缺Windows本机transport时选择本机模式 | 明确不支持/阻塞，不能假装成功 |
 | RSTRBOT-DESKTOP-07 | 升级/回滚/卸载流程检查数据库、密钥和外部插件状态 | 不被安装资源替换或删除；回滚使用兼容备份而非旧程序读新schema |
+
+## 1.13 追加验收（全部 not_executed）
+
+[NATIVE_DELIVERY.md](NATIVE_DELIVERY.md) 是下列场景的完整输入、操作、故障与下游断言来源；不是可选建议，不能只运行本表引用检查就声称软件通过。
+
+| 编号 | 完整场景 | 初始状态 |
+| --- | --- | --- |
+| R13-DESKTOP-001 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-002 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-003 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-004 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-005 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-006 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-007 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |
+| R13-DESKTOP-008 | NATIVE_DELIVERY.md 的同ID场景 | not_executed |

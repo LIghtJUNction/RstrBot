@@ -23,3 +23,9 @@ platform.capabilities 明确只支持出站文本、HTTP 接受回执，不宣�
 同一适配器支持 --mcp-stdio。运营者提供固定 RSTRBOT_WEBHOOK_URL、绝对私有 RSTRBOT_WEBHOOK_STATE、可选 TOKEN 和私网开关。send_message 工具仅允许 text、operation_id，不能覆盖目标/凭据。先持久化哈希意图再发送；相同 ID 同参数返回原回执，改变参数冲突；pending/unknown 与重启均不重放。已发送但保存失败须返回真实投递结果、persistence=failed、reconciliation_required=true。它的独立状态需单独保护，不共享浏览器会话租约。
 
 当前信任边界、协议细节和完整错误分类随依赖 protocol 一起提供。旧生态、Windows named pipe、OS 沙箱是保留目标，不能从本包当前源实现推定已支持。
+
+## 1.13扩展重建合同
+
+继续阅读 [LIFECYCLE_AND_ISOLATION.md](LIFECYCLE_AND_ISOLATION.md) 与 [ADAPTERS_AND_COMPATIBILITY.md](ADAPTERS_AND_COMPATIBILITY.md)，补齐原子安装/代次、实例数据、凭据代理、钩子命令、真实沙箱、通用MCP、双向平台/媒体和兼容加载。新能力均为未实现目标，不改写三个现有worker的当前能力。线格式只经声明依赖`sdk → protocol`读取；不反向依赖产品根或复制HTTP定义。重建时使用显式1.1-draft特性并执行新增验收，不重放未知副作用。
+
+兼容验收先使用 [COMPATIBILITY_FIXTURES.md](COMPATIBILITY_FIXTURES.md) 已冻结的三个官方未修改候选；保留精确profile和未覆盖集，不能修改样本或将旧profile通过扩大为当前全部版本兼容。

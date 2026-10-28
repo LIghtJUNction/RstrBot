@@ -25,3 +25,7 @@ graph TD
 这是重建和集成依赖图，服务器无需运行桌面或Node，浏览器无需安装Rust。避免相同大接口材料在多个别名中重复展开：完整HTTP声明只放在core，其他包通过其递归依赖读取；协议只放在protocol。父包不能假设依赖的AGENTS.md变成全局规则。
 
 每个source只指向本工作区真实的兄弟配方。pack会把依赖固定到各自.deps/<alias>/并生成根LOCK.md，归档可脱离这些作者路径校验/生成提示词。generated/中的实现、历史源码、系统/第三方库和外部账号/服务不是配方依赖；环境说明见ENVIRONMENT.md。
+
+## 1.13版本与接口一致性
+
+八包的r2→1.13材料版本、各接口唯一规范、当前与未来协商及外部前提见 [CONTRACT_INTEGRATION.md](CONTRACT_INTEGRATION.md)。所有source仍是当前八个真实配方；不能为了读取根覆盖表给叶子包增加反向依赖。新合同在各自BUILD_PROMPT/ACCEPTANCE中闭合，脱离根材料仍能完成各包负责的行为。

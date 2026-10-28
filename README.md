@@ -4,6 +4,8 @@
 
 从[完整重建入口](recipes/rstrbot/BUILD_PROMPT.md)开始。配方覆盖多用户与工作区、对话和工具、模型/渠道、知识与记忆、计划任务、可靠投递、四语言SDK、Web与桌面目标；完整第二阶段蓝图仍有待实现范围，见[当前范围](recipes/rstrbot/CURRENT_SCOPE.md)。
 
+逐项实现看[52项能力覆盖](recipes/rstrbot/CAPABILITY_COVERAGE.md)和[验收约定](recipes/rstrbot/ACCEPTANCE_HARNESS.md)；竞品任务与来源改进见[执行册](recipes/rstrbot/COMPETITIVE_RUNBOOK.md)和[OpenClaw反馈](recipes/rstrbot/OPENCLAW_FEEDBACK.md)。合同定义与材料校验不代表软件已实现或比较已胜出。
+
 | 路径 | 用途 |
 | --- | --- |
 | recipes/rstrbot/ | 产品入口、52项需求、215需求族/287原验收、设计、环境、性能计划和开发技能 |
@@ -18,8 +20,8 @@
 tmpdir="$(mktemp -d)"
 printf '临时输出目录: %s\n' "$tmpdir"
 recipkg check recipes/rstrbot
-recipkg pack recipes/rstrbot -o "$tmpdir/rstrbot-0.2.0-recipe.1.recipe.tar.gz"
-recipkg build "$tmpdir/rstrbot-0.2.0-recipe.1.recipe.tar.gz" --lang zh-CN --request '在 generated/rstrbot/ 中重建，遵守配方与验收要求' --output "$tmpdir/rstrbot-build.md"
+recipkg pack recipes/rstrbot -o "$tmpdir/rstrbot.recipe.tar.gz"
+recipkg build "$tmpdir/rstrbot.recipe.tar.gz" --lang zh-CN --request '在 generated/rstrbot/ 中重建，遵守配方与验收要求' --output "$tmpdir/rstrbot-build.md"
 ```
 
 打包文件和build提示词写入系统临时目录，不在仓库中建立产物目录；需要继续使用时从命令输出中取该目录路径。build只生成提示词。把该Markdown交给Agent，才会开始实际实现与验收。源码语言保持Rust核心、TypeScript前端及Rust/Python/TypeScript/C# SDK，辅助工具可选。性能预算暂无数字，重建后按[性能计划](recipes/rstrbot/PERFORMANCE.md)测量。

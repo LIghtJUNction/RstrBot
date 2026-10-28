@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-plugin-protocol"
-version = "0.2.0-recipe.1"
+version = "0.2.0-recipe.2"
 kind = "software"
 description = "独立插件的协议、上下文绑定、状态与错误约定"
 entry = "BUILD_PROMPT.md"

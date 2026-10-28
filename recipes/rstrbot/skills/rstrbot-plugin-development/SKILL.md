@@ -7,7 +7,8 @@ description: Use when building, reviewing, or documenting RstrBot executable plu
 
 ## Read the contract first
 
-- Read `docs/PLUGIN_PROTOCOL.md` and `sdk/README.md` before writing a worker.
+- In the complete recursive recipe, locate the `rstrbot-plugin-protocol`, `rstrbot-sdk`, and `rstrbot-plugin-host` packages and read their entrypoints, authoritative contracts, and acceptance cases. These are the reconstruction inputs.
+- In an existing generated implementation, also read its actual `docs/PLUGIN_PROTOCOL.md` and `sdk/README.md`; those generated files are not prerequisites for consuming this Markdown recipe.
 - Choose the existing Rust, Python, TypeScript, or C# SDK. Implement the public protocol; do not depend on private core objects.
 - Treat the package manifest, installed package, workspace instance, and one invocation as separate things.
 
@@ -23,10 +24,12 @@ description: Use when building, reviewing, or documenting RstrBot executable plu
 
 ## SDK conformance
 
-Build the selected example using the pinned toolchain and run:
+Keep the current 1.0 reference and vectors unchanged. The extension protocol's 1.1-draft, SDK capability contract, host lifecycle/compatibility contracts, and core extension API describe future negotiated capabilities. Bounded host services grant no core-admin access. Freeze the unmodified compatibility fixtures by digest, then record import, behavior, recovery, and cleanup separately; a verified source hash does not prove compatibility. Update SDK documentation and embedded tutorials with the same distinction.
+
+Build the selected example using the pinned toolchain. In a generated implementation that provides this harness, run:
 
 ```sh
 python3 tests/plugin_conformance.py --sdk <rust|python|typescript|csharp>
 ```
 
-For a full local check, use `mise exec -- ./scripts/check.sh`. An unavailable runtime is `not_executed`, not a pass. Update the protocol document, SDK README, and conformance vectors together when changing shared behavior.
+For a full local check, use `mise exec -- ./scripts/check.sh` when that script actually exists. Otherwise generate the required harness and record its real command. An unavailable runtime is `not_executed`, not a pass. Update the protocol document, SDK README, and conformance vectors together when changing shared behavior.

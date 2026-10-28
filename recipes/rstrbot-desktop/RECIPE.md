@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-desktop"
-version = "0.2.0-recipe.1"
+version = "0.2.0-recipe.2"
 kind = "software"
 description = "三平台桌面启动器、本地sidecar与远程工作区连接"
 entry = "BUILD_PROMPT.md"

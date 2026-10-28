@@ -1,0 +1,218 @@
+# 共同任务执行册 · 提示词 1.13
+
+这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入；本轮只编写和校验配方，没有安装或运行竞品，没有调用付费模型或真实聊天渠道。以下所有跨产品结果均为 `not_executed`。
+
+本文件细化 [COMPETITIVE_ACCEPTANCE.md](COMPETITIVE_ACCEPTANCE.md) 的原有 CMP-01～CMP-12，不替代 52/215/287 历史。每个执行卡必须同时关联该任务的 `CMP-*` 与 `R13-CMP-*` ID。当前 RstrBot 能力事实来自 [CURRENT_SCOPE.md](CURRENT_SCOPE.md)，不能从本文件的目标行为反写为已实现。
+
+## 1. 版本冻结与启动前记录
+
+2026-10-28（Asia/Taipei）读取了以下官方 release API 和 tag 对应 commit。它们是可复现候选版本，不是安装成功证据；开始实测时可以沿用，或另开一轮重新冻结，不能运行一半静默更新。
+
+| 产品 | 固定候选 | commit / 输入身份 | 当前比较状态 | 官方来源 |
+| --- | --- | --- | --- | --- |
+| RstrBot | 应用 0.2.0 预览；本次配方 1.13 | Drive r2 的 Git 基线 `25c36e26ab1a0abe12393bd0480a373cf801c714` 加未提交输入；具体生成实现摘要待重建后填写 | not_executed | 本任务 `14-manifest.md`、[SOURCE_EVIDENCE.md](SOURCE_EVIDENCE.md)；Git HEAD 单独不足以重建该快照 |
+| AstrBot | `v4.29.3` | `f61a7f42696da6df25dc7a249ec9b8d54ed9da18` | not_executed | [release](https://github.com/AstrBotDevs/AstrBot/releases/tag/v4.29.3)、[固定 README](https://github.com/AstrBotDevs/AstrBot/blob/f61a7f42696da6df25dc7a249ec9b8d54ed9da18/README.md) |
+| OpenClaw | `v2026.10.8` | `dc2523e5a5c7a309517fd7fa834add938231d526` | not_executed | [release](https://github.com/openclaw/openclaw/releases/tag/v2026.10.8)、[固定 README](https://github.com/openclaw/openclaw/blob/dc2523e5a5c7a309517fd7fa834add938231d526/README.md) |
+| MainBot | 身份未确认；MaiBot 仅候选 `v1.3.17` | 候选 `Mai-with-u/MaiBot`：`6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3` | not_executed | [候选 release](https://github.com/Mai-with-u/MaiBot/releases/tag/v1.3.17)、[固定 README](https://github.com/Mai-with-u/MaiBot/blob/6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3/README.md)；身份未确认不得称其为用户指定对手 |
+
+release/tag 解析只证明版本身份。下载后另记录源包/容器镜像/安装包摘要、构建命令、锁文件摘要、插件与运行时版本、原生签名验证结果；尚未下载的摘要填 `unknown`。不同部署方式分别报告，例如源码服务与桌面安装器不能混为同一体验样本。MainBot 的身份问题只阻断它的正式比较，不阻断 RstrBot 配方、AstrBot/OpenClaw准备与通用夹具。
+
+### 环境和模型矩阵
+
+| 维度 | 可执行规则 | 本轮值 |
+| --- | --- | --- |
+| 主比较环境 | 四产品轮流使用同一台隔离测试主机/同规格虚机；固定 OS、CPU 架构/配额、RAM、存储、网络限制、浏览器版本；产品运行时按其固定文档提供 | unknown，未实际配置 |
+| 数据根/身份 | 每产品独立临时目录、端口、账号、工作区、凭据；不复用任何现有私有业务数据库；每次试验保留种子与重置点 | 仅下面的合成定义 |
+| 数据库/缓存 | 同产品先默认数据库，再测其声明的可选方案；RstrBot 的 SQLite、PostgreSQL × Valkey 关闭/开启/中断分别记录；竞品不支持同后端时写不适用，禁止冒充同配置性能 | not_executed |
+| 设备 | Web 先测 320/390/768/1440 CSS px 与 200% 缩放；Linux/Windows/macOS 原生安装另建独立结果行；硬件、最低 OS、实体 Passkey 未知 | not_executed |
+| D：确定性上游 | 每产品经自身正式模型入口调用同一个本地 HTTP/SSE 夹具；固定模型名 `fixture-chat-v1`、响应脚本、时间线、工具调用 ID、故障点；记录实际出站请求和返回 | 夹具待实现；不能拿它证明模型质量或商业兼容 |
+| L：本地真实模型 | 若四产品都能接入同一实际模型，固定模型文件摘要、推理引擎/量化/采样参数、上下文与硬件；缺能力记缺口 | 模型/设备 unknown；not_executed |
+| E：外部真实端到端 | 需可用且明确授权的测试账号、配额、同一具体模型版本/区域/参数、供应商价格日期、平台测试目标；不能用诊断回复冒充 | 本次禁止付费调用与真实外发，not_executed |
+| 性能候选 | 1 vCPU/1 GiB 是根 PERFORMANCE 的待测候选；运行时确实不支持时保留无法运行记录，不擅自提高该产品配额后作横比 | unknown；不得写为已达标 |
+
+D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路径和故障语义；它不能证明 Telegram、Discord、商业模型或人的满意度。比较“好用”采用同角色、同入口、同资料，保留产品合理默认值；为匹配能力而修改设置时记录设置步骤与差异。不得为了公平而关闭权限保护，也不能把缺少的能力悄悄从分母删除。
+
+### 初始能力与执行状态
+
+`partial`/`gap` 是 RstrBot 输入材料描述，不是本轮实测分数；外部产品统一 `unverified`，只能在逐项阅读固定文档并运行后改为 `supported`/`unsupported`/`misconfigured`，不得用未准备账号推断功能缺失。
+
+| 任务 | RstrBot 输入能力 | AstrBot | OpenClaw | MainBot / MaiBot 候选 | 四产品本轮执行 |
+| --- | --- | --- | --- | --- | --- |
+| CMP-01 | partial：本地初次对话；真实提供方未验 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-02 | partial：发现/保存/选择；完整路由回退未实现 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-05 | partial：原生工作区/私聊；组合路径待验 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-06 | partial：计划/预览/skip；完整故障组合待验 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-07 | partial：Webhook意图/回执；真实平台/多目标缺口 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-08 | partial：RFB局部修复；读屏/跨浏览器待验 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-09 | gap：通用附件/媒体未实现 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-10 | gap：群聊/双向平台未实现 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-11 | gap：子代理/写工具审批/编排未完整实现 | unverified | unverified | identity_pending / unverified | not_executed |
+| CMP-12 | partial：数据库备份/单节点；附件灾备/多节点/原生待验 | unverified | unverified | identity_pending / unverified | not_executed |
+
+## 2. 合成夹具与故障控制合同
+
+夹具由未来生成实现提供在一次性运行目录，不进入 `recipes/`。每种产品的适配层仅翻译入口和取证格式，不修改受测产品内部行为，不把绕过 UI 的脚本步骤计为普通用户操作。不得在配方内嵌真实密钥、cookie、用户消息或公开可用的分享链接。
+
+| 夹具 | 确定性内容 / 可观察输出 |
+| --- | --- |
+| F-IDENTITY | `owner-a`、`member-b`、`owner-c` 三个合成账户；工作区 `alpha` 和 `beta`；A/B同属alpha、C属beta；各有私聊及同名私有资料；公共资料正文含 `SHARED-CMP-001`，A/B/C私有资料分别含 `PRIVATE-A/B/C-CMP-001` |
+| F-MODEL | 提供方 A/B 两个独立地址；不同合成凭据与同名模型 ID，以 `(provider_instance_id, model_id)` 区分；记录请求序号、脱敏目标、credential fingerprint、run/tool ID、开始/结束、输出/usage；脚本含正常、401、429、首字节前断开、部分流后断开、迟到片段、畸形usage；真实原始凭据不进入证据 |
+| F-TOOL | 四SDK等价只读工具 `read_fixture` 返回 `fixture_revision=1` 与 `value=READY`；写入工具 `append_once` 只作用于本次合成接收账本。账本可从产品外独立读出 `{intent_key,payload_hash,received_at,count}`，避免用UI自报成功作唯一证据 |
+| F-DOC | UTF-8 Markdown：标题“冷却站值班表”，段落“蓝班负责甲阀；红班负责乙阀。”；包含重复标题、中文组合字符、HTML字样及第二版“红班负责丙阀。”。每版记录字节摘要；删除与改版查询必须区分 |
+| F-SINK | 受控本地接收端 T1/T2；可 `accept`、`reject_before_effect`、`accept_then_drop_ack`、`delay_ack`；提供独立只读账本。发送 intent_key 相同/不同分别计数；不把HTTP 200当最终用户已读 |
+| F-TIME | 可控服务时钟/调度时钟；记录tzdb版本。样例 `Asia/Tokyo` 与 `Asia/Taipei` 同一瞬间对照；`America/New_York` 使用2026-03-08 02:30不存在与2026-11-01 01:30重复场景；预期按产品公开策略核对，不要求竞品采RstrBot skip |
+| F-MEDIA | 本地生成的无个人内容PNG、5秒单音WAV、1页文本PDF、UTF-8文本及超限/损坏/伪扩展名样本；记录原字节摘要、大小、MIME和输出；绝不从真实聊天或个人相册取材 |
+| F-CHANNEL | 合成平台适配器入站序列含群消息、私聊、@提及、自身消息、引用自身旧消息、重复平台事件、撤销成员、断线重连；平台消息ID与接收/消费/回答/投递四种状态分开 |
+
+故障屏障：`G0`接受前，`G1`持久意图后/外部调用前，`G2`外部已接收/确认前，`G3`确认后/本地保存前，`G4`终态持久化后/界面刷新前。屏障必须通过测试适配器或数据库/网络故障装置实现，记录实际触发位置；只在UI显示一个“模拟失败”按钮不能证明底层路径。
+
+对于权限撤销，至少在排队、握手完成、调用前、响应返回四个时间点执行；能阻止尚未开始的调用，不承诺撤回远端已接受的动作。取消后保留真实发生的费用与副作用；不知道是否发生就保留 `unknown`。测试终止后移除合成接收端/测试账号，证据仅保留必要摘要。
+
+## 3. 逐项可执行验收卡
+
+以下每项的成功、故障和恢复断言都是 RstrBot 的规范要求；对竞品执行相同用户意图并按其实际提供的路径记录结果、缺口及政策差异。每项都有只读下游核对，失败不得靠换目标、换账号或无限重试“修好”。所有卡当前 `status=not_executed`。
+
+### CMP-01 / R13-CMP-01：新实例到首次对话
+
+输入：全新数据根、F-IDENTITY的A、F-MODEL A、固定提示“返回READY并保留对话”。部署者从官方安装入口开始，记录安装到可用的每次操作与等待。RstrBot依核心 CLI/OPENAPI 初始化；竞品采用冻结 README 的正式流程，不使用未声明端点。
+
+步骤与下游：完成初始化→选择提供方→填写合成凭据→发消息→等待终态→关闭浏览器/重开历史。F-MODEL只收到一次有效生成，历史含同一消息/输出、实际模型与唯一终态；实例重启后仍读到该记录。
+
+反例：空插件、坏地址、错误凭据分别应给对应修复入口；纠错不清其他表单值。初始化竞争只能产生一个首管理员。G1取消/撤销会话后不发生新的模型请求；G2断线不假装未调用，保留未知用量；刷新不能自动再发。额外新手账号不能读取初始化秘密。证据：操作录像、实际出站计数、脱敏会话导出、重启前后资源ID与状态。
+
+### CMP-02 / R13-CMP-02：增加供应商并切换
+
+输入：A已有模型和正在使用的选择，再新增B，两个提供方拥有相同显示名但不同ID/秘密；参考 `R13-OC-69160` 与 `R13-OC-177909`。
+
+步骤与下游：通过模型向导发现A→保存并成功调用→新增B→保留A→选择B并调用→重开表单与历史。两地址分别收到各自凭据指纹与所选模型；模型列表保留A/B，旧会话选择未被新增覆盖。发现仅列ID，不发生成；自定义ID入口始终可用。
+
+反例：B验证失败或取消不修改A；并发旧CAS保存应冲突且草稿保留；切换工作区后A的迟到发现结果不得填入B。修改A目标地址但未提供新密钥/明确清除应拒绝。撤销权限后的迟到列表不暴露资源。持久层冲突不得触发上游回退；真正允许回退时每次尝试记录目标、费用和批准链，unknown副作用禁止重放。证据：保存前后脱敏配置diff、目标端请求账本、CAS错误及取消后的UI。
+
+### CMP-03 / R13-CMP-03：安装和调用只读插件
+
+输入：固定来源/摘要/许可证的 F-TOOL 四SDK样例；尚未生成时记准备缺口，不拿任意CLI echo冒充SDK进程。
+
+步骤与下游：普通安装入口→查看所需能力与信任等级→建立alpha实例→显式启用/授权→从对话调用→在插件进程和产品历史读到 `READY` 及相同call_id。四语言分别运行共同向量，显示真实运行时版本。无Python/Node/.NET时Rust核心仍能启动；相应插件报依赖缺失。
+
+反例：声明read_only但请求写操作应拒绝；未授权实例不可调用；准备新版本失败保留旧代可用或明确受控停机；插件崩溃/超时/取消时唯一终态、无孤儿进程和悬空工具。G1禁用插件后调用计数不增加，旧代迟到结果不注入新运行。重启不续做unknown调用，配置/数据仍归原实例。记录安装/恢复步骤、进程树、SDK结果及预算；不把握手成功计为业务通过。
+
+### CMP-04 / R13-CMP-04：资料导入、引用与撤销
+
+输入：F-DOC共享版、A私有版和同名beta版。A/B按权限从知识页导入和提问“红班负责什么”。
+
+步骤与下游：导入→等待明确可检索状态→回答→打开引用的原文/版本/位置→改为第二版→重复查询→删除→刷新/重启再查。每条引用对应当时获准版本；旧索引不能覆盖新索引；删除后生成上下文、缓存、导出均不可取回原文。
+
+反例：解析损坏、超限、索引断电/取消不发布半份资料；并发改版与旧索引回调隔离；B没有A私有片段，C没有alpha资料。运行中撤权后不消费迟到检索结果，已外发模型请求按真实边界报告。自动摘要/派生记忆的来源失效需显式失效或重算，固定记忆不因未召回误删。证据：索引generation、源摘要、检索结果/实际模型输入摘要、越权拒绝、删除后账本。
+
+### CMP-05 / R13-CMP-05：双工作区、双账号与私人内容
+
+输入：F-IDENTITY全部账户，两个浏览器档案加同档案两个标签页；提示词编辑器留不同私有草稿和历史。
+
+步骤与下游：A/B在alpha建立私聊，C在beta建立同名资源；轮流列表、分页、搜索、订阅事件、导出、复制资源链接；管理员界面不能隐式读取他人私聊。logout→B登录→回到旧A标签页：A草稿/提示词历史不可见，B新稿不被旧异步回调覆盖。
+
+反例：替换资源ID、旧游标、下载URL、缓存键、跨标签授权变更均按当前身份处理。RFB-001的origin+实例+账号+scope私有命名、原子草稿/历史和旧匿名不认领必须保留；密码/Passkey成功及模拟OAuth返回分别验证清理。失效会话不能由同用户另一会话续租。重启后归属不变；跨入口来源由 `R13-OC-84544`核对。预算按主体归属不能串账。证据仅含合成字符串、拒绝状态、标签页录像、必要存储键摘要，不导出会话令牌。
+
+### CMP-06 / R13-CMP-06：跨时区计划与连续重启
+
+输入：F-TIME、F-MODEL、F-SINK；once/interval/cron各一份，东京09:00显示台北08:00；预览至少下一3次时刻，记录时区/解析策略。
+
+步骤与下游：填计划→核心只读preview→核对两地时间→保存→到点观察真实run/模型/投递→暂停→重启→恢复后读取历史。预览期间模型和接收端计数为0；同一occurrence只认领一次；pause不伪装撤回已派发操作。
+
+反例：DST缺失/重复时刻、时钟前后跳、暂停后迟到preview、一次执行后连续重启、G1/G2/G3分别崩溃；按 `R13-OC-42640/59301`保留已执行或中断事实并禁止未知外发重放。所有者降权或移除后新计划执行被拒绝，禁止管理员悄悄替换他人执行意图。预算耗尽显示未调用原因而非“任务成功”。恢复使用已显示的skip/错过策略，不临时补跑。证据：occurrence/claim/run/receipt关联、下游计数、虚拟时钟与重启时间线。
+
+### CMP-07 / R13-CMP-07：生成与可靠投递
+
+输入：F-SINK T1/T2，T1为已批准目标，T2属于无关会话；带独立intent_key的合成消息。
+
+步骤与下游：保存停用路由→预览目标→批准/启用→一次发送→GET只读回执→独立T1账本→刷新/重启复查。生成完成、平台accepted、持久化成功分别显示；accepted不等于人类已读。
+
+反例：停用/未批准发送无下游动作；G1撤权是not_sent；T1接收后断ack是unknown，重复入口同键只返回原操作；修改同键正文是冲突。G3数据库故障必须显示“外部已接受，本地保存异常”的已知范围，恢复先只读核对。不能自动借T2或另会话补发；runner静默与显式工具授权按 `R13-OC-91420`区分。取消不能撤回已接受投递，未知费用不记零。不同合法intent可发送相同文字，不做全局文本去重。证据：产品意图账本、T1/T2计数、无关历史摘要、故障后恢复动作。
+
+### CMP-08 / R13-CMP-08：窄屏、键盘与网络恢复
+
+输入：F-IDENTITY A、含中文输入法的长草稿，中文/英文各独立运行，两个主题，320/390/768/1440px与200%缩放；只用键盘完成核心路径。
+
+步骤与下游：切侧栏/顶栏→真实上下滚动→折叠/恢复→模型选择→提交→断网→写新稿→重新联网→只读核对旧run→显式继续原意图或新建意图。输入法合成期间Enter不发送；焦点不被自动折叠吞掉；读屏合并播报而非逐token轰炸。
+
+反例：旧请求到达不得清除新稿/切换后的会话；恢复网络不得自动重发；权限撤销的恢复按钮禁用并说明；RFB-003错误只使用当前语言，草稿保留、核对入口只读。空/加载/失败/禁用/部分完成/恢复全部真实可达，有限选项来自实际能力并保留自定义；减弱动效、后台/离屏暂停不影响操作。重启后按账号恢复草稿与阅读位置；键盘不能触达隐藏危险操作。证据：完整路径录像、焦点序列、出站计数和单语言错误截图。
+
+### CMP-09 / R13-CMP-09：媒体与文件
+
+输入：F-MEDIA和A/B私有会话；本项目现状为未实现，必须显示gap直到完整实现并验收。
+
+步骤与下游：上传→验证格式/大小→可取消解析/处理→获准预览→将原文件交给声明相应能力的模型/工具→下载读回核对摘要→重启查附件归属。转换产物单独记录来源摘要，不用缩略图替代原文件证据。
+
+反例：伪扩展名、解码膨胀、损坏、路径穿越/软硬链接/重定向及超限不得跨授权读取；取消上传不留下可公开访问的孤儿；撤权后原URL、预览、缓存和worker新读取均拒绝。断点恢复绑定上传身份/尺寸/摘要，不接入另一账号或旧generation。外部已处理但确认丢失为unknown，不自动再次收费；不支持的媒体明确拒绝。证据：上传/转换状态链、独立字节摘要、越权请求与实际上游附件引用。
+
+### CMP-10 / R13-CMP-10：群聊参与与静默消费
+
+输入：F-CHANNEL固定顺序：普通群消息→安静时段@提及→私聊→自身回声→引用自身旧消息→重复平台事件→撤成员→断线重连。
+
+步骤与下游：通过适配器配置明确提及/安静/节流政策→注入固定事件→核对接收、消费、规划、回答、投递各计数→重启继续新事件。不回复仍推进消费游标并保留获准历史；自身回声不再次规划，引用自身旧话不一概丢弃；群策略不误压私聊。
+
+反例：私有群内容不能进另一群/个人记忆；成员/机器人授权撤销后不得获取迟到事件；重连重复事件去重但不同消息不误合并；来源/当前入口/目的地保持独立。入站观察插件默认无私信正文权限，启用与撤销按 `R13-OC-186700`，不以“钩子没触发”擅自放开隐私。门控若调用模型，其费用也计入；平台unknown不自动重复发。受控适配器与真实平台结果单列，后者在本轮为not_executed。
+
+### CMP-11 / R13-CMP-11：长任务、子代理与编排
+
+输入：父任务读取F-DOC，子任务只获一个源片段和只读工具；另一个节点请求 `append_once`，必须审批；准备有循环/无效引用图和正常有向图。
+
+步骤与下游：保存版本→只读预览（下游写入0）→启动→观察父子归属/预算/截止→批准参数固定的写入→读取独立账本→展示部分结果与终态。子代理有效权限为父授权、子配置、当下策略交集，不能自行扩大；图版本冻结在运行快照，后续编辑只影响新run。
+
+反例：取消父run、耗尽共享预算、降权、超时/子崩溃、无进展循环分别终止或部分完成；子无法向无关私聊收集/写入数据；unknown写工具不在恢复或模型再提议时自动重放。审批后参数/目标变更必须重新批准。handoff包含获准媒体与出处；真实子结果不足时不得合成成功。未来重建未提供该能力时维持gap，普通异步run不能算子代理通过。
+
+### CMP-12 / R13-CMP-12：更新、备份、恢复和部署
+
+输入：身份/会话/计划/投递/知识/插件各有合成数据和在途G1/G2事实；主数据存储按支持方案展开矩阵。
+
+步骤与下游：干净安装→写样本→一致备份→校验清单→导入空目标→先隔离恢复→只读核对归属/摘要/引用/预算/未知意图→明确解封→检查新意图。源库不删除，恢复不复用旧会话和认证挑战；不完整外部状态备份明确标记。
+
+反例：损坏摘要/缺插件外部状态/非空目标/迁移中断/旧二进制读新schema应拒绝或进入可诊断恢复；不能静默删除未知schema。停止/清空Valkey不能放宽ACL/预算；SQLite写队列和PG断连各自有界。多节点只有PG、共享资源、fencing/claim竞争、失联恢复真实通过才可宣称；Windows/macOS/Linux原生安装/进程树/签名/更新分别取证。G2未知操作跨备份/恢复仍不重放，外部sink计数不增。发布/CI/推送不属于本轮授权，仅把必要门槛写入未来发行记录。
+
+## 4. 结果记录、体验和性能口径
+
+每个“产品×任务×环境×故障点×重复”独立一条记录。原始证据放运行者选定的私有临时目录，不规定固定artifacts目录；配方只存脱敏摘要、相对证据引用及SHA-256，保留失败样本。
+
+```yaml
+comparison_schema: rstrbot-comparison/1
+task_id: CMP-01
+acceptance_id: R13-CMP-01
+product: RstrBot
+identity_confirmed: true
+version_commit: unknown
+build_digest: unknown
+fixture_seed: cmp-20261028-v1
+profile: D
+environment_record: unknown
+capability: partial
+status: not_executed
+started_at: null
+finished_at: null
+attempts: 0
+steps_user_actions: null
+manual_config_edits: null
+help_requests: null
+recoverable_errors: null
+task_elapsed_ms: null
+recovery_elapsed_ms: null
+downstream_expected_count: null
+downstream_observed_count: null
+other_scope_effects: null
+budget_actual: unknown
+budget_unknown: true
+evidence: []
+limitations: [not_run]
+```
+
+结果枚举只用 `passed / failed / blocked / not_executed`；能力另记 `supported / partial / gap / unverified`。`blocked`是已尝试执行并记录具体外部障碍；当前未启动的测试仍not_executed。缺能力可以同时记能力gap与执行not_executed，必须进入“目标未满足”清单，不计作成功；对方安装失败只有在环境满足其公开前提且可复现时才判failed。所有未知数为null/unknown，不填0。
+
+步骤计数：一个明确用户决策或提交动作算一次；滚动/展开单列，不能为某产品合并十次点击；安装依赖、编辑配置、求助和重试均包含。任务时间从给出完整任务到独立下游核对完成；恢复时间从故障可见到状态明确且下一合法操作可用。将初次部署者、熟练所有者、普通成员、插件开发者分别统计，AI执行记录不能解释为人类满意度。
+
+性能遵守 [PERFORMANCE.md](PERFORMANCE.md)：记录冷/热启动、上游/队列/模型/工具/数据库/UI分段、整体RSS与各子进程、CPU与网络、实际请求数/费用。建议同环境轮换产品顺序，先3次预热再至少30次有效任务用于探索性p50/p95，失败与超时另外保留；需要稳定p99结论时增加到至少1000次并给置信区间/原始分布。这里的次数是采样计划，绝非结果或性能达标门槛。上游服务抖动、缓存差异、样本不足和不能固定模型版本必须在结论旁说明；不可删除慢样本使结论更漂亮。
+
+## 5. 完成与领先声明门槛
+
+`R13-CMP-GATE`：收集所有12任务与各P0反例、缺口、blocked/not_executed；校验版本/fixture/证据摘要、下游读回与配置差异；任何权限隔离、数据正确性、取消后越权、预算误报、unknown重放失败均阻断领先声明。先证明功能/安全正确，再比较体验/速度；不能靠加权总分抵消P0失败。
+
+只在同一冻结范围中没有未解释倒退、指定优势有足量同条件证据、缺失能力已显式列出时，才能使用“在这些任务/版本/环境下领先”。12个共同任务不是所有产品全部能力，哪怕全过也不能据此直接宣称“全面超越OpenClaw”。全面目标仍需建立并冻结额外特有能力目录、逐项无缺口证据和用户确认的用途范围。MainBot身份未确认时，不能对MainBot出结论。当前本文件的完成含义仅为可执行合同已交付，比较结果未产生。

@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot-sdk"
-version = "0.2.0-recipe.1"
+version = "0.2.0-recipe.2"
 kind = "software"
 description = "Rust、Python、TypeScript、C# 的共同插件 SDK"
 entry = "BUILD_PROMPT.md"
