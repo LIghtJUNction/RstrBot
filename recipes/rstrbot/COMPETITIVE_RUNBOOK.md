@@ -1,31 +1,31 @@
 # 共同任务执行册 · 提示词 1.13
 
-这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入；本轮只编写和校验配方，没有安装或运行竞品，没有调用付费模型或真实聊天渠道。以下所有跨产品结果均为 `not_executed`。
+这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据，OpenClaw 另有一项回退路径复测；MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡及其余共同任务仍未完成，不能据此判断总体领先。
 
 本文件细化 [COMPETITIVE_ACCEPTANCE.md](COMPETITIVE_ACCEPTANCE.md) 的原有 CMP-01～CMP-12，不替代 52/215/287 历史。每个执行卡必须同时关联该任务的 `CMP-*` 与 `R13-CMP-*` ID。当前 RstrBot 能力事实来自 [CURRENT_SCOPE.md](CURRENT_SCOPE.md)，不能从本文件的目标行为反写为已实现。
 
 ## 1. 版本冻结与启动前记录
 
-2026-10-28（Asia/Taipei）读取了以下官方 release API 和 tag 对应 commit。它们是可复现候选版本，不是安装成功证据；开始实测时可以沿用，或另开一轮重新冻结，不能运行一半静默更新。
+2026-10-29（Asia/Taipei）按官方 release 和 tag 固定以下版本。它们是可复现候选版本，不等于所有对比运行输入均已留存；开始新实测时可以另开一轮重新冻结，不能运行一半静默更新。
 
-| 产品 | 固定候选 | commit / 输入身份 | 初始整卡状态 | 官方来源 |
+| 产品 | 固定候选 | commit / 输入身份 | 当前局部状态 | 官方来源 |
 | --- | --- | --- | --- | --- |
-| RstrBot | 应用 0.2.0 预览；本次配方 1.13 | Drive r2 的 Git 基线 `25c36e26ab1a0abe12393bd0480a373cf801c714` 加未提交输入；具体生成实现摘要待重建后填写 | not_executed | 本任务 `14-manifest.md`、[SOURCE_EVIDENCE.md](SOURCE_EVIDENCE.md)；Git HEAD 单独不足以重建该快照 |
-| AstrBot | `v4.29.3` | `f61a7f42696da6df25dc7a249ec9b8d54ed9da18` | not_executed | [release](https://github.com/AstrBotDevs/AstrBot/releases/tag/v4.29.3)、[固定 README](https://github.com/AstrBotDevs/AstrBot/blob/f61a7f42696da6df25dc7a249ec9b8d54ed9da18/README.md) |
-| OpenClaw | `v2026.10.8` | `dc2523e5a5c7a309517fd7fa834add938231d526` | not_executed | [release](https://github.com/openclaw/openclaw/releases/tag/v2026.10.8)、[固定 README](https://github.com/openclaw/openclaw/blob/dc2523e5a5c7a309517fd7fa834add938231d526/README.md) |
-| MaiBot（用户所说 MainBot） | `v1.3.17` | `Mai-with-u/MaiBot`：`6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3` | not_executed | [release](https://github.com/Mai-with-u/MaiBot/releases/tag/v1.3.17)、[固定 README](https://github.com/Mai-with-u/MaiBot/blob/6bcb2e068cd98793a132cb8cc4ebf3cc00cb8fc3/README.md)；身份由用户于2026-10-29确认 |
+| RstrBot | 应用 0.2.0 预览；本次配方 1.13 | Drive r2 的 Git 基线 `25c36e26ab1a0abe12393bd0480a373cf801c714` 加未提交输入；具体生成实现摘要待重建后填写 | CMP-01 局部通过；整卡未完成 | 本任务 `14-manifest.md`、[SOURCE_EVIDENCE.md](SOURCE_EVIDENCE.md)；Git HEAD 单独不足以重建该快照 |
+| AstrBot | `v4.29.3` | `f61a7f42696da6df25dc7a249ec9b8d54ed9da18`；官方界面包 SHA-256 `a09f560c4140b930180f63a4929c885da80e24fb9bbda56619727bd25e985a11` | 既有 E2E 的本地回复及重启读回局部通过；本轮未重跑 | [release](https://github.com/AstrBotDevs/AstrBot/releases/tag/v4.29.3)、[固定 README](https://github.com/AstrBotDevs/AstrBot/blob/f61a7f42696da6df25dc7a249ec9b8d54ed9da18/README.md) |
+| OpenClaw | `v2026.10.8` | `dc2523e5a5c7a309517fd7fa834add938231d526` | CMP-01 局部通过；OC-185423 的两次本地合成回退路径通过，整卡未完成 | [release](https://github.com/openclaw/openclaw/releases/tag/v2026.10.8)、[固定 README](https://github.com/openclaw/openclaw/blob/dc2523e5a5c7a309517fd7fa834add938231d526/README.md) |
+| MaiBot（用户所说 MainBot） | `v1.3.18` | `Mai-with-u/MaiBot`：`2a9af62cec37035d29237acbe2cf3adceb700b27` | `blocked`：协议要求先阅读并同意；未运行 | [release](https://github.com/Mai-with-u/MaiBot/releases/tag/v1.3.18)、[固定 README](https://github.com/Mai-with-u/MaiBot/blob/2a9af62cec37035d29237acbe2cf3adceb700b27/README.md)；身份由用户于2026-10-29确认 |
 
-release/tag 解析只证明版本身份。下载后另记录源包/容器镜像/安装包摘要、构建命令、锁文件摘要、插件与运行时版本、原生签名验证结果；尚未下载的摘要填 `unknown`。不同部署方式分别报告，例如源码服务与桌面安装器不能混为同一体验样本。用户确认 MaiBot 身份后即可在相同边界内继续准备和测试；不得把身份确认写成测试通过。
+release/tag 解析只证明版本身份。下载后另记录源包/容器镜像/安装包摘要、构建命令、锁文件摘要、插件与运行时版本、原生签名验证结果；尚未下载的摘要填 `unknown`。不同部署方式分别报告，例如源码服务与桌面安装器不能混为同一体验样本。MaiBot v1.3.18 的 EULA 明确规定运行或使用前必须阅读并同意，隐私条款也要求用户同意其数据处理方式；本轮没有替用户接受条款、绕过确认门或启动软件，因此只记 `blocked`，不记产品失败。
 
 ### 环境和模型矩阵
 
 | 维度 | 可执行规则 | 本轮值 |
 | --- | --- | --- |
-| 主比较环境 | 四产品轮流使用同一台隔离测试主机/同规格虚机；固定 OS、CPU 架构/配额、RAM、存储、网络限制、浏览器版本；产品运行时按其固定文档提供 | unknown，未实际配置 |
+| 主比较环境 | 四产品轮流使用同一台隔离测试主机/同规格虚机；固定 OS、CPU 架构/配额、RAM、存储、网络限制、浏览器版本；产品运行时按其固定文档提供 | unknown；此前及本轮的局部测试环境不同，未做统一环境横比 |
 | 数据根/身份 | 每产品独立临时目录、端口、账号、工作区、凭据；不复用任何现有私有业务数据库；每次试验保留种子与重置点 | 仅下面的合成定义 |
 | 数据库/缓存 | 同产品先默认数据库，再测其声明的可选方案；RstrBot 的 SQLite、PostgreSQL × Valkey 关闭/开启/中断分别记录；竞品不支持同后端时写不适用，禁止冒充同配置性能 | not_executed |
 | 设备 | Web 先测 320/390/768/1440 CSS px 与 200% 缩放；Linux/Windows/macOS 原生安装另建独立结果行；硬件、最低 OS、实体 Passkey 未知 | not_executed |
-| D：确定性上游 | 每产品经自身正式模型入口调用同一个本地 HTTP/SSE 夹具；固定模型名 `fixture-chat-v1`、响应脚本、时间线、工具调用 ID、故障点；记录实际出站请求和返回 | 夹具待实现；不能拿它证明模型质量或商业兼容 |
+| D：确定性上游 | 每产品经自身正式模型入口调用同一个本地 HTTP/SSE 夹具；固定模型名 `fixture-chat-v1`、响应脚本、时间线、工具调用 ID、故障点；记录实际出站请求和返回 | 局部：既有 CMP-01 与本轮 OpenClaw 测试用本地夹具；全产品共用夹具合同尚未实现，不能证明模型质量或商业兼容 |
 | L：本地真实模型 | 若四产品都能接入同一实际模型，固定模型文件摘要、推理引擎/量化/采样参数、上下文与硬件；缺能力记缺口 | 模型/设备 unknown；not_executed |
 | E：外部真实端到端 | 需可用且明确授权的测试账号、配额、同一具体模型版本/区域/参数、供应商价格日期、平台测试目标；不能用诊断回复冒充 | 本次禁止付费调用与真实外发，not_executed |
 | 性能候选 | 1 vCPU/1 GiB 是根 PERFORMANCE 的待测候选；运行时确实不支持时保留无法运行记录，不擅自提高该产品配额后作横比 | unknown；不得写为已达标 |
@@ -34,11 +34,11 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 
 ### 初始能力与执行状态
 
-`partial`/`gap` 表示能力范围，不是本轮实测分数；竞品只在阅读固定文档和运行后更新实际观察，不得用未准备账号推断功能缺失。正常回复和重启读回仅覆盖整卡的一部分，故整卡仍为 not_executed。
+`partial`/`gap` 表示能力范围，不是本轮实测分数；竞品只在阅读固定文档和运行后更新实际观察，不得用未准备账号推断功能缺失。正常回复、重启读回和单项回退只覆盖各自卡片的一部分；CMP-01 整卡仍未完成。
 
 | 任务 | RstrBot 输入能力 | AstrBot | OpenClaw | MaiBot（已确认） | 四产品本轮执行 |
 | --- | --- | --- | --- | --- | --- |
-| CMP-01 | partial：本地初次对话；真实提供方未验 | partial：本地回复及重启读回 | partial：本地回复及重启读回 | unverified | not_executed（整卡） |
+| CMP-01 | partial：本地初次对话；真实提供方未验 | partial：固定版本地回复及重启读回；官方包 SHA-256 已记录 | partial：本地回复及重启读回 | unverified；运行 blocked 于条款确认 | partial（局部路径）；整卡未完成 |
 | CMP-02 | partial：发现/保存/选择；完整路由回退未实现 | unverified | unverified | unverified | not_executed |
 | CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | unverified | not_executed |
 | CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | unverified | not_executed |
@@ -219,7 +219,7 @@ limitations: [not_run]
 
 `R13-CMP-GATE`：收集所有12任务与各P0反例、缺口、blocked/not_executed；校验版本/fixture/证据摘要、下游读回与配置差异；任何权限隔离、数据正确性、取消后越权、预算误报、unknown重放失败均阻断领先声明。先证明功能/安全正确，再比较体验/速度；不能靠加权总分抵消P0失败。
 
-只在同一冻结范围中没有未解释倒退、指定优势有足量同条件证据、缺失能力已显式列出时，才能使用“在这些任务/版本/环境下领先”。12个共同任务不是所有产品全部能力，哪怕全过也不能据此直接宣称“全面超越OpenClaw”。全面目标仍需建立并冻结额外特有能力目录、逐项无缺口证据和用户确认的用途范围。MaiBot未完成实际测试时，不能对MaiBot出结论。当前本文件的完成含义仅为可执行合同已交付，比较结果未产生。
+只在同一冻结范围中没有未解释倒退、指定优势有足量同条件证据、缺失能力已显式列出时，才能使用“在这些任务/版本/环境下领先”。12个共同任务不是所有产品全部能力，哪怕全过也不能据此直接宣称“全面超越OpenClaw”。全面目标仍需建立并冻结额外特有能力目录、逐项无缺口证据和用户确认的用途范围。MaiBot未完成实际测试时，不能对MaiBot出结论。本轮只有局部路径证据，整卡比较和总体领先结论均未产生。
 
 ## 2026-10-29 本地初次对话请求差异
 
@@ -228,3 +228,13 @@ limitations: [not_run]
 ### CMP-08 补充 · 长草稿重排来源
 
 按 R13-OC-153139 / RSTRBOT-25 检查草稿重排和手动阅读意图；2026-10-29 RstrBot仅跑 Chromium 模拟390×844→844×390→390×844长草稿末尾路径，文字/焦点/位置保留。全部其他反例、实体设备和跨产品共同任务仍未执行。
+
+### R13-OC-185423 · OpenClaw 回退路径本地复测
+
+2026-10-29 在隔离的 OpenClaw `v2026.10.8` Gateway 上，通过本机 OpenAI 兼容夹具运行两次：一次调试触发的 `agentTurn`，一次到期后由调度器自动触发的一次性任务。两个任务均在主提供方返回 HTTP 401 后切换到回退提供方并返回 `READY`；耗时分别为 4617 ms 和 1218 ms。夹具账本共记录一次模型列表请求、两次主提供方 401、两次回退提供方 200，均为流式请求。所有工具拒绝、无聊天渠道、无外部模型、无消息投递；两个临时任务在结束后移除。
+
+这两个场景未复现 [OpenClaw #185423](https://github.com/openclaw/openclaw/issues/185423)，但没有复现不等于该问题已修复。Issue 截至本日仍 open；报告环境为 Windows 10/OpenClaw 2026.10.7，记录一次运行有 8 次回退尝试失败、配置含两种后备模型。本地环境为 Linux/OpenClaw 2026.10.8，只配置一个后备夹具且观察到两次后备请求成功，不能覆盖原报告的运行时、系统和失败序列。RstrBot 的安全回退能力仍是实现缺口，需按已有 R13-OC-185423 合同单独实现和验收。
+
+### MaiBot v1.3.18 · 协议门槛
+
+确认 [v1.3.18 release](https://github.com/Mai-with-u/MaiBot/releases/tag/v1.3.18) 与固定提交 `2a9af62cec37035d29237acbe2cf3adceb700b27`，只检查该版本 README、[EULA](https://github.com/Mai-with-u/MaiBot/blob/2a9af62cec37035d29237acbe2cf3adceb700b27/EULA.md) 和[隐私政策](https://github.com/Mai-with-u/MaiBot/blob/2a9af62cec37035d29237acbe2cf3adceb700b27/PRIVACY.md)。EULA 明确要求运行/使用前阅读并同意，隐私条款规定使用即同意其数据处理方式；用户本轮只确认了项目身份，没有接受条款。因此未安装、启动或绕过确认。运行状态为 `blocked`，不是软件测试失败，也没有 MaiBot 的功能或竞品结论。
