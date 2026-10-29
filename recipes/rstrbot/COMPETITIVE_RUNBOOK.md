@@ -46,7 +46,7 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 | CMP-06 | partial：计划/预览/skip；完整故障组合待验 | unverified | unverified | unverified | not_executed |
 | CMP-07 | partial：Webhook意图/回执；真实平台/多目标缺口 | unverified | unverified | unverified | not_executed |
 | CMP-08 | partial：RFB局部修复；读屏/跨浏览器待验 | unverified | unverified | unverified | not_executed |
-| CMP-09 | gap：通用附件/媒体未实现 | unverified | unverified | unverified | not_executed |
+| CMP-09 | gap：文本与受限图片已有路径；通用附件、音视频及完整媒体未实现 | unverified | unverified | unverified | not_executed |
 | CMP-10 | gap：群聊/双向平台未实现 | unverified | unverified | unverified | not_executed |
 | CMP-11 | gap：子代理/写工具审批/编排未完整实现 | unverified | unverified | unverified | not_executed |
 | CMP-12 | partial：数据库备份/单节点；附件灾备/多节点/原生待验 | unverified | unverified | unverified | not_executed |
@@ -144,7 +144,7 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 
 ### CMP-09 / R13-CMP-09：媒体与文件
 
-输入：F-MEDIA和A/B私有会话；本项目现状为未实现，必须显示gap直到完整实现并验收。
+输入：F-MEDIA和A/B私有会话；当前只有 UTF-8 文本与受限 PNG/JPEG 路径，完整媒体必须显示 gap 直到全部实现并验收。
 
 步骤与下游：上传→验证格式/大小→可取消解析/处理→获准预览→将原文件交给声明相应能力的模型/工具→下载读回核对摘要→重启查附件归属。转换产物单独记录来源摘要，不用缩略图替代原文件证据。
 

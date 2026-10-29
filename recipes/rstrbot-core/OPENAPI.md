@@ -1,6 +1,6 @@
 # 完整声明式 HTTP 接口
 
-来自当前工作区docs/openapi.json。保留完整对象，作为数据格式、枚举、响应及约束的可离线输入；它不是实现源码。API操作68个，健康操作2个。示例均为示例，未在本迁移中执行。
+来自当前工作区docs/openapi.json。保留完整对象，作为数据格式、枚举、响应及约束的可离线输入；它不是实现源码。API操作69个，健康操作2个。示例均为示例，未在本迁移中执行。
 
 ## 操作索引
 
@@ -53,6 +53,8 @@
 | PATCH | `/api/v1/workspaces/{wid}/resource/{id}` | update_resource | Replace editable configuration with version protection |
 | DELETE | `/api/v1/workspaces/{wid}/resource/{id}` | delete_resource | Delete an editable resource at its current version |
 | POST | `/api/v1/workspaces/{wid}/chat` | chat | Accept an idempotent asynchronous conversation run |
+| POST | `/api/v1/workspaces/{wid}/chat/text-attachments` | chat_with_text_attachments | Accept a conversation run with UTF-8 text attachments |
+| POST | `/api/v1/workspaces/{wid}/chat/image-attachments` | chat_images | Accept a conversation run with original PNG/JPEG images |
 | POST | `/api/v1/workspaces/{wid}/routes/{id}/send` | send_route | Send once to an explicitly authorized route |
 | GET | `/api/v1/workspaces/{wid}/runs/{id}` | run | Read an authorized run |
 | POST | `/api/v1/workspaces/{wid}/runs/{id}/cancel` | cancel_run | Request cancellation of a run |
@@ -65,7 +67,7 @@
 | GET | `/api/v1/workspaces/{wid}/knowledge/search` | search_knowledge | Search authorized text chunks |
 | POST | `/api/v1/workspaces/{wid}/schedules/preview` | preview_schedule | Preview next calendar/interval times without dispatch |
 | POST | `/api/v1/workspaces/{wid}/schedules/{id}/run` | trigger_schedule | Manually claim and dispatch an owned schedule |
-| POST | `/api/v1/workspaces/{wid}/schedules/{id}/reconcile` | reconcile_schedule | Record review without executing or enabling |
+| POST | `/api/v1/workspaces/{wid}/schedules/{id}/reconcile` | reconcile_schedule | Record review of an uncertain schedule and keep it paused |
 | GET | `/api/v1/workspaces/{wid}/events` | events | Replay authorized durable events |
 | GET | `/api/v1/workspaces/{wid}/audit` | audit | Read authorized audit metadata |
 | GET | `/api/v1/workspaces/{wid}/budget` | budget | Read current durable budget totals |
@@ -3677,6 +3679,102 @@
         }
       }
     },
+    "/api/v1/workspaces/{wid}/chat/image-attachments": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/WorkspaceId"
+        }
+      ],
+      "post": {
+        "operationId": "chat_images",
+        "summary": "Accept a conversation run with original PNG/JPEG images",
+        "description": "Only the dedicated route accepts images. It follows chat authorization and idempotency; a workspace budget or an image-incompatible model prevents dispatch.",
+        "tags": [
+          "Execution"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error402"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/api.rs::chat_images",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageChatRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workspaces/{wid}/routes/{id}/send": {
       "parameters": [
         {
@@ -5872,6 +5970,12 @@
           "chat": {
             "$ref": "#/components/schemas/Capability"
           },
+          "text_attachments": {
+            "$ref": "#/components/schemas/Capability"
+          },
+          "image_attachments": {
+            "$ref": "#/components/schemas/Capability"
+          },
           "knowledge": {
             "$ref": "#/components/schemas/Capability"
           },
@@ -7225,6 +7329,11 @@
           "clear_api_key": {
             "type": "boolean"
           },
+          "supports_images": {
+            "type": "boolean",
+            "default": false,
+            "description": "Explicit user declaration that this OpenAI-compatible model accepts image input; not automatically verified."
+          },
           "max_tokens": {
             "type": "integer",
             "format": "int64",
@@ -7972,6 +8081,116 @@
           "idempotency_key"
         ]
       },
+      "ImageChatRequest": {
+        "type": "object",
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 32768,
+            "x-max-utf8-bytes": 32768,
+            "description": "At most 32768 UTF-8 bytes.",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 200,
+            "x-max-utf8-bytes": 200,
+            "description": "Stable nonblank key scoped to user/workspace. Exact intent replay returns its stored run; changed content/config with the same key conflicts.",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "x-max-utf8-bytes": 255,
+                  "description": "A nonempty .txt or .md filename without path separators or control characters."
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 16384,
+                  "x-max-utf8-bytes": 16384,
+                  "description": "UTF-8 text without NUL. Original bytes are preserved."
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "text"
+              ]
+            },
+            "maxItems": 3,
+            "description": "UTF-8 text files sent with the message; combined text is at most 32768 UTF-8 bytes. The files inherit conversation visibility and are included in the model request."
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "x-max-utf8-bytes": 255,
+                  "description": "A PNG/JPEG filename without paths or control characters."
+                },
+                "mime": {
+                  "type": "string",
+                  "enum": [
+                    "image/png",
+                    "image/jpeg"
+                  ]
+                },
+                "data": {
+                  "type": "string",
+                  "maxLength": 349528,
+                  "description": "Original bytes in canonical Base64. Total decoded bytes across images is at most 262144."
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "mime",
+                "data"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 3
+          }
+        },
+        "additionalProperties": false,
+        "description": "Use only on the image-attachments route. Images are stored with conversation visibility and sent to an explicitly image-enabled OpenAI-compatible model. Image costs are unknown and dispatch is rejected while a workspace budget is enabled.",
+        "required": [
+          "conversation_id",
+          "content",
+          "model_id",
+          "idempotency_key",
+          "images"
+        ]
+      },
       "ReconcileScheduleInput": {
         "type": "object",
         "properties": {
@@ -8098,6 +8317,40 @@
               "additionalProperties": true
             }
           },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "mime": {
+                  "type": "string",
+                  "enum": [
+                    "image/png",
+                    "image/jpeg"
+                  ]
+                },
+                "data": {
+                  "type": "string",
+                  "description": "Original bytes encoded as Base64."
+                },
+                "sha256": {
+                  "type": "string",
+                  "description": "SHA-256 of decoded original bytes."
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "mime",
+                "data",
+                "sha256"
+              ]
+            },
+            "maxItems": 3
+          },
           "citations": {
             "type": "array",
             "items": {}
@@ -8195,6 +8448,11 @@
           "base_url": {
             "description": "Normally string. Existing runtime paths can preserve this field as arbitrary JSON; consumers must check its type.",
             "x-preferred-json-type": "string"
+          },
+          "supports_images": {
+            "type": "boolean",
+            "default": false,
+            "description": "Explicit user declaration that this OpenAI-compatible model accepts image input; not automatically verified."
           },
           "max_tokens": {
             "type": "integer",
