@@ -1,6 +1,6 @@
 # 共同任务执行册 · 提示词 1.13
 
-这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据；OpenClaw 有一项正常回退路径复测，RstrBot 有同键冲突预派发检查和模型响应后注入的助手消息 CAS 冲突检查。MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡、CMP-02 四产品同任务及其余共同任务仍未完成，不能据此判断总体领先。
+这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据；OpenClaw v2026.10.8 另有一项 transcript 冲突不回退与 HTTP 404 正常回退的本地复测，RstrBot 有同键冲突预派发检查和模型响应后注入的助手消息 CAS 冲突检查。MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡、CMP-02 四产品同任务及其余共同任务仍未完成，不能据此判断总体领先。
 
 本文件细化 [COMPETITIVE_ACCEPTANCE.md](COMPETITIVE_ACCEPTANCE.md) 的原有 CMP-01～CMP-12，不替代 52/215/287 历史。每个执行卡必须同时关联该任务的 `CMP-*` 与 `R13-CMP-*` ID。当前 RstrBot 能力事实来自 [CURRENT_SCOPE.md](CURRENT_SCOPE.md)，不能从本文件的目标行为反写为已实现。
 
@@ -39,7 +39,7 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 | 任务 | RstrBot 输入能力 | AstrBot | OpenClaw | MaiBot（已确认） | 四产品本轮执行 |
 | --- | --- | --- | --- | --- | --- |
 | CMP-01 | partial：本地初次对话；真实提供方未验 | partial：固定版本地回复及重启读回；官方包 SHA-256 已记录 | partial：本地回复及重启读回 | unverified；运行 blocked 于条款确认 | partial（局部路径）；整卡未完成 |
-| CMP-02 | partial：发现/保存/选择；另测同键预派发冲突及模型响应后注入的保存冲突；完整路由回退未实现 | unverified | unverified | unverified | not_executed（R13-OC-177909 两个子路径 partial） |
+| CMP-02 | partial：发现/保存/选择；另测同键预派发冲突及模型响应后注入的保存冲突；完整路由回退未实现 | unverified | partial：v2026.10.8 本地 transcript 冲突不回退，HTTP 404 正常回退；未测完整供应商配置任务 | unverified | not_executed（R13-OC-177909 的 RstrBot 子路径 partial；OpenClaw 局部复测） |
 | CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | unverified | not_executed |
 | CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | unverified | not_executed |
 | CMP-05 | partial：原生工作区/私聊；组合路径待验 | unverified | unverified | unverified | not_executed |

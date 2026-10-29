@@ -268,3 +268,11 @@
 根配方 .26、核心 .15、存储 .9、Web .20，固定源码子模块 `2439e50`；更新图片、权限、未知费用、开发技能/教程和 OpenAPI 合同，保留此前要求。`recipkg check`、递归打包、归档检查及中文 build 通过；归档为 106 个普通 UTF-8 Markdown 文件，包含 LOCK，完整提示词包含全部非 LOCK 文件；嵌入提示词与 OpenAPI 与配方一致。归档 SHA-256 `8141f0d4b69f5b7db36afe8e3f3d3356caac9ae0bf2b50efca387e10d31283bd`，提示词 SHA-256 `8518cd1cadeab2b38e81b888511c5594a7c4cdc9fa3183c9b43f0f01aaebb10f`；材料检查不证明独立重建成功。
 
 独立 HTTP 夹具、实际 Chromium、预算并发/强杀恢复、备份和权限检查见 [端到端记录](E2E_2026-10-29.md)。图片路径仍限制最多三张、总计 256 KiB，且没有实际商业视觉模型验收；完整 CMP-09 和竞品全面比较仍未完成，本机既有 8788 服务未重启。
+
+## 2026-10-29 OpenClaw 复测与当前配方归档校验
+
+新增 OpenClaw v2026.10.8 的隔离 transcript 冲突与 HTTP 404 回退正对照；输入、请求计数、结果和限制见 [R13-OC-177909 E2E 记录](E2E_2026-10-29.md#r13-oc-177909)。该项只补验收证据，没有新增产品合同或改动生成源码。
+
+使用 Recipkg `0.1.1` 对根配方执行 `recipkg check`、`recipkg pack`、`recipkg check <archive>`、`recipkg unpack`、解包目录 `check` 和 `recipkg build <archive> --lang zh-CN`，均退出0。包身份为 `rstrbot@0.2.0-recipe.27`；临时输出位于系统 `/tmp` 并已清理。归档含109个普通 UTF-8 Markdown 文件（含完整依赖闭包及 `LOCK.md`），无非 Markdown 成员、二进制或文件系统链接；归档 SHA-256 `a5f53090677e3afcb70c3f0d90cc1becef5fb74b294fd859c6809903b7272777`。中文生成提示词为2,400,018字节、SHA-256 `9d97c6cf6a422063a31797c988638121bd1f75b406d2d61cef1949ca36d26117`，109份归档 Markdown 原文全部可在提示词中找到。此项证明配方与归档材料完整性，不代表软件已由配方独立重建。
+
+当前源码仍通过 `generated/rstrbot-implementation/` 固定为 Git 子模块提交 `9fd0f6d304ab3f0993dbb104e3a7b4f6ad493930`；它不进入 Recipkg 归档。根仓库含 `generated/` 目录树，子目录由 Git link 指向源码仓库。
