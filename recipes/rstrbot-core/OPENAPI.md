@@ -1,6 +1,6 @@
 # 完整声明式 HTTP 接口
 
-来自当前工作区docs/openapi.json。保留完整对象，作为数据格式、枚举、响应及约束的可离线输入；它不是实现源码。API操作69个，健康操作2个。示例均为示例，未在本迁移中执行。
+来自生成实现的 `docs/openapi.json`。保留完整对象，作为数据格式、枚举、响应及约束的离线输入；它不是实现源码。当前API v1有71个操作，另有2个健康操作。示例仅描述结构，不是本轮执行回执。
 
 ## 操作索引
 
@@ -72,11 +72,11 @@
 | GET | `/api/v1/workspaces/{wid}/audit` | audit | Read authorized audit metadata |
 | GET | `/api/v1/workspaces/{wid}/budget` | budget | Read current durable budget totals |
 | PUT | `/api/v1/workspaces/{wid}/budget` | set_budget | Set or clear the workspace budget limit |
-| GET | `/api/v1/workspaces/{wid}/reservations` | reservations | Inspect recent budget reservations |
+| GET | `/api/v1/workspaces/{wid}/reservations` | reservations | Inspect budget reservations |
+| POST | `/api/v1/workspaces/{wid}/reservations/{id}/reconcile` | reconcile_reservation | Report or correct an unknown model cost |
+| GET | `/api/v1/workspaces/{wid}/reservations/{id}/reconciliations` | reservation_reconciliations | Read administrator-reported cost history |
 | GET | `/api/v1/workspaces/{wid}/export` | export_workspace | Export only caller-visible sanitized resources |
 | GET | `/api/v1/openapi.json` | openapi | Read the OpenAPI document |
-| GET | `/health/live` | live | Read process liveness |
-| GET | `/health/ready` | ready | Check durable storage readiness |
 
 ## OpenAPI 3.1 完整对象
 
@@ -5107,8 +5107,8 @@
       ],
       "get": {
         "operationId": "reservations",
-        "summary": "Inspect recent budget reservations",
-        "description": "Workspace admin minimum; up to 500 reservations ordered newest first. No settlement/reconciliation mutation is exposed by this endpoint.",
+        "summary": "Inspect budget reservations",
+        "description": "Workspace admin minimum. Returns a stable newest-first offset page, total count, and has_more so every reservation can be inspected beyond one page. Reconciliation revision is the number of append-only administrator reports.",
         "tags": [
           "Budget"
         ],
@@ -5129,10 +5129,17 @@
                   "$ref": "#/components/schemas/ReservationList"
                 },
                 "example": {
-                  "items": []
+                  "items": [],
+                  "offset": 0,
+                  "limit": 100,
+                  "total": 0,
+                  "has_more": false
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
           },
           "401": {
             "$ref": "#/components/responses/Error401"
@@ -5147,7 +5154,195 @@
             "$ref": "#/components/responses/UnexpectedError"
           }
         },
-        "x-handler": "src/api.rs::reservations"
+        "x-handler": "src/api.rs::reservations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ReservationLimit"
+          },
+          {
+            "$ref": "#/components/parameters/ReservationOffset"
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/reservations/{id}/reconcile": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/WorkspaceId"
+        },
+        {
+          "$ref": "#/components/parameters/ResourceId"
+        }
+      ],
+      "post": {
+        "operationId": "reconcile_reservation",
+        "summary": "Report or correct an unknown model cost",
+        "description": "Current workspace owner/admin is checked inside the budget transaction. Initial revision 0 only accepts unknown reservations; later writes require the current revision and append a correction. Same administrator and identical latest payload after a lost response is idempotent; stale/conflicting payloads return 409. Records the administrator's report, not provider verification. No provider call or model replay occurs; actual charges are recorded even above the budget limit.",
+        "tags": [
+          "Budget"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": [],
+            "csrfHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                },
+                "example": {
+                  "id": "33333333-3333-4333-8333-333333333333",
+                  "workspace_id": "22222222-2222-4222-8222-222222222222",
+                  "operation_id": "example-run:model:1",
+                  "amount_microusd": 0,
+                  "actual_microusd": 18000,
+                  "state": "settled",
+                  "created_at": 1792800000,
+                  "updated_at": 1792800001,
+                  "reconciliation_revision": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/api.rs::reconcile_reservation",
+        "x-csrf": "Required even for public setup/login unless Authorization starts with Bearer; cross-site/origin checks also apply to bearer requests.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          },
+          {
+            "$ref": "#/components/parameters/Origin"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "UTF-8 JSON, maximum total body 1 MiB. Byte-length limits are annotated separately from JSON Schema character counts.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconcileReservationInput"
+              },
+              "examples": {
+                "first_report": {
+                  "summary": "Illustrative, no real credentials or IDs",
+                  "value": {
+                    "expected_revision": 0,
+                    "actual_microusd": 18000,
+                    "source": "usage_dashboard",
+                    "confirm_reported_cost": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/reservations/{id}/reconciliations": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/WorkspaceId"
+        },
+        {
+          "$ref": "#/components/parameters/ResourceId"
+        }
+      ],
+      "get": {
+        "operationId": "reservation_reconciliations",
+        "summary": "Read administrator-reported cost history",
+        "description": "Owner/admin only. Uses current membership and verifies the reservation belongs to this workspace. Returns append-only report/correction revisions with prior/current amount, selected source, actor ID and timestamp. This is audit data and does not establish provider verification.",
+        "tags": [
+          "Budget"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetReconciliationList"
+                },
+                "example": {
+                  "items": []
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "$ref": "#/components/responses/UnexpectedError"
+          }
+        },
+        "x-handler": "src/api.rs::reservation_reconciliations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/After"
+          },
+          {
+            "$ref": "#/components/parameters/EventLimit"
+          }
+        ]
       }
     },
     "/api/v1/workspaces/{wid}/export": {
@@ -5415,6 +5610,32 @@
           1,
           500
         ]
+      },
+      "ReservationLimit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "default": 100
+        },
+        "description": "Reservation page size; server clamps to 1–500.",
+        "x-server-clamp": [
+          1,
+          500
+        ]
+      },
+      "ReservationOffset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "description": "Zero-based reservation offset; negative values are clamped to zero."
       },
       "Offset": {
         "name": "offset",
@@ -6174,6 +6395,21 @@
               "settled",
               "unknown"
             ]
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          },
+          "reconciliation_revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
           }
         },
         "additionalProperties": true,
@@ -6183,7 +6419,10 @@
           "operation_id",
           "amount_microusd",
           "actual_microusd",
-          "state"
+          "state",
+          "created_at",
+          "updated_at",
+          "reconciliation_revision"
         ]
       },
       "ReservationList": {
@@ -6193,6 +6432,154 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Reservation"
+            },
+            "maxItems": 500
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total",
+          "has_more"
+        ]
+      },
+      "ReconcileReservationInput": {
+        "type": "object",
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "actual_microusd": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Exact nonnegative integer micro-USD, capped at 2^53-1 for lossless browser JSON handling."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "usage_dashboard",
+              "invoice",
+              "usage_receipt",
+              "provider_adjustment"
+            ]
+          },
+          "confirm_reported_cost": {
+            "const": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "expected_revision",
+          "actual_microusd",
+          "source",
+          "confirm_reported_cost"
+        ]
+      },
+      "BudgetReconciliation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "reservation_id": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "old_microusd": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "Integer micro-US dollars (1 USD = 1,000,000 micro-USD)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actual_microusd": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Integer micro-US dollars (1 USD = 1,000,000 micro-USD)."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "usage_dashboard",
+              "invoice",
+              "usage_receipt",
+              "provider_adjustment"
+            ]
+          },
+          "performed_by": {
+            "type": "string",
+            "description": "Opaque resource/account/workspace identifier; do not infer authorization from its shape."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTC Unix timestamp in seconds."
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "reservation_id",
+          "revision",
+          "expected_revision",
+          "old_microusd",
+          "actual_microusd",
+          "source",
+          "performed_by",
+          "created_at"
+        ]
+      },
+      "BudgetReconciliationList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BudgetReconciliation"
             },
             "maxItems": 500
           }

@@ -1,6 +1,6 @@
 # Rust 核心服务
 
-重建 rstrbot 可执行程序及公共HTTP API v1。默认127.0.0.1:8787，同源提供Web静态目录和API。读 [HTTP_CONTRACT.md](HTTP_CONTRACT.md)、[OPENAPI.md](OPENAPI.md) 与 [CLI.md](CLI.md)：OPENAPI.md 包含当前完整声明式OpenAPI 3.1对象，所有66个API操作和2个健康操作、DTO、状态码、错误、字节限制和示例均须保留。示例不是已执行回执。参考命令指向未来实现，配方未附带程序。
+重建 rstrbot 可执行程序及公共HTTP API v1。默认127.0.0.1:8787，同源提供Web静态目录和API。读 [HTTP_CONTRACT.md](HTTP_CONTRACT.md)、[OPENAPI.md](OPENAPI.md) 与 [CLI.md](CLI.md)：OPENAPI.md 包含当前完整声明式OpenAPI 3.1对象，所有71个API操作和2个健康操作、DTO、状态码、错误、字节限制和示例均须保留。示例不是已执行回执。参考命令指向未来实现，配方未附带程序。
 
 ## 依赖使用合同
 
@@ -34,7 +34,7 @@ Webhook路由默认停用，实例批准、配置保存、启用、发送分开�
 
 继续读取 [DOMAIN_CONTRACTS.md](DOMAIN_CONTRACTS.md) 的 D01–D09 和 [EXTENSION_API.md](EXTENSION_API.md) 的 E01–E09。身份/服务主体、配置继承、模型路由/预算、写工具审批、知识索引/摘要、计划投递、入站群聊/媒体、子代理/编排和多节点都必须按其输入、输出、归属、状态及恢复边界生成；不能只写“将来插件提供”。所有新增行为当前均未实现/未执行，部分既有能力也需重新验收。
 
-当前 API v1 的唯一完整接口仍是 OPENAPI.md，不修改其既有66+2操作；未来扩展使用独立 `/api/v2`、`rstrbot-http/2-draft` 和封闭操作表。协议的 1.1-draft 能力/可选 broker 通过 `plugins → sdk → protocol` 读取；不靠握手/声明授予业务权。数据扩展需 `storage/DURABILITY_CONTRACT.md` 的 schema 3 迁移及故障门槛。已有本地 RFB 修复的真实预览、私有账号草稿、单语言失败/手动核对合同必须保留。
+当前 API v1 的唯一完整接口仍是 OPENAPI.md。recipe .15 输入记录的“66+2”操作数与当时的OpenAPI/路由不符；原路由基线为69 API+2健康，本版本在保持原行为的基础上新增两个账务核对操作，现为71 API+2健康。后续扩展仍使用独立 `/api/v2`、`rstrbot-http/2-draft` 和封闭操作表。协议的 1.1-draft 能力/可选 broker 通过 `plugins → sdk → protocol` 读取；不靠握手/声明授予业务权。数据扩展需 `storage/DURABILITY_CONTRACT.md` 的 schema 3 迁移及故障门槛。已有本地 RFB 修复的真实预览、私有账号草稿、单语言失败/手动核对合同必须保留。
 
 新增验收为 ACCEPTANCE.md 的 `R13-CORE-001`–`R13-CORE-042`；每项读取实际下游记录/字节/计数，并验证失败、取消、重启、撤权及预算/副作用。上游历史 issue 仅提供回归场景，不能成为本项目或竞品当前通过/失败证据。
 
@@ -65,6 +65,12 @@ RSTRBOT-36：会话终态遗留占用与未终态的孤儿占用分开核对；�
 ## 聊天请求字段完整性
 
 两个聊天入口对顶层和文本附件字段拒绝未知字段，在任何运行接纳、消息写入或模型请求前返回错误。维持已声明字段语义并在OpenAPI记录兼容性变化。参见根合同 RSTRBOT-40。
+
+## 1.15 未知费用核对与版本更正
+
+依照根 RSTRBOT-42，实现工作区 owner/admin 专用的reservation读取、首次核对和更正历史。reservation清单使用带总数的稳定有序分页；事件历史按独占事件ID续页，使所有旧记录可达。新API `POST /workspaces/{wid}/reservations/{id}/reconcile` 严格接受 0 到 9,007,199,254,740,991 的整数 `actual_microusd`、来源枚举、`expected_revision` 与必需确认；history GET 返回前后金额、来源、管理员和时间。首次只允许 `unknown` 转 `settled`；reserved在途、跨workspace、失权、陈旧版本及非法输入原子拒绝。更正追加版本并按差额更新总账；相同revision和payload重试不重复入账。未知费用不由本地预算额度抹去或阻止实际发生的账单入账。
+
+审计重用持久events并由现有rstrbot-db-v2备份；普通成员事件数据须脱敏，管理员历史接口单独按当前ACL读取。金额是管理员填报，不能称供应商已验证；不存账单原文/凭据，不产生供应商请求或模型调用。更新HTTP契约、OpenAPI生成器与验证、数据库/HTTP/浏览器验收；保留所有既有v1路由和向量。
 
 
 ## 图片输入

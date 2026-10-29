@@ -1,6 +1,6 @@
 # 扩展 HTTP 合同 · rstrbot-http/2-draft
 
-状态：**specified / not_implemented / not_executed**。这是下一轮生成的唯一扩展接口来源，不是当前服务端路由清单。当前 `/api/v1`、`OPENAPI.md` 的 66 个业务操作和 2 个健康操作不增删、不重解释；旧客户端不被强迫升级。此处的 HTTP 契约版本与配方版本、数据库 schema、插件 wire 协议分别管理；插件扩展选择 `1.1-draft`，不会因为 HTTP v2 就接受未知插件版本。
+状态：**specified / not_implemented / not_executed**。这是下一轮生成的唯一扩展接口来源，不是当前服务端路由清单。当前 `/api/v1`、`OPENAPI.md` 有71个业务操作和2个健康操作；原69个操作保持兼容，本版本新增两个管理员账务核对操作。旧客户端不被强迫升级。此处的 HTTP 契约版本与配方版本、数据库 schema、插件 wire 协议分别管理；插件扩展选择 `1.1-draft`，不会因为 HTTP v2 就接受未知插件版本。
 
 本合同通过有限 operation registry 与严格 DTO 给出可生成的接口。实现必须从本文件产生一份扩展 OpenAPI 和四 SDK 的同版类型，校验路由/DTO 对照后才能对外声明 available；不能在每包复制一份不同的“真实 API”。引用的业务语义在 [DOMAIN_CONTRACTS.md](DOMAIN_CONTRACTS.md)，持久语义在 `storage/DURABILITY_CONTRACT.md`。下文代码块为声明式类型，不是必须依赖的实现源码。
 

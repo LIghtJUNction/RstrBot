@@ -2,7 +2,7 @@
 
 # RstrBot HTTP contract — application 0.2.0, API v1
 
-Machine-readable OpenAPI 3.1: `GET /api/v1/openapi.json` and `docs/openapi.json`; covers all 66 API operations plus the two health operations. Router coverage includes the identity, email and provider configuration modules.
+Machine-readable OpenAPI 3.1: `GET /api/v1/openapi.json` and `docs/openapi.json`; covers all 71 API operations plus the two health operations. The 69-operation pre-change baseline is preserved, with two additive reservation-reconciliation operations. Router coverage includes the identity, email and provider configuration modules.
 
 ## Account and authentication additions
 
@@ -27,6 +27,8 @@ Base `/api/v1`. Errors `{error:{code,message}}`. Browser uses HttpOnly SameSite=
 `GET /setup`: `{initialized,database,valkey,version}`. `POST /setup`: `{token,username,password,workspace}`; establishes session. The first CLI launch establishes a database connection; setup displays explicit SQLite/PostgreSQL choices and requires an actual successful selection before completing a type change. `POST /setup/test-database` requires bootstrap token and accepts `{token,database_url}`. Safe database change before setup via `POST /setup/database` with same body; never overwrites initialized target. `GET /auth/me` returns `{user}`; login username/password, logout POST. `POST /admin/users` `{username,password}` creates login without membership, administrator only.
 
 `GET /workspaces` returns `{items}`; POST `{name}`. `/workspaces/:wid/members` GET and POST `{user_id,role}` (user id from account creation); PATCH `/members/:uid` `{role}`, DELETE same. GET `/capabilities` includes supported/authorized/available. GET `/budget`, PUT `{limit_microusd:null|integer}`.
+
+`GET /workspaces/:wid/reservations?offset=0&limit=100` is workspace owner/admin only and returns `{items,offset,limit,total,has_more}` in deterministic newest-first pages (limit clamps to 1–500); continue until `has_more=false` to inspect every reservation. `POST /workspaces/:wid/reservations/:id/reconcile` registers or corrects administrator-reported actual cost; `GET /workspaces/:wid/reservations/:id/reconciliations?after=N&limit=100` reads append-only history after the exclusive event ID; continue from the last returned `id` to read all revisions. The server rechecks current admin role and workspace under the budget lock. First revision requires `state=unknown` and `expected_revision:0`; later corrections require the latest revision. An identical retry by the same administrator is idempotent; stale or conflicting input returns 409. `actual_microusd` is an integer from 0 to 9,007,199,254,740,991 (1 USD = 1,000,000 micro-USD), allowing exact JSON values in browser clients; `source` is `usage_dashboard|invoice|usage_receipt|provider_adjustment`; `confirm_reported_cost` must be true. Each revision stores old/new amount, source, actor and time in durable events and the existing backup format. Ordinary member event streams redact amount/source. This is a local administrator report, not provider verification, payment, supplier mutation or request replay. The actual charge is recorded even when it exceeds the workspace budget.
 
 Resources have `{id,workspace_id,owner_id,kind,visibility,version,data,created_at,updated_at}`; timestamps Unix seconds. Data:
 

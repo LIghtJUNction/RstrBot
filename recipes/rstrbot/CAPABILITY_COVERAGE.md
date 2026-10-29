@@ -6,7 +6,7 @@
 
 下文core指 `recipes/rstrbot-core/DOMAIN_CONTRACTS.md` 的D01–D09及同包 `EXTENSION_API.md`；store指 `recipes/rstrbot-store/DURABILITY_CONTRACT.md`；host指 `recipes/rstrbot-plugin-host/LIFECYCLE_AND_ISOLATION.md` 与 `ADAPTERS_AND_COMPATIBILITY.md`；protocol指 `recipes/rstrbot-plugin-protocol/EXTENSION_PROTOCOL.md` 并保留 `PROTOCOL_REFERENCE.md` 的当前1.0；SDK指 `recipes/rstrbot-sdk/SDK_CAPABILITY_CONTRACT.md`；web指 `recipes/rstrbot-web/CAPABILITY_WORKFLOWS.md` 的U01–U07；desktop指 `recipes/rstrbot-desktop/NATIVE_DELIVERY.md` 的N01–N05。作者路径仅用于定位；归档按RECIPE的source/别名逐层解析，不能把父包变成子包反向依赖。
 
-递归顺序：rstrbot→desktop→web→core；core→store及host；host→SDK→protocol。最深处只定义可被父包消费的合同，不复制根历史或core的大OpenAPI。每项还须运行对应组件ACCEPTANCE原ID及其R13追加ID；当前HTTP 66+2操作仍唯一位于core OPENAPI，本文不增加假v1路径。
+递归顺序：rstrbot→desktop→web→core；core→store及host；host→SDK→protocol。最深处只定义可被父包消费的合同，不复制根历史或core的大OpenAPI。每项还须运行对应组件ACCEPTANCE原ID及其R13追加ID；当前HTTP 71+2操作仍唯一位于core OPENAPI，本文不增加假v1路径。
 
 ## 验收共同输入与判断
 
@@ -131,7 +131,7 @@
 
 | 边界 | 必须执行并断言的行为 |
 | --- | --- |
-| 成功：输入→输出/状态 | 枚举现有66 API＋2健康操作与DTO，再协商未来操作；同operation从不同入口取得相同归属/效果。 |
+| 成功：输入→输出/状态 | 枚举现有71 API＋2健康操作与DTO，再协商未来操作；同operation从不同入口取得相同归属/效果。 |
 | 失败与恢复 | 未知版本、操作、字段、能力与不匹配配置版本明确拒绝；未来字段不能偷偷经v1通用编辑生效。 |
 | 取消 | 取消有操作身份和只读核对入口；取消等待不撤销已提交事务。 |
 | 重启 | 重启后相同幂等键/参数读回原意图，变参数冲突，原终态不复活。 |

@@ -83,3 +83,11 @@ RFB-005 的本地修复和已执行测试见仓库 `docs/E2E_2026-10-29.md` 的1
 ## RFB-015 · P1 · 插件目录被停用实例遮蔽
 
 真实 SQLite、核心与诊断模型/工具进程：只有一个启用插件时，交互和计划任务均产生一次工具结果；随后添加100个较新的停用插件，启用实例不在第一页，两条路径都显示 completed 但工具结果为零。原因是发现逻辑只读取100条并在内存过滤。修复需完整分页并对目录上限明确失败，验证见 RSTRBOT-38。
+
+## RFB-016 · P1 · 未知模型费用没有核对入口
+
+2026-10-29，配方/实现版本1.32，SQLite隔离实例和本地OpenAI兼容接收端。`python tests/image_attachments.py` 的9项检查全部通过；它实际完成PNG/JPEG模型请求并确认无可靠用量时 `cost_microusd` 为 null、reservation 为 unknown，崩溃重启后仍保留。`node tests/browser/verify_image_attachments.mjs --chromium /usr/bin/chromium` 的3项浏览器检查通过；设置页显示“Unknown cost records = 2”，同时明确没有手动结算入口。Chromium 156.0.8078.73，无页面错误。夹具不提供真实供应商账单，也未核验外部实际费用。
+
+要求：owner/admin按工作区读取未知记录，选择固定来源类别并精确登记整数微美元；必须说明这是管理员对照供应商记录后的填报，不是RstrBot验证。首次登记只处理unknown，revision防止并发/迟到表单，重复请求不重复入账；已登记金额可追加更正版本并按差额调整汇总。保留管理员、时间、来源、旧/新金额并随备份恢复，普通成员看不到单笔金额。错误来源、负数、进行中reservation、撤权、跨工作区和陈旧revision均拒绝。映射 RSTRBOT-42、RSTRBOT-CORE-21/22、RSTRBOT-WEB-24。
+
+修复与复验（2026-10-29，配方1.33/根.27/核心.16/Web.21）：owner/admin现在可分页浏览所有reservation（总数、has_more、每页默认100、上限500），更正历史按事件ID继续加载，不会被单页条数截断。不同管理员并发提交不同金额只有一个版本成功；预算设置与核对共用工作区锁。管理页按Enter只进入复核，明确确认前无POST；移除设置区装饰性横线。`cargo test --locked` 33项通过，Rust构建通过；`npm --prefix web run typecheck/build`通过；HTTP图像夹具10项、Chromium 3组通过，无浏览器控制台/网络错误；静态OpenAPI覆盖71 API+2健康操作。Recipkg源检查、109个Markdown文件的递归归档检查和中文提示词构建均通过。PostgreSQL、外部供应商账单、读屏/非Chromium平台及独立配方重建未执行；证据见生成实现 `docs/MIGRATION.md` 与 `docs/evidence/RFB-016/`。

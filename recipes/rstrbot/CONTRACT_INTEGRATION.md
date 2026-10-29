@@ -25,7 +25,7 @@
 
 | 对象 | 唯一规范位置 | 当前与扩展关系 |
 | --- | --- | --- |
-| 当前HTTP/DTO/错误/数值范围 | core OPENAPI.md（完整声明）与HTTP_CONTRACT.md（语义） | 仍为API v1，66 API＋2健康；本轮不改其字节，旧程序不会因新文档增加路由 |
+| 当前HTTP/DTO/错误/数值范围 | core OPENAPI.md（完整声明）与HTTP_CONTRACT.md（语义） | 当前API v1为71 API＋2健康；原69项兼容，recipe .16新增两项管理员费用核对操作，未更新的旧提示词数字以当前OpenAPI为准 |
 | 未来HTTP动作/DTO/发现/只读核对 | core EXTENSION_API.md | `rstrbot-http/2-draft`、`/api/v2`为未实现目标；封闭registry、三态能力、严格版本与明确效果 |
 | 领域状态/授权/预算/来源 | core DOMAIN_CONTRACTS.md | 现有v1权限继续有效；未来对象和策略只能在协商成功后开放 |
 | 数据耐久、唯一性、备份迁移与fence | store DURABILITY_CONTRACT.md | 已有schema2/备份v2继续读取；新schema迁移按该合同独立验收，不假装当前格式已含附件/插件外部状态 |

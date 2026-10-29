@@ -1,6 +1,6 @@
 # 核心领域完成合同 · 提示词 1.13
 
-本文件把未来能力落实为可以生成和验收的行为。它**不改变当前实现状态**：r2 的 API v1、66 个业务操作和 2 个健康操作由 `OPENAPI.md` 与 `HTTP_CONTRACT.md` 独占定义；这些当前接口保持兼容。服务身份、受限凭据代理、写工具审批、子代理、群聊、通用媒体、索引换代、编排和多节点等新增行为均为 `specified / not_implemented / not_executed`。已有部分实现也必须重新执行本文件对应场景，历史回执不能充当本轮通过。
+本文件把未来能力落实为可以生成和验收的行为；本文件本身不证明这些能力已实现。当前 API v1 由 `OPENAPI.md` 与 `HTTP_CONTRACT.md` 独占定义，现有71个业务操作和2个健康操作中，新增的两项费用核对操作仍受本文件的权限、账本与恢复边界约束。recipe .15 中“66个”是与当时OpenAPI/路由不符的过期数字，不能作为接口基线。服务身份、受限凭据代理、写工具审批、子代理、群聊、通用媒体、索引换代、编排和多节点等未来行为仍为 `specified / not_implemented / not_executed`。已有部分实现也必须重新执行本文件对应场景，历史回执不能充当本轮通过。
 
 未来 HTTP 操作、DTO 和协商只在 [EXTENSION_API.md](EXTENSION_API.md) 定义；持久状态与恢复使用 `storage` 依赖的 `DURABILITY_CONTRACT.md`；插件线协议使用 `plugins → sdk → protocol` 中的 `EXTENSION_PROTOCOL.md`。本文件规定业务含义，不复制 OpenAPI 或上游 SDK 源码。
 

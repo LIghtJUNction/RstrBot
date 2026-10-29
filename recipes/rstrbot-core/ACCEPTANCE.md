@@ -69,7 +69,7 @@
 | R13-CORE-037 / D09 | 不同cwd启动，同数据根并发核心；维护时移动数据根，注入校验/复制失败；配置无效升级 | 数据路径不随cwd改变；只一实例；失败不删来源/用户数据；原数据/权限/密钥指纹读回一致，不能自动覆盖唯一备份 |
 | R13-CORE-038 / D09 | 未来PG双节点+共享资产，延迟旧owner使lease转移再恢复，网络分区/Valkey停机/旧worker迟到；压力中取消/暂停 | fencing拒绝旧提交/可控派发；外部未知不因接管重发；控制操作不饿死；PG存在不等于多节点通过；全部实际负载/失败保留 |
 | R13-CORE-039 / D03/E01 | 制造消息幂等冲突/本地storage或ACL错误，再对照真正获准上游重试错误；脱敏日志前后计算业务digest | 本地错误模型HTTP/回退计数0且不消耗provider attempt；对照回退严格受总上限/预算；digest由原规范化业务输入得出；对应R13-OC-177909 |
-| R13-CORE-040 / E01–E09 | 从本合同生成扩展OpenAPI/路由/四SDK DTO，遍历E05+E08所有operation_name、kind、ReadRef消费路由、未知字段/枚举/边界；运行全旧v1向量 | v1 66+2不改变；registry/DTO/handler/只读投影逐项闭合，未知动作拒绝；三态能力不从文档推true；HTTP/worker/schema版本可独立不匹配并清楚拒绝 |
+| R13-CORE-040 / E01–E09 | 从本合同生成扩展OpenAPI/路由/四SDK DTO，遍历E05+E08所有operation_name、kind、ReadRef消费路由、未知字段/枚举/边界；运行全旧v1向量 | 新增账务操作前的69 API+2健康及其向量保持；当前v1共71 API+2健康；registry/DTO/handler/只读投影逐项闭合，未知动作拒绝；三态能力不从文档推true；HTTP/worker/schema版本可独立不匹配并清楚拒绝 |
 | R13-CORE-041 / E08 | 实例管理员从固定archive/git/index/local候选discover→download→prepare明确执行批准→权限decision→activate；第二版本失败/取消/扩权拒绝；workspace admin尝试全局安装、建立合法实例后卸载三种数据策略，重启 | 实际摘要/许可/进程/注册表读回；未批准prepare执行计数0；旧active保留；跨scope拒绝；实例停用撤销租约；export未确认交付不删；未知/已完成回执不被卸载清空 |
 | R13-CORE-042 / E08 | 用批准stdio命令与本地Streamable HTTP夹具分别保存MCP连接、启用、目录刷新/分页；初始化失败后修正同配置，版本错/撤权/新目录扩权、同代并发断线及unknown写调用，重启 | 目录在真实握手前不可用；profile准确；新工具不自动批准；一次合并重连有界；配置/目录可GET读回且secret不返回；非幂等unknown无重放，未批准命令不能执行 |
 
@@ -78,6 +78,13 @@
 | 编号 | 输入与操作 | 预期结果 |
 | --- | --- | --- |
 | RSTRBOT-CORE-20 | 对发现、模型测试与对话分别注入401/403/429、未知插件码和断网；重启后读run | 使用约定安全分类，HTTP v1保持502、持久失败终态和可选分类；旧记录/旧worker通用回退，不返回原始上游内容，不自动重放或猜测未知费用 |
+
+## 1.15 预算未知费用核对（隔离SQLite本地通过；PostgreSQL未执行）
+
+| 编号 | 输入与操作 | 预期结果 |
+| --- | --- | --- |
+| RSTRBOT-CORE-21 | 两个owner/admin并发核对同一unknown（相同与不同值）；核对reservation列表两页、历史以事件ID续页；本管理员丢回执后原payload重试；旧revision和更正；再从另工作区/失权/普通成员访问 | SQLite本地验证：相同payload仅一版本/一笔spent，异payload恰一成功、另一409；reservation总数/has_more与页边界正确，完整历史可续读；每次更正按差额调整spent；reserved在途拒绝；历史和事件不越权。PostgreSQL未执行 |
+| RSTRBOT-CORE-22 | 负数、非整数、溢出、非法来源、缺确认、未知字段、他工作区reservation；预算并发更改；读取事件、SQLite备份并隔离恢复 | 输入失败时账本不变；预算/核对由同一锁串行；普通成员事件数据不含单笔金额/来源；管理员历史含旧/新额、来源、actor和时间，备份恢复后总账一致。新增前69个v1 API向量及两个健康路由仍通过；本版新增两项账务API，当前为71 API加2健康路由 |
 
 ## 1.18 会话模型绑定
 
