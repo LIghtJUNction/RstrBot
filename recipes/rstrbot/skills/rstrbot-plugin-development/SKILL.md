@@ -39,3 +39,5 @@ For 1.14 provider rejections, use the supplemental PROVIDER_ERRORS contract and 
 The 1.15 generated implementation is the `generated/rstrbot-implementation/` source submodule. Verify its URL and pinned commit; recipe archives must not include implementation source or Git metadata.
 
 1.29 按 RSTRBOT-38 实测交互及计划运行的工具目录分页、权限和超限错误；工具目录完整性不得扩大授权。
+
+1.30 按 RSTRBOT-39 核对文本附件原文、模型账本、重启、权限和同意图恢复；文本附件不能冒充图片或完整媒体支持。

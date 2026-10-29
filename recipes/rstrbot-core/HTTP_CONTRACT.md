@@ -42,7 +42,7 @@ Resources have `{id,workspace_id,owner_id,kind,visibility,version,data,created_a
 - agents: `{name,system_prompt,model_id,max_steps:6,knowledge:true,memory:true}`. Frozen per run.
 - runs (read only): `{conversation_id,status:"queued|running|completed|failed|cancelled|interrupted|unknown",stage,content,error?,usage?,cost_microusd?,steps,delivery,persistence,created_at}`. Unknown cost is null.
 
-POST `/workspaces/:wid/chat` `{conversation_id,content,model_id,idempotency_key,agent_id?}` -> `{run,conversation}`; returns accepted asynchronously. GET `/events?after=cursor&limit=100` -> `{items,cursor}` durable ordered events `{id,kind,data,resource_id,...}`; data includes run_id/conversation_id, delta on `run.delta`. Poll 700 ms while active, 3s idle; switching context cancels old read requests and invalidates their view updates; an already submitted mutation is not implicitly cancelled. POST `/runs/:id/cancel`. GET `/runs/:id` resource. Every poll rechecks membership and private visibility. SSE optional, polling provides reliable recovery.
+POST `/workspaces/:wid/chat` `{conversation_id,content,model_id,idempotency_key,agent_id?,attachments?:[{name,text}]}` -> `{run,conversation}`; returns accepted asynchronously. GET `/events?after=cursor&limit=100` -> `{items,cursor}` durable ordered events `{id,kind,data,resource_id,...}`; data includes run_id/conversation_id, delta on `run.delta`. Poll 700 ms while active, 3s idle; switching context cancels old read requests and invalidates their view updates; an already submitted mutation is not implicitly cancelled. POST `/runs/:id/cancel`. GET `/runs/:id` resource. Every poll rechecks membership and private visibility. SSE optional, polling provides reliable recovery.
 
 GET `/workspaces/:wid/export` exports only caller-visible resources, model secrets removed. GET `/admin/backup` administrator-only offline-consistent snapshot (does not contain key); CLI restore into empty database, pauses external work. GET `/workspaces/:wid/audit` -> `{items}` metadata only, no private message content.
 
@@ -164,3 +164,9 @@ authorized read is required to restore it.
 上游实际返回401/403/429时，模型调用的安全错误分类分别为 `provider_authentication_failed`、`provider_access_denied`、`provider_rate_limited`。HTTP v1向调用方仍为502错误封套，不是本机401/403；持久化run数据可含可选`error_code`及不含秘密的`error`。未知码保留原有通用插件错误，网络/响应未知不得归入已拒绝；不透传原始上游响应、认证信息或地址。旧记录不含`error_code`时保持可读，旧客户端可忽略附加字段。
 
 POST `/schedules/:id/reconcile` 接受 `{version,acknowledge:true}`；仅有当前执行权限的计划所有者可确认，CAS 检查旧版本及待核对状态，已知活动运行拒绝。返回已确认但暂停的计划，保留旧事实，操作不调用模型或投递。
+
+Text attachments accept up to three UTF-8 .txt/.md names and original text, 16,384 bytes each and 32,768 bytes total. The core validates inputs and atomically stores them with the conversation message. The same key with changed attachments conflicts. Original text and SHA-256 are returned only to authorized conversation readers; the model receives the original text as untrusted user-supplied data. Images, PDF and binary files are not accepted.
+
+The capabilities response reports `text_attachments` with supported/authorized/available, extensions and byte/file limits; generic `attachments` remains unsupported for images, audio, PDF, binary files and dedicated uploads.
+
+`POST /workspaces/:wid/chat/text-attachments` follows the same chat schema and authorization; clients with files use this distinct route so older cores return 404 rather than silently ignoring unknown attachment fields. Never fall back to plain chat automatically.
