@@ -50,3 +50,5 @@ description: Use when updating RstrBot recipes, generating the implementation, o
 1.29 按 RSTRBOT-38 实测交互及计划运行的工具目录分页、权限和超限错误；工具目录完整性不得扩大授权。
 
 1.30 按 RSTRBOT-39 核对文本附件原文、模型账本、重启、权限和同意图恢复；文本附件不能冒充图片或完整媒体支持。
+
+1.31 按 RSTRBOT-40 实测未知聊天字段在消息/运行写入和模型请求前被拒绝，核对OpenAPI并说明旧客户端兼容性；这不等于图片功能已实现。

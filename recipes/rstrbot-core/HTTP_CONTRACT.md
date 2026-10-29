@@ -44,6 +44,8 @@ Resources have `{id,workspace_id,owner_id,kind,visibility,version,data,created_a
 
 POST `/workspaces/:wid/chat` `{conversation_id,content,model_id,idempotency_key,agent_id?,attachments?:[{name,text}]}` -> `{run,conversation}`; returns accepted asynchronously. GET `/events?after=cursor&limit=100` -> `{items,cursor}` durable ordered events `{id,kind,data,resource_id,...}`; data includes run_id/conversation_id, delta on `run.delta`. Poll 700 ms while active, 3s idle; switching context cancels old read requests and invalidates their view updates; an already submitted mutation is not implicitly cancelled. POST `/runs/:id/cancel`. GET `/runs/:id` resource. Every poll rechecks membership and private visibility. SSE optional, polling provides reliable recovery.
 
+Both chat routes reject unknown top-level or attachment fields before admission and model dispatch. This intentionally changes older versions that ignored extra chat fields; unsupported image fields must not be reported as accepted. Existing documented text requests remain valid.
+
 GET `/workspaces/:wid/export` exports only caller-visible resources, model secrets removed. GET `/admin/backup` administrator-only offline-consistent snapshot (does not contain key); CLI restore into empty database, pauses external work. GET `/workspaces/:wid/audit` -> `{items}` metadata only, no private message content.
 
 Capabilities not implemented are `supported:false,available:false,reason` and do not produce fake successes. Never send model/plugin secrets in error bodies.
