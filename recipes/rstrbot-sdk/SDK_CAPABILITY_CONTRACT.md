@@ -26,9 +26,9 @@
 
 UTF-8字节长度用于帧和配额，不能以Python字符数/JavaScript UTF-16长度代替。ID是字符串；generation及其他wire整数只接受协议safe整数范围。未知usage为null，不由语言默认值填0。缺字段与显式null分别保留；金额为十进制字符串。错误不能包含密钥、完整私有URL、远端原始正文或环境。
 
-provider opaque_state作为受限JSON树原样往返，稀疏tool-call索引、数组顺序、签名串及非ASCII内容不丢失。不把相同tool name当相同调用ID。媒体只传asset_ref及有范围的read_handle，读取到的字节和sha256可由共同fixture检查；SDK不能自行打开远端提供的宿主路径。
+provider opaque_state作为受限JSON树原样往返，稀疏tool-call索引、数组顺序、签名串及非ASCII内容不丢失。不把相同tool name当相同调用ID。核心发起工具调用时，模型原始tool-call ID作为不透明`call_id`传给worker并须与历史`tool_call_id`一致；它不同于JSON-RPC `id`与通知`request_id`，不表示授权或重放。媒体只传asset_ref及有范围的read_handle，读取到的字节和sha256可由共同fixture检查；SDK不能自行打开远端提供的宿主路径。
 
-进度只能用协商通知和当前root ID，且有界阻塞/背压；消费者慢时显式slow_consumer并关闭根调用，不能静默丢字段或攒无限数组。每根调用恰好一个终态，通过原子终态门锁拒绝第二次完成；但已知副作用回执必须留在最终结果/错误中。用户取消、截止、连接断开和runtime异常分别归因，cancel不进入普通重试分支。
+进度只能用协商通知和当前root ID，且有界阻塞/背压；消费者慢时显式slow_consumer并关闭根调用，不能静默丢字段或攒无限数组。SDK将`tools.call.params.call_id`作为不透明业务数据原样交给handler；它与JSON-RPC `id`和通知`params.request_id`分开，不表示授权或幂等。每根调用恰好一个终态，通过原子终态门锁拒绝第二次完成；但已知副作用回执必须留在最终结果/错误中。用户取消、截止、连接断开和runtime异常分别归因，cancel不进入普通重试分支。
 
 初始deadline转换为剩余时长后用单调时钟倒计时；通知/重连不能延长原根deadline。SDK把取消传给handler与HostServices，在本地截止后不再提交新子请求；宿主仍负责强制终止不合作进程。重启后无活的InvocationContext，缓存的handle全部不可复用，重建持久工作只能由核心调度一个新根调用。
 

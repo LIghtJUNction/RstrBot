@@ -23,3 +23,7 @@
 ## 1.14 安全分类
 
 [PROVIDER_ERRORS.md](PROVIDER_ERRORS.md)声明可选的三个模型上游拒绝码；旧worker、旧host和未知错误保留通用回退，不改变1.0握手或把上游拒绝伪装成本机登录失败。
+
+## 1.15 工具调用关联字段
+
+协议1.0 framing和JSON-RPC请求ID语义不变。新核心在`tools.call`业务参数中发送不透明字符串`call_id`，值等于模型原始tool-call ID；SDK/worker必须保留并向业务handler提供，不能与JSON-RPC顶层`id`或通知`params.request_id`混淆。兼容旧核心的worker仍接受缺少该字段的调用；新核心调用时必须提供。该字段不授予权限、不定义幂等或重放。

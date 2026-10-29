@@ -10,6 +10,7 @@
 | RSTRBOT-PLUGIN-PROTOCOL-04 | 发送非法 JSON、批次、超大帧、未知通知、错误 request_id 或双重终态 | 明确协议失败并有界清理，不能当成功 |
 | RSTRBOT-PLUGIN-PROTOCOL-05 | 发送未知方法与错误类型参数 | 分别返回 -32601 与 -32602 |
 | RSTRBOT-PLUGIN-PROTOCOL-06 | 调用期间取消并模拟远端已接收的写入 | 本地终止；已知回执保留，不确定结果维持 unknown |
+| RSTRBOT-PLUGIN-PROTOCOL-07 | `tools.call`携带固定`call_id`并使用不同JSON-RPC请求ID、通知`request_id` | 业务handler原样收到`call_id`；三种ID不混淆，缺失字段仍兼容旧核心 |
 
 ## 1.13扩展验收
 

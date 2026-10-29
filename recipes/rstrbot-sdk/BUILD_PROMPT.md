@@ -23,3 +23,7 @@ Python 的 rstrbot.plugins 入口点发现只读取元数据；--list 不导入�
 ## 1.14 可选上游错误码
 
 四种语言SDK共同遵守协议补充 递归依赖 protocol 的 `PROVIDER_ERRORS.md` 的三种整数错误码与旧host/worker回退向量；消息安全、请求ID和失败终态一致，不能把新增配方当成四语言运行通过。
+
+## 1.15 工具调用关联字段
+
+四种SDK都将`tools.call.params.call_id`不改写地交给业务handler；缺少该可选扩展字段时仍兼容旧核心。该字段不同于JSON-RPC请求`id`和通知`params.request_id`，不承担权限或重放语义。共同向量为带唯一call_id的真实四语言进程，并检查handler返回值与输入完全相同。

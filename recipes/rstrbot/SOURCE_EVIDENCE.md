@@ -4,7 +4,7 @@
 
 ## 2026-10-29 后续调整
 
-用户要求按迁移技能在远程提供 generated 子模块；本文件下方“最终确定的布局”记录的是此前时点，现由独立源码仓库与 `generated/rstrbot-implementation/` gitlink 取代。源码仍不属于配方依赖或配方归档。独立源码仓库：[https://github.com/LIghtJUNction/rstrbot-implementation](https://github.com/LIghtJUNction/rstrbot-implementation)，固定提交 `4fe18fdb2dbd5ae1892c11e503811801bd463287`，父提交为原源码基线 `ead5bf2cea735078e1a37655dcc136485f781b7f`；包含此前保留的本地 UI/SDK/文档与后续修复。完整迁移记录见项目 docs/MIGRATION.md。
+用户要求按迁移技能在远程提供 generated 子模块；本文件下方“最终确定的布局”记录的是此前时点，现由独立源码仓库与 `generated/rstrbot-implementation/` gitlink 取代。源码仍不属于配方依赖或配方归档。独立源码仓库：[https://github.com/LIghtJUNction/rstrbot-implementation](https://github.com/LIghtJUNction/rstrbot-implementation)。迁移初始源码提交为 `4fe18fdb2dbd5ae1892c11e503811801bd463287`（基于原源码 `ead5bf2cea735078e1a37655dcc136485f781b7f`）；源码后续持续迭代，当前工具调用 ID 传递修复位于提交 `89355964d2c1f0561fed9188fbdc2b09b8e8c357`（父提交 `9fd0f6d304ab3f0993dbb104e3a7b4f6ad493930`）。完整迁移记录见项目 docs/MIGRATION.md。
 
 ## 当时确定的布局（历史）
 
@@ -112,3 +112,7 @@ Pro自报材料和隔离副本应用检查，不声称运行官方Recipkg或软�
 1.20 发送意图浏览器修复与随包资料位于源码子模块 `09ac632b472257603e9cca74ee46a744863ddb74`；核心调试二进制未改变。真实Chromium及本地诊断worker的失确认、刷新、手动继续、变参数、未发与存储拒绝验证见 docs/E2E_2026-10-29.md；跨设备、并发标签页及真实提供方未验。
 
 1.21 多标签页待确认请求协调实现及随包资料位于源码子模块 `0bca19f1ea10daf3171945b78817ebbaefd0f513`；核心调试二进制未变。Chromium 双标签页和不支持锁的本机测试见 docs/E2E_2026-10-29.md；其他浏览器、跨设备及撤权竞态未完成。
+
+## CMP-03 工具调用 ID 传递修复（2026-10-29）
+
+源码提交 `89355964d2c1f0561fed9188fbdc2b09b8e8c357` 将模型原始工具调用 ID 传给插件 worker 的 `tools.call.params.call_id`，并由 Python、TypeScript、Rust、C# SDK 示例回显。四语言共同协议向量 24 项、真实 Python worker/历史消息/事件关联回归及 Rust 插件进程 10 项通过；完整记录、构建摘要与未验边界见 [本轮 E2E 记录](../../docs/E2E_2026-10-29.md#rstrbot-cmp-03)。

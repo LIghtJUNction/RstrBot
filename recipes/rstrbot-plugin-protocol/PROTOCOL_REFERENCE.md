@@ -186,8 +186,12 @@ evidence of connectivity to a paid or local external model.
 ## 7. Tools, hooks and data
 
 The sample `tools.list` response describes `echo`, its input schema and
-`effect: "read_only"`. `tools.call` accepts `{name, arguments}` and returns
-content. The echo tool does not read files, access the network or write state.
+`effect: "read_only"`. `tools.call` accepts `{name, arguments}` and may include
+an opaque `call_id` equal to the original model tool-call ID. New cores always
+send it; workers remain compatible with older cores that omit it. SDK handlers
+preserve it as business data. It is distinct from the JSON-RPC request `id` and
+event `params.request_id`, and is not an authorization, idempotency or replay
+token. The echo tool does not read files, access the network or write state.
 Other tools must declare whether they are read-only, idempotent writes or
 non-replayable writes. The core, not the worker, binds any confirmation to the
 operation and parameters and validates resource authority before execution.

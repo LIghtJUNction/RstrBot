@@ -5,7 +5,7 @@ format = "recipkg/1"
 
 [package]
 name = "rstrbot"
-version = "0.2.0-recipe.27"
+version = "0.2.0-recipe.28"
 kind = "software"
 description = "RstrBot 完整产品重建入口、需求追踪与跨组件集成"
 entry = "BUILD_PROMPT.md"

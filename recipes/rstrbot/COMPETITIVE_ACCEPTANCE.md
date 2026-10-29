@@ -49,7 +49,7 @@ AstrBot为AstrBotDevs/AstrBot，OpenClaw为openclaw/openclaw；用户于2026-10-
 | --- | --- | --- | --- |
 | R13-CMP-01 | 初次真实对话、坏配置纠错、重开历史、接受/执行事实一致 | root/desktop/web/core/store/host | not_executed |
 | R13-CMP-02 | 两供应商并存、CAS/迟到隔离、秘密不换目标、本地冲突不跨供应商回退 | web/core/store/host | not_executed |
-| R13-CMP-03 | 实际SDK进程结果、运行时缺失、崩溃/取消/卸载撤权与进程回收 | host/sdk/protocol/core | partial：四 SDK 协议向量、宿主进程套件、自定义 Python SDK 包隔离调用及内置诊断插件浏览器调用有局部证据；其余完整链路仍 not_executed，见 [E2E 记录](../../docs/E2E_2026-10-29.md#rstrbot-cmp-03) |
+| R13-CMP-03 | 实际SDK进程结果、运行时缺失、崩溃/取消/卸载撤权与进程回收 | host/sdk/protocol/core | partial：四 SDK 共24个协议向量、宿主进程套件、自定义 Python SDK 包隔离调用和`call_id`与历史逐字核对、内置诊断插件浏览器调用均有局部证据；完整UI安装链、恢复与平台矩阵仍 not_executed，见 [E2E 记录](../../docs/E2E_2026-10-29.md#rstrbot-cmp-03) |
 | R13-CMP-04 | 源版本/引用、删除撤权、索引中断/代次、实际模型输入核对 | core/store/host/web | not_executed |
 | R13-CMP-05 | 私有数据/草稿/事件/导出隔离、双标签迟到、凭据租约撤销 | web/core/store/protocol | not_executed |
 | R13-CMP-06 | 真预览零派发、DST/skip、持久发生时刻、连续重启不丢/不重放 | web/core/store/host | not_executed |
