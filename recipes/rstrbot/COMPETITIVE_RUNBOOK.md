@@ -1,6 +1,6 @@
 # 共同任务执行册 · 提示词 1.13
 
-这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据；AstrBot v4.29.3 另有双供应商配置、路由和重启读回的 CMP-02 正向子路径；OpenClaw v2026.10.8 另有一项 transcript 冲突不回退与 HTTP 404 正常回退的本地复测，RstrBot 有同键冲突预派发检查和模型响应后注入的助手消息 CAS 冲突检查。MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡、CMP-02 四产品同任务及其余共同任务仍未完成，不能据此判断总体领先。
+这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据；AstrBot v4.29.3 另有双供应商配置、路由和重启读回的 CMP-02 正向子路径；OpenClaw v2026.10.8 另有一项 transcript 冲突不回退与 HTTP 404 正常回退的本地复测，RstrBot 有同键冲突预派发检查和模型响应后注入的助手消息 CAS 冲突检查。RstrBot CMP-03 另有四 SDK 协议向量、插件宿主进程用例、自定义 Python SDK 包的隔离调用，以及内置诊断插件的浏览器链路局部证据。MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡、CMP-02 四产品同任务、CMP-03 完整插件任务及其余共同任务仍未完成，不能据此判断总体领先。
 
 本文件细化 [COMPETITIVE_ACCEPTANCE.md](COMPETITIVE_ACCEPTANCE.md) 的原有 CMP-01～CMP-12，不替代 52/215/287 历史。每个执行卡必须同时关联该任务的 `CMP-*` 与 `R13-CMP-*` ID。当前 RstrBot 能力事实来自 [CURRENT_SCOPE.md](CURRENT_SCOPE.md)，不能从本文件的目标行为反写为已实现。
 
@@ -40,7 +40,7 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 | --- | --- | --- | --- | --- | --- |
 | CMP-01 | partial：本地初次对话；真实提供方未验 | partial：固定版本地回复及重启读回；官方包 SHA-256 已记录 | partial：本地回复及重启读回 | unverified；运行 blocked 于条款确认 | partial（局部路径）；整卡未完成 |
 | CMP-02 | partial：发现/保存/选择；另测同键预派发冲突及模型响应后注入的保存冲突；完整路由回退未实现 | partial：v4.29.3 两个 OpenAI Compatible 来源独立配置、模型发现/保存、路由及重启读回；取消、CAS、迟到结果和换目标反例未测 | partial：v2026.10.8 本地 transcript 冲突不回退，HTTP 404 正常回退；未测完整供应商配置任务 | unverified | not_executed（完整四产品卡未完成；RstrBot、AstrBot、OpenClaw 均只有局部子路径） |
-| CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | unverified | not_executed |
+| CMP-03 | partial：操作员通过本地 CLI 注册可信包；WebUI 可建实例并启用；四 SDK 协议向量、自定义 Python SDK 隔离调用及内置诊断插件浏览器调用有局部实测。固定 F-TOOL、同一包从安装到历史读回、权限/升级/崩溃恢复链和通用沙箱仍未验 | unverified | unverified | unverified | partial（仅 RstrBot 子路径；四产品同题 not_executed） |
 | CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | unverified | not_executed |
 | CMP-05 | partial：原生工作区/私聊；组合路径待验 | unverified | unverified | unverified | not_executed |
 | CMP-06 | partial：计划/预览/skip；完整故障组合待验 | unverified | unverified | unverified | not_executed |
@@ -105,6 +105,8 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 步骤与下游：普通安装入口→查看所需能力与信任等级→建立alpha实例→显式启用/授权→从对话调用→在插件进程和产品历史读到 `READY` 及相同call_id。四语言分别运行共同向量，显示真实运行时版本。无Python/Node/.NET时Rust核心仍能启动；相应插件报依赖缺失。
 
 反例：声明read_only但请求写操作应拒绝；未授权实例不可调用；准备新版本失败保留旧代可用或明确受控停机；插件崩溃/超时/取消时唯一终态、无孤儿进程和悬空工具。G1禁用插件后调用计数不增加，旧代迟到结果不注入新运行。重启不续做unknown调用，配置/数据仍归原实例。记录安装/恢复步骤、进程树、SDK结果及预算；不把握手成功计为业务通过。
+
+2026-10-29 的 RstrBot 局部证据见 [CMP-03 记录](../../docs/E2E_2026-10-29.md#rstrbot-cmp-03)。现有二进制在 Linux 上经 Python、TypeScript、Rust、C# 四个 SDK 各跑 5 个 1.0 协议向量，共 20 项通过；宿主子进程测试 10 项通过。隔离核心用 `plugin-install` 注册临时 Python SDK 包后，交互聊天的单工具调用通过；工具总数 64/65 及单插件 32/33 边界分别通过/拒绝，超限的模型请求账本为 0。Chromium 的 24 项 UI 回归包含内置诊断包建实例、启用和真实模型-工具-模型往返。该 UI 样本没有安装或调用自定义 Python 包；尚未把相同 `call_id` 从模型工具调用一路核对到插件进程与持久历史。固定 F-TOOL 四语言包、声明只读后的写操作拒绝、未授权实例、升级回滚、应用级崩溃恢复及跨平台链仍为 `not_executed`，因此本卡维持 `partial`。
 
 ### CMP-04 / R13-CMP-04：资料导入、引用与撤销
 
