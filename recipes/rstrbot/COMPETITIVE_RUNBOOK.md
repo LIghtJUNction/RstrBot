@@ -1,6 +1,6 @@
 # 共同任务执行册 · 提示词 1.13
 
-这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据，OpenClaw 另有一项回退路径复测；MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡及其余共同任务仍未完成，不能据此判断总体领先。
+这份执行册的本质是：让不同产品做同一件事，再到接收端、存储端和重开后的界面核对事情是否真的完成。它是未来重建的强制验收输入。截至 2026-10-29，RstrBot、AstrBot 和 OpenClaw 有 CMP-01 局部本地证据；OpenClaw 有一项正常回退路径复测，RstrBot 有一项同键不同正文冲突的预派发局部检查。MaiBot v1.3.18 只完成源码/协议门槛检查，未运行。没有调用付费模型或真实聊天渠道；CMP-01 整卡、CMP-02 四产品同任务及其余共同任务仍未完成，不能据此判断总体领先。
 
 本文件细化 [COMPETITIVE_ACCEPTANCE.md](COMPETITIVE_ACCEPTANCE.md) 的原有 CMP-01～CMP-12，不替代 52/215/287 历史。每个执行卡必须同时关联该任务的 `CMP-*` 与 `R13-CMP-*` ID。当前 RstrBot 能力事实来自 [CURRENT_SCOPE.md](CURRENT_SCOPE.md)，不能从本文件的目标行为反写为已实现。
 
@@ -39,7 +39,7 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 | 任务 | RstrBot 输入能力 | AstrBot | OpenClaw | MaiBot（已确认） | 四产品本轮执行 |
 | --- | --- | --- | --- | --- | --- |
 | CMP-01 | partial：本地初次对话；真实提供方未验 | partial：固定版本地回复及重启读回；官方包 SHA-256 已记录 | partial：本地回复及重启读回 | unverified；运行 blocked 于条款确认 | partial（局部路径）；整卡未完成 |
-| CMP-02 | partial：发现/保存/选择；完整路由回退未实现 | unverified | unverified | unverified | not_executed |
+| CMP-02 | partial：发现/保存/选择；另有同键冲突预派发局部检查；完整路由回退未实现 | unverified | unverified | unverified | not_executed（R13-OC-177909 单一子路径 partial） |
 | CMP-03 | partial：受信任只读 worker；通用沙箱/安装链缺口 | unverified | unverified | unverified | not_executed |
 | CMP-04 | partial：文本/词法检索；复杂解析/向量缺口 | unverified | unverified | unverified | not_executed |
 | CMP-05 | partial：原生工作区/私聊；组合路径待验 | unverified | unverified | unverified | not_executed |
@@ -91,6 +91,8 @@ D/L/E 三层分别形成结论。受控真实 HTTP 下游足以证明内部路�
 反例：B验证失败或取消不修改A；并发旧CAS保存应冲突且草稿保留；切换工作区后A的迟到发现结果不得填入B。修改A目标地址但未提供新密钥/明确清除应拒绝。撤销权限后的迟到列表不暴露资源。持久层冲突不得触发上游回退；真正允许回退时每次尝试记录目标、费用和批准链，unknown副作用禁止重放。证据：保存前后脱敏配置diff、目标端请求账本、CAS错误及取消后的UI。
 
 补充运行 R13-OC-185423：仅在用户启用且首次请求明确拒绝、无未知外部效果时，双提供方独立账本核对一次已接纳消息的合法备用调用；覆盖真实消息冲突、预算、取消、撤权与 unknown 不转移。缺少能力或夹具时记 not_executed，不能由合同推导运行通过。
+
+2026-10-29 RstrBot 对 R13-OC-177909 仅完成预派发冲突子路径：本地 HTTP/SSE 夹具先完成原请求，再重启核心并提交同键不同正文，确认 409、请求总数不增加、run/消息/事件不变。未配置第二提供方，不能据此写“回退提供方为零”；也没有复现模型返回后保存冲突的时序。完整证据、摘要与限制见 [E2E 记录](../../docs/E2E_2026-10-29.md#r13-oc-177909)。RstrBot、AstrBot、OpenClaw、MaiBot 四产品同题依然 `not_executed`。
 
 2026-10-29 RstrBot 本机局部测试发现 RFB-005：新增模型会改变旧会话所选目标；1.18修复后已本地验证会话恢复、重启、显式切换、新增和删除模型。浏览器多账号撤权、迟到读取和竞品相同任务未跑，见 TEST_FEEDBACK，整卡仍 not_executed。
 

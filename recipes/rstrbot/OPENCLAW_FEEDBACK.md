@@ -1,6 +1,6 @@
 # OpenClaw问题到配方的首批回归线索
 
-查询日期：2026-10-28。先经GitHub仓库搜索确认openclaw/openclaw；连接器/CLI曾有网络EOF，随后使用GitHub正文页和恢复后的issue/全部评论接口核验下列5条。选择范围为模型配置、调度重启、投递与会话归属，不是全部issue调查。
+查询日期：2026-10-29。先经GitHub仓库搜索确认openclaw/openclaw；连接器/CLI曾有网络EOF，随后使用GitHub正文页和恢复后的issue/全部评论接口核验下列5条。选择范围为模型配置、调度重启、投递与会话归属，不是全部issue调查。
 
 这些是上游历史报告，当前5条均closed，不能称为OpenClaw现存缺陷或RstrBot已复现。选其可复用的用户目标作为验收加固；当前RstrBot比较状态均not_executed。旧机器人评论中的“保持open”不能覆盖后来关闭状态；具体发行修复未经核验的保持未知。
 
@@ -20,9 +20,9 @@
 
 ## 1.13 再核验与可落盘回归合同
 
-核验日期：2026-10-28（Asia/Taipei）。本轮通过GitHub issue、全部评论和已链接PR的只读接口重新核对原5条；未下载业务日志附件，未执行OpenClaw、未接触真实渠道。下面新增的RstrBot要求来自用户既有52项能力与这些外部线索的交集，属于本项目设计取舍；不能把上游实现建议当作已证明的根因或必须复制的内部结构。
+核验日期：2026-10-29（Asia/Taipei）。本轮通过GitHub issue、全部评论和已链接PR的只读接口重新核对原5条；未下载业务日志附件，未执行OpenClaw、未接触真实渠道。下面新增的RstrBot要求来自用户既有52项能力与这些外部线索的交集，属于本项目设计取舍；不能把上游实现建议当作已证明的根因或必须复制的内部结构。
 
-证据分层：`report`=报告者描述；`source_review`=代码/文档分析；`upstream_test_report`=上游声称运行的测试；`merged`=PR合并元数据；`release_claim`=发行/评论指出包含；`local_e2e`=本轮独立实机。核阅原5条及新增来源时均未在当前 OpenClaw 复现；其后仅对 OC-185423 的明确 401 正常回退路径做了局部复测，未复现 issue 报告的 transcript 接纳冲突。该结果不证明 OpenClaw 当前存在故障或已普遍修复；RstrBot 的该回退验收仍 `not_executed`。
+证据分层：`report`=报告者描述；`source_review`=代码/文档分析；`upstream_test_report`=上游声称运行的测试；`merged`=PR合并元数据；`release_claim`=发行/评论指出包含；`local_e2e`=本轮独立实机。OpenClaw 的 OC-177909 未在本项目复现；本项目现有本地检查只覆盖已完成请求之后，同键不同正文在模型派发前被拒绝的路径。它不能验证 OpenClaw 的冲突分类/回退，也不能代替“模型返回后保存冲突”路径。OC-185423 的明确 401 正常回退仍只是另一条局部路径，不代表 OC-177909 或完整回退合同通过。
 
 | OC编号 | 本轮读取的正文与关键评论 | 最新状态/修复来源 | 本轮可得结论及限制 |
 | --- | --- | --- | --- |
@@ -88,11 +88,11 @@
 
 <a id="oc-177909"></a>
 
-[正文](https://github.com/openclaw/openclaw/issues/177909)报告2026.10.5的本地transcript幂等冲突被当模型失败引发跨提供方回退；当前issue仍open。已读全部6条评论，其中[源码审查](https://github.com/openclaw/openclaw/issues/177909#issuecomment-6281118620)明确未独立运行原触发，[后续评论](https://github.com/openclaw/openclaw/issues/177909#issuecomment-6433588182)区分“本地冲突导致错误回退”和“真实提供方故障后回退接纳失败”两个问题，不能混成同根因。**本轮核实[PR177956](https://github.com/openclaw/openclaw/pull/177956)已于2026-10-26合并**，merge=`9ca1643decade716fee56231949e557ad9b44b7c`；[PR178269](https://github.com/openclaw/openclaw/pull/178269)仍open。PR177956报告生产Gateway+真实SQLite冲突+本地HTTP夹具的前后对照，同时明确未复现原Slack/重启/压缩触发；本轮没有复跑，也未核定发行包含。open不能自动等同“尚无修复”。
+[正文](https://github.com/openclaw/openclaw/issues/177909)报告2026.10.5的本地transcript幂等冲突被当模型失败引发跨提供方回退；2026-10-29 查询时 issue 仍 open。[PR177956](https://github.com/openclaw/openclaw/pull/177956)已于2026-10-26合并，merge=`9ca1643decade716fee56231949e557ad9b44b7c`；其上游报告称使用构建后的 Gateway、真实 SQLite 所有者冲突和本地 HTTP/SSE 端点做前后对照，明确没有复现原 Slack/重启/压缩触发。[PR178269](https://github.com/openclaw/openclaw/pull/178269)查询时仍 open。v2026.10.8 [发行说明](https://github.com/openclaw/openclaw/releases/tag/v2026.10.8)包含“session admission races no longer trigger model fallback”的概括说明，但没有把该句明确链接到 #177909/#177956；具体发行是否包含此修复仍记 `unknown`。已读的[源码审查](https://github.com/openclaw/openclaw/issues/177909#issuecomment-6281118620)未运行原触发；[后续评论](https://github.com/openclaw/openclaw/issues/177909#issuecomment-6433588182)区分本地冲突误触发回退与真实提供方故障后接纳失败，不能混成同一根因。
 
 **R13-OC-177909，P0，RB-008/023/024/025/026，CMP-02/11/12。** 责任：core统一错误域、store幂等接纳、host模型尝试计数。新增规范：授权、参数、持久化、幂等冲突与提供方错误分别编码；只有明确允许的提供方错误才进入已批准回退链，本地状态冲突不会改善于换模型。持久接纳使用同一规范化业务正文指纹；日志脱敏是观察投影，不得改变业务比较语义或保存明文秘密。
 
-验收：真实store中用同键不同正文制造冲突，测试“模型调用前”路径上游计数0与“模型返回后保存冲突”路径计数最多原1次；第二提供方始终0，已存原文不被覆盖，run明确报告本地冲突。重启/重试原键不重复生成。对照合法真实上游失败：在无已知输出/副作用且策略允许时按固定尝试上限回退，每次先核授权和预算；取消/撤权停止下一次。分别计已知成本、未知使用、真实请求次数，不把失败归为免费，也不宣称修复了全部触发冲突的源头。当前 `not_executed`。
+验收：真实store中用同键不同正文制造冲突，测试“模型调用前”路径上游计数0与“模型返回后保存冲突”路径计数最多原1次；第二提供方始终0，已存原文不被覆盖，run明确报告本地冲突。重启/重试原键不重复生成。对照合法真实上游失败：在无已知输出/副作用且策略允许时按固定尝试上限回退，每次先核授权和预算；取消/撤权停止下一次。分别计已知成本、未知使用、真实请求次数，不把失败归为免费，也不宣称修复了全部触发冲突的源头。当前 `partial`：隔离 SQLite 的本地 HTTP 集成与 HTTP/SSE 夹具覆盖同键不同正文的预派发拒绝，确认 409、无新模型请求、run/消息/事件不变；报告见 [E2E 记录](../../docs/E2E_2026-10-29.md#r13-oc-177909)。模型返回后保存冲突、备用提供方账本/真实回退正对照、原 Slack/重启/压缩触发和完整 CMP-02 仍 `not_executed`；RstrBot 当前没有自动模型回退能力，不能将“备用提供方零请求”声称为本轮观察结果。
 
 ### OC-186700
 
