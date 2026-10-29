@@ -37,3 +37,5 @@ For a full local check, use `mise exec -- ./scripts/check.sh` when that script a
 For 1.14 provider rejections, use the supplemental PROVIDER_ERRORS contract and four-SDK vectors. Preserve generic fallback for older hosts/workers, never expose response bodies, and do not treat an upstream 401 as local sign-out. Report SDK runtimes not actually tested.
 
 The 1.15 generated implementation is the `generated/rstrbot-implementation/` source submodule. Verify its URL and pinned commit; recipe archives must not include implementation source or Git metadata.
+
+1.29 按 RSTRBOT-38 实测交互及计划运行的工具目录分页、权限和超限错误；工具目录完整性不得扩大授权。

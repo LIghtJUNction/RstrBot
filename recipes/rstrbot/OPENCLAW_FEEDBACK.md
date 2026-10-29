@@ -135,3 +135,7 @@
 ## 会话恢复中的终态与遗留占用（2026-10-29）
 
 [OpenClaw #181770](https://github.com/openclaw/openclaw/issues/181770) 报告 2026.10.6 的一个既有会话持续拒绝新消息；状态 closed/completed，相关 [#181801](https://github.com/openclaw/openclaw/pull/181801) 已合并，处理终态遗留。报告者在[后续验证](https://github.com/openclaw/openclaw/issues/181770#issuecomment-6375256933)指出自己的未终态栅栏未被该修复覆盖；[后续 #181952](https://github.com/openclaw/openclaw/issues/181952) closed/completed，维护者称 [#181992](https://github.com/openclaw/openclaw/pull/181992) 在无活动运行和待投递时处理该形态，并描述隔离 Gateway 测试。上述属于报告者/维护者及上游测试证据；本项目未在当前 OpenClaw 或 RstrBot 复现同一状态，也未核实哪一个发行版包含修复。RSTRBOT-36 提炼按证据释放孤儿占用且保留仍有效的工作和副作用；本地验收 not_executed，不据单纯 killed 状态清除。
+
+## OC-120385 · 工具目录在不同执行入口不完整
+
+2026-10-29 查阅 [OpenClaw #120385](https://github.com/openclaw/openclaw/issues/120385) 正文和评论，问题仍 open。作者已更正：原定时任务案例的 MCP 缺失由任务有限 toolsAllow 配置导致，而不是最初猜测的身份绑定；部分媒体续接修复已合并，其他目录缩减与错误诊断仍需上游复测。RstrBot 不支持相同 Code Mode/MCP 通用目录；本地另实测100个停用插件遮蔽旧启用插件，交互和计划都漏工具。这是不同根因的本地证据，转为 RSTRBOT-38，不能视为对当前 OpenClaw 的实测。

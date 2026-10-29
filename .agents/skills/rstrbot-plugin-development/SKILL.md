@@ -16,3 +16,5 @@ description: Use when updating RstrBot plugin protocol/SDK recipes or generating
 1.14上游模型拒绝按协议补充PROVIDER_ERRORS分类：四SDK向量保持同一整数码、旧host和旧worker通用回退；中英文提示只使用安全分类，不能暴露响应体或把上游401当作用户登出。实际未运行的语言须单独标记。
 
 1.15生成实现位于 `generated/rstrbot-implementation/` 源码子模块；核对子模块URL和固定提交，配方归档不包含源码或Git元数据。
+
+1.29 按 RSTRBOT-38 实测交互及计划运行的工具目录分页、权限和超限错误；工具目录完整性不得扩大授权。
